@@ -43,7 +43,7 @@ void __stdcall FunctionTailcallGlobal(FunctionID functionID, UINT_PTR clientData
 }
 
 //x86 implementations can be done from inline assembly
-//x64 has to be handled by MASM
+//x64 has to be handled by MASM or shortcutted via C (see http://blogs.msdn.com/jkeljo/archive/2005/08/11/450506.aspx)
 #ifdef X86
 void _declspec(naked) FunctionEnterNaked(FunctionID functionID, UINT_PTR clientData, COR_PRF_FRAME_INFO frameInfo, COR_PRF_FUNCTION_ARGUMENT_INFO *argumentInfo)
 {
@@ -120,4 +120,22 @@ void _declspec(naked) FunctionTailcallNaked(FunctionID functionID, UINT_PTR clie
         ret     12
     }
 }
+#endif
+
+#ifdef X64
+void FunctionEnterNaked(FunctionID functionID, UINT_PTR clientData, COR_PRF_FRAME_INFO frameInfo, COR_PRF_FUNCTION_ARGUMENT_INFO *argumentInfo)
+{
+	FunctionEnterGlobal(functionID, clientData, frameInfo, argumentInfo);
+}
+
+void FunctionLeaveNaked(FunctionID functionID, UINT_PTR clientData, COR_PRF_FRAME_INFO frameInfo, COR_PRF_FUNCTION_ARGUMENT_RANGE *retvalRange)
+{
+	FunctionLeaveGlobal(functionID, clientData, frameInfo, retvalRange);
+}
+
+void FunctionTailcallNaked(FunctionID functionID, UINT_PTR clientData, COR_PRF_FRAME_INFO frameInfo)
+{
+	FunctionTailcallGlobal(functionID, clientData, frameInfo);
+}
+
 #endif

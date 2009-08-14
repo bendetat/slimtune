@@ -170,7 +170,7 @@ private:
 	struct WalkData
 	{
 		ClrProfiler* profiler;
-		std::vector<unsigned int>* functions;
+		std::vector<unsigned int, UIntPoolAlloc>* functions;
 		HANDLE hProcess;
 		HANDLE hThread;
 	};

@@ -143,7 +143,8 @@ namespace Messages
 	struct Sample
 	{
 		unsigned int ThreadId;
-		std::vector<unsigned int> Functions;
+
+		std::vector<unsigned int, UIntPoolAlloc> Functions;
 
 		void Write(IProfilerServer& server);
 	};

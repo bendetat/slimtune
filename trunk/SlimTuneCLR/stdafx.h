@@ -66,11 +66,6 @@
 #include <cstddef>
 #include <cassert>
 
-#include <stdexcept>
-#include <string>
-#include <vector>
-#include <unordered_map>
-
 #pragma warning(push)
 #pragma warning(disable:4100)
 #pragma warning(disable:4244)
@@ -83,10 +78,18 @@
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/thread.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/pool/pool_alloc.hpp>
 #pragma warning(pop)
+
+#include <stdexcept>
+#include <string>
+#include <vector>
+#include <unordered_map>
 
 #include "SlimTuneProfiler.h"
 #include "ProfilerBase.h"
 #include "Utilities.h"
+
+typedef boost::pool_allocator<unsigned int> UIntPoolAlloc;
 
 using namespace ATL;

@@ -971,7 +971,7 @@ void ClrProfiler::OnTimer()
 		context.ContextFlags = CONTEXT_FULL;
 		GetThreadContext(hThread, &context);
 
-		std::vector<unsigned int>* functions = &sample.Functions;
+		std::vector<unsigned int, UIntPoolAlloc>* functions = &sample.Functions;
 		functions->reserve(32);
 
 		//Attempt an initial stackwalk with what we've got
@@ -1042,7 +1042,8 @@ void ClrProfiler::OnTimer()
 #ifdef X64
 				//It's unnecessary to call DoStackSnapshot on x64 -- we'll just walk ourselves
 				inManagedCode = false;
-				functions->push_back(funcId);
+				FunctionInfo* funcInfo = reinterpret_cast<FunctionInfo*>(MapFunction(funcId, true));
+				functions->push_back(funcInfo->Id);
 				continue;
 #else
 				//we found our managed stack
@@ -1084,6 +1085,8 @@ void ClrProfiler::OnTimer()
 
 		CloseHandle(hThread);
 	}
+
+	boost::singleton_pool<boost::pool_allocator_tag, sizeof(unsigned int)>::purge_memory();
 
 	ResumeAll();
 	if(m_active)
