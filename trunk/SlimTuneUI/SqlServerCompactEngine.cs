@@ -43,6 +43,8 @@ namespace SlimTuneUI
 
 	class SqlServerCompactEngine : IStorageEngine
 	{
+		private const string kCallersSchema = "(ThreadId INT NOT NULL, CallerId INT NOT NULL, CalleeId INT NOT NULL, HitCount INT NOT NULL)";
+		private const string kSamplesSchema = "(ThreadId INT NOT NULL, FunctionId INT NOT NULL, HitCount INT NOT NULL)";
 		//Everything is stored sorted so that we can sprint through the database quickly
 		CallGraph<int> m_callers;
 		//this is: FunctionId, ThreadId, HitCount
@@ -289,6 +291,25 @@ namespace SlimTuneUI
 			}
 		}
 
+		public void Snapshot(string name)
+		{
+			lock(m_lock)
+			{
+				Flush();
+
+				var cmd = new SqlCeCommand("INSERT INTO Snapshots (Name, DateTime) VALUES (@Name, @DateTime)", m_sqlConn);
+				cmd.Parameters.Add(new SqlCeParameter("@Name", name));
+				cmd.Parameters.Add(new SqlCeParameter("@DateTime", DateTime.Now));
+				cmd.ExecuteNonQuery();
+
+				int id = (int) QueryScalar("SELECT MAX(Id) FROM Snapshots");
+				ExecuteNonQuery(string.Format("CREATE TABLE Callers_{0} {1}", id, kCallersSchema));
+				ExecuteNonQuery(string.Format("INSERT INTO Callers_{0} SELECT * FROM Callers", id));
+				ExecuteNonQuery(string.Format("CREATE TABLE Samples_{0} {1}", id, kSamplesSchema));
+				ExecuteNonQuery(string.Format("INSERT INTO Samples_{0} SELECT * FROM Samples", id));
+			}
+		}
+
 		public DataSet Query(string query)
 		{
 			var command = new SqlCeCommand(query, m_sqlConn);
@@ -320,20 +341,19 @@ namespace SlimTuneUI
 
 		private void CreateSchema()
 		{
+			ExecuteNonQuery("CREATE TABLE Snapshots (Id INT PRIMARY KEY IDENTITY, Name NVARCHAR (256), DateTime DATETIME)");
 			ExecuteNonQuery("CREATE TABLE Functions (Id INT PRIMARY KEY, ClassId INT, IsNative INT NOT NULL, Name NVARCHAR (1024), Signature NVARCHAR (2048))");
 			ExecuteNonQuery("CREATE TABLE Classes (Id INT PRIMARY KEY, Name NVARCHAR (1024))");
 
 			//We will look up results in CallerId order when updating this table
-			ExecuteNonQuery("CREATE TABLE Callers (ThreadId INT NOT NULL, CallerId INT NOT NULL, CalleeId INT NOT NULL, HitCount INT NOT NULL)");
+			ExecuteNonQuery("CREATE TABLE Callers " + kCallersSchema);
 			ExecuteNonQuery("CREATE INDEX CallerIndex ON Callers(CallerId);");
 			ExecuteNonQuery("CREATE INDEX CalleeIndex ON Callers(CalleeId);");
 			ExecuteNonQuery("CREATE INDEX Compound ON Callers(ThreadId, CallerId, CalleeId);");
 
-			ExecuteNonQuery("CREATE TABLE Samples (ThreadId INT NOT NULL, FunctionId INT NOT NULL, HitCount INT NOT NULL)");
+			ExecuteNonQuery("CREATE TABLE Samples " + kSamplesSchema);
 			ExecuteNonQuery("CREATE INDEX FunctionIndex ON Samples(FunctionId);");
 			ExecuteNonQuery("CREATE INDEX Compound ON Samples(ThreadId, FunctionId);");
-
-			ExecuteNonQuery("CREATE TABLE Timings (FunctionId INT NOT NULL, Time BIGINT NOT NULL)");
 
 			ExecuteNonQuery("CREATE TABLE Threads (Id INT NOT NULL, IsAlive INT, Name NVARCHAR(256))");
 			ExecuteNonQuery("ALTER TABLE Threads ADD CONSTRAINT pk_Id PRIMARY KEY (Id)");

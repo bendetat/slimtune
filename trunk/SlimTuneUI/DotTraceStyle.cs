@@ -49,15 +49,17 @@ ORDER BY HitCount DESC
 			public int ThreadId;
 			public string Name;
 			public decimal Percent;
-			public string FormattedString;
+			public string FormattedText;
+			public string TipText;
 
-			public NodeData(int id, int threadId, string name, decimal percent, string formattedString)
+			public NodeData(int id, int threadId, string name, decimal percent, string formattedText, string tipText)
 			{
 				Id = id;
 				ThreadId = threadId;
 				Name = name;
 				Percent = percent;
-				FormattedString = formattedString;
+				FormattedText = formattedText;
+				TipText = tipText;
 			}
 		}
 
@@ -196,7 +198,8 @@ ORDER BY HitCount DESC
 					string name = (string) row["Function"];
 					//TODO: Replace with proper filters
 					string rawString = @"{0:P2} Thread {1} - {2}{3}{4}";
-					string niceString = @"\1{0:P2} \2Thread {1} \0- {2}\2{3}\0{4}";
+					string tipString = "{0:P2} - Thread {1}\r\nEntry point: {2}{3}{4}";
+					string niceString = @"\1{0:P3} \2Thread {1} \0- {2}\2{3}\0{4}";
 
 					string signature, funcName, classAndFunc, baseName;
 					BreakName(name, out signature, out funcName, out classAndFunc, out baseName);
@@ -207,10 +210,11 @@ ORDER BY HitCount DESC
 						threadName = "#" + threadId;
 
 					string nodeText = string.Format(rawString, percent, threadName, baseName, classAndFunc, signature);
-					string formatString = string.Format(niceString, percent, threadName, baseName, classAndFunc, signature);
+					string tipText = string.Format(tipString, percent, threadName, baseName, classAndFunc, signature);
+					string formatText = string.Format(niceString, percent, threadName, baseName, classAndFunc, signature);
 
 					TreeNode newNode = new TreeNode(nodeText, new TreeNode[] { new TreeNode("dummy") });
-					newNode.Tag = new NodeData((int) row["Id"], threadId, string.Empty, 1, formatString);
+					newNode.Tag = new NodeData((int) row["Id"], threadId, string.Empty, 1, formatText, tipText);
 					m_treeView.Nodes.Add(newNode);
 				}
 			}
@@ -229,19 +233,23 @@ ORDER BY HitCount DESC
 				{
 					string name = (string) row["Function"];
 					string rawString = @"{0:P2} {1} - {2:P2} - {3}{4}{5}";
+					string tipString = "[Id {6}] {3}{4}{5}\r\n{0:P3} of thread - {1} calls\r\n{2:P3} of parent";
 					string niceString = @"\1{0:P2} \2{1} \0- \3{2:P2} \0- {3}\2{4}\0{5}";
 
 					string signature, funcName, classAndFunc, baseName;
 					BreakName(name, out signature, out funcName, out classAndFunc, out baseName);
 					decimal percentOfParent = (decimal) row["Percent"];
 					decimal percent = percentOfParent * parent.Percent;
+					int id = (int) row["Id"];
 
 					string nodeText = string.Format(rawString, percent, funcName, percentOfParent, baseName, classAndFunc, signature);
-					string formatString = string.Format(niceString, percent, funcName, percentOfParent,
+					string tipText = string.Format(tipString, percent, (int) row["HitCount"], percentOfParent,
+						baseName, classAndFunc, signature, id);
+					string formatText = string.Format(niceString, percent, funcName, percentOfParent,
 						baseName, classAndFunc, signature);
 
 					TreeNode newNode = new TreeNode(nodeText, new TreeNode[] { new TreeNode() });
-					newNode.Tag = new NodeData((int) row["Id"], (int) parent.ThreadId, name, percent, formatString);
+					newNode.Tag = new NodeData(id, (int) parent.ThreadId, name, percent, formatText, tipText);
 					node.Nodes.Add(newNode);
 				}
 			}
@@ -264,7 +272,7 @@ ORDER BY HitCount DESC
 				return;
 			}
 
-			string text = data.FormattedString;
+			string text = data.FormattedText;
 			var graphics = e.Graphics;
 			Font currentFont = e.Node.NodeFont ?? e.Node.TreeView.Font;
 			Brush currentBrush = (e.State & TreeNodeStates.Selected) != 0 ? Brushes.White : Brushes.Black;
@@ -277,7 +285,7 @@ ORDER BY HitCount DESC
 				return;
 			}
 
-			bool parentSelected = e.Node.Parent != null &&  e.Node.Parent.IsSelected;
+			bool parentSelected = e.Node.Parent != null && e.Node.Parent.IsSelected;
 			int rectX = e.Bounds.X > 0 ? e.Bounds.X : 0;
 			if(parentSelected)
 				graphics.FillRectangle(Brushes.AliceBlue, rectX, e.Bounds.Y, m_treeView.Width, e.Bounds.Height);
@@ -353,6 +361,21 @@ ORDER BY HitCount DESC
 		private void FilterMenu_Click(object sender, EventArgs e)
 		{
 			m_treeView.Invalidate();
+		}
+
+		private void m_treeView_MouseMove(object sender, MouseEventArgs e)
+		{
+			TreeNode node = m_treeView.GetNodeAt(e.X, e.Y);
+
+			if(node != null && node.Tag != null)
+			{
+				NodeData data = node.Tag as NodeData;
+				m_extraInfoTextBox.Text = data.TipText;
+			}
+			else
+			{
+				m_extraInfoTextBox.Text = string.Empty;
+			}
 		}
 	}
 }

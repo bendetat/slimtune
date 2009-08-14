@@ -96,6 +96,7 @@ namespace SlimTuneUI
 
 		bool AllowFlush { get; set; }
 		void Flush();
+		void Snapshot(string name);
 
 		DataSet Query(string query);
 		object QueryScalar(string query);
