@@ -126,7 +126,8 @@ namespace SlimTuneUI
 					Connection conn = new Connection(storage);
 					conn.Executable = psi.FileName;
 					conn.RunClient(progress.Client);
-					conn.SetAutoSnapshots(10000);
+					//TODO: set options
+					conn.SetAutoSnapshots(10000, false);
 					m_mainWindow.ConnectionList.AddConnection(conn);
 
 					VisualizerEntry visEntry = m_visualizerCombo.SelectedItem as VisualizerEntry;

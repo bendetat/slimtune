@@ -31,7 +31,7 @@ namespace SlimTuneUI
 	{
 		public static void LoadPlugins()
 		{
-			string pluginsDir = Application.StartupPath + "\\plugins\\";
+			string pluginsDir = Application.StartupPath + "\\Plugins\\";
 			var plugins = Directory.GetFiles(pluginsDir, "*.dll", SearchOption.AllDirectories);
 			foreach(var file in plugins)
 			{

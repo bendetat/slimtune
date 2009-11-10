@@ -38,6 +38,7 @@ namespace SlimTuneUI
 		public MainWindow()
 		{
 			InitializeComponent();
+			Program.LoadPlugins();
 
 			ConnectionList = new ConnectionList(this);
 			ConnectionList.Show(DockPanel);

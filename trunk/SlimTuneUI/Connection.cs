@@ -21,6 +21,7 @@ namespace SlimTuneUI
 		Thread m_recvThread;
 		volatile bool m_receive = false;
 		System.Timers.Timer m_snapshotTimer;
+		bool m_clearAfterSnapshot = false;
 
 		public string Name
 		{
@@ -67,13 +68,15 @@ namespace SlimTuneUI
 			m_recvThread.Start(Client);
 		}
 
-		public void SetAutoSnapshots(double interval)
+		public void SetAutoSnapshots(double interval, bool clearAfterSnapshot)
 		{
 			if(!m_receive)
 				return;
 
+			m_clearAfterSnapshot = clearAfterSnapshot;
 			m_snapshotTimer = new System.Timers.Timer(interval);
 			m_snapshotTimer.Elapsed += new System.Timers.ElapsedEventHandler(m_snapshotTimer_Elapsed);
+			m_snapshotTimer.Start();
 		}
 
 		/// <summary>
@@ -87,6 +90,8 @@ namespace SlimTuneUI
 		void m_snapshotTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
 		{
 			StorageEngine.Snapshot("Auto");
+			if(m_clearAfterSnapshot)
+				StorageEngine.ClearData();
 		}
 
 		void ReceiveThread(object data)

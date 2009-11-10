@@ -75,7 +75,7 @@ namespace SlimTuneUI
 			{
 				Connection conn = new Connection(storage);
 				conn.RunClient(progress.Client);
-				conn.SetAutoSnapshots(10000);
+				conn.SetAutoSnapshots(10000, false);
 				m_mainWindow.ConnectionList.AddConnection(conn);
 
 				VisualizerEntry visEntry = m_visualizerCombo.SelectedItem as VisualizerEntry;

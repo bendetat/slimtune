@@ -298,7 +298,7 @@ HRESULT ClrProfiler::SetInitialEventMask()
 		eventMask |= COR_PRF_ENABLE_STACK_SNAPSHOT;
 	}
 	
-	if(m_config.Mode & PM_Hybrid)
+	if(m_config.Mode & PM_Tracing)
 	{
 		eventMask |= COR_PRF_MONITOR_ENTERLEAVE;
 		eventMask |= COR_PRF_MONITOR_CODE_TRANSITIONS;
@@ -911,12 +911,11 @@ void ClrProfiler::OnTimerGlobal(LPVOID lpParameter, BOOLEAN TimerOrWaitFired)
 
 HRESULT ClrProfiler::StackWalkGlobal(FunctionID funcId, UINT_PTR ip, COR_PRF_FRAME_INFO frameInfo, ULONG32 contextSize, BYTE contextBytes[], void *clientData)
 {
-	WalkData* data = static_cast<WalkData*>(clientData);
 	if(funcId == 0)
-	{
 		return S_OK;
-	}
 
+	WalkData* data = static_cast<WalkData*>(clientData);
+	CONTEXT* context = reinterpret_cast<CONTEXT*>(contextBytes);
 	FunctionInfo* info = reinterpret_cast<FunctionInfo*>(data->profiler->MapFunction(funcId, true));
 	data->functions->push_back(info->Id);
 	return S_OK;
@@ -976,7 +975,7 @@ void ClrProfiler::OnTimer()
 
 		//Attempt an initial stackwalk with what we've got
 		WalkData dataFirst = { this, functions, hProcess, hThread };
-		HRESULT walkResult = m_ProfilerInfo2->DoStackSnapshot(threadInfo->NativeId, StackWalkGlobal, COR_PRF_SNAPSHOT_DEFAULT,
+		HRESULT walkResult = m_ProfilerInfo2->DoStackSnapshot(threadInfo->NativeId, StackWalkGlobal, COR_PRF_SNAPSHOT_REGISTER_CONTEXT,
 				&dataFirst, (BYTE*) &context, sizeof(CONTEXT));
 		if(SUCCEEDED(walkResult) && functions->size() > 0)
 		{
