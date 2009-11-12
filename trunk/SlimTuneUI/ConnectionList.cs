@@ -140,7 +140,7 @@ namespace SlimTuneUI
 		private void m_openVisualizerButton_Click(object sender, EventArgs e)
 		{
 			Connection conn = m_connectionList.SelectedItem as Connection;
-			var visEntry = m_visualizersCombo.SelectedItem as VisualizerEntry;
+			var visEntry = m_visualizersCombo.SelectedItem as TypeEntry;
 			if(conn == null || visEntry == null || visEntry.Type == null)
 				return;
 

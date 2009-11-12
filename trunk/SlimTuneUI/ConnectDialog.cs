@@ -78,7 +78,7 @@ namespace SlimTuneUI
 				conn.SetAutoSnapshots(10000, false);
 				m_mainWindow.ConnectionList.AddConnection(conn);
 
-				VisualizerEntry visEntry = m_visualizerCombo.SelectedItem as VisualizerEntry;
+				TypeEntry visEntry = m_visualizerCombo.SelectedItem as TypeEntry;
 				if(visEntry != null && visEntry.Type != null)
 				{
 					IVisualizer visualizer = Activator.CreateInstance(visEntry.Type) as IVisualizer;

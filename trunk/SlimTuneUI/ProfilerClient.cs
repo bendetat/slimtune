@@ -32,12 +32,12 @@ namespace SlimTuneUI
 {
 	public enum ProfilerMode
 	{
-		PM_Disabled = 0,
+		Disabled = 0,
 
-		PM_Sampling = 0x01,
-		PM_Tracing = 0x02,
+		Sampling = 0x01,
+		Tracing = 0x02,
 
-		PM_Hybrid = PM_Sampling | PM_Tracing,
+		Hybrid = Sampling | Tracing,
 	}
 
 	public class ThreadInfo

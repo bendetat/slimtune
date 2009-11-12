@@ -47,10 +47,8 @@ namespace SlimTuneUI
 			}
 		}
 
-		public static IEnumerable<Type> GetVisualizers()
+		private static IEnumerable<Type> GetTypeList(Type baseType)
 		{
-			Type visualizerType = typeof(IVisualizer);
-
 			var assemblies = AppDomain.CurrentDomain.GetAssemblies();
 			foreach(var assembly in assemblies)
 			{
@@ -58,15 +56,25 @@ namespace SlimTuneUI
 					continue;
 				if(assembly.GlobalAssemblyCache)
 					continue;
-				
+
 				foreach(var type in assembly.GetExportedTypes())
 				{
-					if(type == typeof(IVisualizer))
+					if(type == baseType)
 						continue;
-					if(visualizerType.IsAssignableFrom(type))
+					if(baseType.IsAssignableFrom(type))
 						yield return type;
 				}
 			}
+		}
+
+		public static IEnumerable<Type> GetVisualizers()
+		{
+			return GetTypeList(typeof(IVisualizer));
+		}
+
+		public static IEnumerable<Type> GetLaunchers()
+		{
+			return GetTypeList(typeof(ILauncher));
 		}
 
 		/// <summary>

@@ -42,12 +42,12 @@ namespace SlimTuneUI
 		}
 	}
 
-	public class VisualizerEntry
+	public class TypeEntry
 	{
 		public string Name { get; set; }
 		public Type Type { get; set; }
 
-		public VisualizerEntry(string name, Type type)
+		public TypeEntry(string name, Type type)
 		{
 			this.Name = name;
 			this.Type = type;
@@ -110,21 +110,33 @@ namespace SlimTuneUI
 			}
 		}
 
-		public static IEnumerable<object> GetVisualizerList(bool includeDummy)
+		public static string GetDisplayName(Type type)
+		{
+			var attribs = type.GetCustomAttributes(typeof(DisplayNameAttribute), false);
+			if(attribs.Length > 0)
+				return (attribs[0] as DisplayNameAttribute).DisplayName;
+			else
+				return type.FullName;
+		}
+
+		public static IEnumerable<TypeEntry> GetVisualizerList(bool includeDummy)
 		{
 			if(includeDummy)
-				yield return new VisualizerEntry("(None)", null);
+				yield return new TypeEntry("(None)", null);
 
 			foreach(var vis in Program.GetVisualizers())
 			{
-				string displayName;
-				var attribs = vis.GetCustomAttributes(typeof(DisplayNameAttribute), false);
-				if(attribs.Length > 0)
-					displayName = (attribs[0] as DisplayNameAttribute).DisplayName;
-				else
-					displayName = vis.FullName;
+				string displayName = GetDisplayName(vis);
+				yield return new TypeEntry(displayName, vis);
+			}
+		}
 
-				yield return new VisualizerEntry(displayName, vis);
+		public static IEnumerable<TypeEntry> GetLauncherList()
+		{
+			foreach(var launcher in Program.GetLaunchers())
+			{
+				string displayName = GetDisplayName(launcher);
+				yield return new TypeEntry(displayName, launcher);
 			}
 		}
 	}

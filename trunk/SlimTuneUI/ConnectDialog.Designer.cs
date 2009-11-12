@@ -51,6 +51,8 @@ namespace SlimTuneUI
 		{
 			this.components = new System.ComponentModel.Container();
 			this.m_frontendOptionsGroupBox = new System.Windows.Forms.GroupBox();
+			this.m_visualizerLabel = new System.Windows.Forms.Label();
+			this.m_visualizerCombo = new System.Windows.Forms.ComboBox();
 			this.m_browseDbButton = new System.Windows.Forms.Button();
 			this.m_resultsFileTextBox = new System.Windows.Forms.TextBox();
 			this.m_saveAsLabel = new System.Windows.Forms.Label();
@@ -61,8 +63,6 @@ namespace SlimTuneUI
 			this.m_executableLabel = new System.Windows.Forms.Label();
 			this.m_connectButton = new System.Windows.Forms.Button();
 			this.m_saveResultsDialog = new System.Windows.Forms.SaveFileDialog();
-			this.m_visualizerLabel = new System.Windows.Forms.Label();
-			this.m_visualizerCombo = new System.Windows.Forms.ComboBox();
 			this.m_toolTip = new System.Windows.Forms.ToolTip(this.components);
 			this.m_frontendOptionsGroupBox.SuspendLayout();
 			this.m_connectOptionsGroupBox.SuspendLayout();
@@ -81,6 +81,27 @@ namespace SlimTuneUI
 			this.m_frontendOptionsGroupBox.TabIndex = 18;
 			this.m_frontendOptionsGroupBox.TabStop = false;
 			this.m_frontendOptionsGroupBox.Text = "Front-end Options";
+			// 
+			// m_visualizerLabel
+			// 
+			this.m_visualizerLabel.AutoSize = true;
+			this.m_visualizerLabel.Location = new System.Drawing.Point(8, 50);
+			this.m_visualizerLabel.Name = "m_visualizerLabel";
+			this.m_visualizerLabel.Size = new System.Drawing.Size(54, 13);
+			this.m_visualizerLabel.TabIndex = 20;
+			this.m_visualizerLabel.Text = "Visualizer:";
+			// 
+			// m_visualizerCombo
+			// 
+			this.m_visualizerCombo.DisplayMember = "Name";
+			this.m_visualizerCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.m_visualizerCombo.FormattingEnabled = true;
+			this.m_visualizerCombo.Location = new System.Drawing.Point(75, 47);
+			this.m_visualizerCombo.Name = "m_visualizerCombo";
+			this.m_visualizerCombo.Size = new System.Drawing.Size(400, 21);
+			this.m_visualizerCombo.Sorted = true;
+			this.m_visualizerCombo.TabIndex = 19;
+			this.m_toolTip.SetToolTip(this.m_visualizerCombo, "The visualizer to open when the front-end connects.");
 			// 
 			// m_browseDbButton
 			// 
@@ -175,27 +196,6 @@ namespace SlimTuneUI
 			this.m_saveResultsDialog.DefaultExt = "sdf";
 			this.m_saveResultsDialog.Filter = "Results (*.sdf)|*.sdf";
 			this.m_saveResultsDialog.Title = "Save Results...";
-			// 
-			// m_visualizerLabel
-			// 
-			this.m_visualizerLabel.AutoSize = true;
-			this.m_visualizerLabel.Location = new System.Drawing.Point(8, 50);
-			this.m_visualizerLabel.Name = "m_visualizerLabel";
-			this.m_visualizerLabel.Size = new System.Drawing.Size(54, 13);
-			this.m_visualizerLabel.TabIndex = 20;
-			this.m_visualizerLabel.Text = "Visualizer:";
-			// 
-			// m_visualizerCombo
-			// 
-			this.m_visualizerCombo.DisplayMember = "Name";
-			this.m_visualizerCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.m_visualizerCombo.FormattingEnabled = true;
-			this.m_visualizerCombo.Location = new System.Drawing.Point(75, 47);
-			this.m_visualizerCombo.Name = "m_visualizerCombo";
-			this.m_visualizerCombo.Size = new System.Drawing.Size(400, 21);
-			this.m_visualizerCombo.Sorted = true;
-			this.m_visualizerCombo.TabIndex = 19;
-			this.m_toolTip.SetToolTip(this.m_visualizerCombo, "The visualizer to open when the front-end connects.");
 			// 
 			// m_toolTip
 			// 

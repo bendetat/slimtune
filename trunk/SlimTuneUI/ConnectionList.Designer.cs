@@ -82,7 +82,7 @@
 			// m_clearDataButton
 			// 
 			this.m_clearDataButton.Enabled = false;
-			this.m_clearDataButton.Image = ((System.Drawing.Image) (resources.GetObject("m_clearDataButton.Image")));
+			this.m_clearDataButton.Image = ((System.Drawing.Image)(resources.GetObject("m_clearDataButton.Image")));
 			this.m_clearDataButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			this.m_clearDataButton.Location = new System.Drawing.Point(6, 182);
 			this.m_clearDataButton.Name = "m_clearDataButton";
@@ -97,7 +97,7 @@
 			// m_disconnectButton
 			// 
 			this.m_disconnectButton.Enabled = false;
-			this.m_disconnectButton.Image = ((System.Drawing.Image) (resources.GetObject("m_disconnectButton.Image")));
+			this.m_disconnectButton.Image = ((System.Drawing.Image)(resources.GetObject("m_disconnectButton.Image")));
 			this.m_disconnectButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			this.m_disconnectButton.Location = new System.Drawing.Point(6, 30);
 			this.m_disconnectButton.Name = "m_disconnectButton";
@@ -112,7 +112,7 @@
 			// m_openVisualizerButton
 			// 
 			this.m_openVisualizerButton.Enabled = false;
-			this.m_openVisualizerButton.Image = ((System.Drawing.Image) (resources.GetObject("m_openVisualizerButton.Image")));
+			this.m_openVisualizerButton.Image = ((System.Drawing.Image)(resources.GetObject("m_openVisualizerButton.Image")));
 			this.m_openVisualizerButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			this.m_openVisualizerButton.Location = new System.Drawing.Point(6, 119);
 			this.m_openVisualizerButton.Name = "m_openVisualizerButton";
@@ -126,7 +126,7 @@
 			// 
 			// m_visualizersCombo
 			// 
-			this.m_visualizersCombo.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+			this.m_visualizersCombo.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
 						| System.Windows.Forms.AnchorStyles.Right)));
 			this.m_visualizersCombo.DisplayMember = "Name";
 			this.m_visualizersCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
@@ -142,7 +142,7 @@
 			// m_visualizersLabel
 			// 
 			this.m_visualizersLabel.AutoSize = true;
-			this.m_visualizersLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
+			this.m_visualizersLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.m_visualizersLabel.Location = new System.Drawing.Point(3, 73);
 			this.m_visualizersLabel.Name = "m_visualizersLabel";
 			this.m_visualizersLabel.Size = new System.Drawing.Size(136, 16);
@@ -152,7 +152,7 @@
 			// m_closeButton
 			// 
 			this.m_closeButton.Enabled = false;
-			this.m_closeButton.Image = ((System.Drawing.Image) (resources.GetObject("m_closeButton.Image")));
+			this.m_closeButton.Image = ((System.Drawing.Image)(resources.GetObject("m_closeButton.Image")));
 			this.m_closeButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			this.m_closeButton.Location = new System.Drawing.Point(95, 30);
 			this.m_closeButton.Name = "m_closeButton";
@@ -166,7 +166,7 @@
 			// m_statusLabel
 			// 
 			this.m_statusLabel.AutoSize = true;
-			this.m_statusLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
+			this.m_statusLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.m_statusLabel.Location = new System.Drawing.Point(3, 12);
 			this.m_statusLabel.Name = "m_statusLabel";
 			this.m_statusLabel.Size = new System.Drawing.Size(44, 15);
@@ -183,10 +183,10 @@
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(182, 494);
 			this.Controls.Add(this.m_splitter);
-			this.DockAreas = ((WeifenLuo.WinFormsUI.Docking.DockAreas) ((((WeifenLuo.WinFormsUI.Docking.DockAreas.Float | WeifenLuo.WinFormsUI.Docking.DockAreas.DockLeft)
+			this.DockAreas = ((WeifenLuo.WinFormsUI.Docking.DockAreas)((((WeifenLuo.WinFormsUI.Docking.DockAreas.Float | WeifenLuo.WinFormsUI.Docking.DockAreas.DockLeft)
 						| WeifenLuo.WinFormsUI.Docking.DockAreas.DockRight)
 						| WeifenLuo.WinFormsUI.Docking.DockAreas.Document)));
-			this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
+			this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
 			this.HideOnClose = true;
 			this.Name = "ConnectionList";

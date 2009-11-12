@@ -53,22 +53,6 @@ namespace SlimTuneUI
 			this.m_runButton = new System.Windows.Forms.Button();
 			this.m_openExeDialog = new System.Windows.Forms.OpenFileDialog();
 			this.m_saveResultsDialog = new System.Windows.Forms.SaveFileDialog();
-			this.m_launchOptionsGroupBox = new System.Windows.Forms.GroupBox();
-			this.m_browseWorkingDirButton = new System.Windows.Forms.Button();
-			this.m_workingDirTextBox = new System.Windows.Forms.TextBox();
-			this.m_workingDirLabel = new System.Windows.Forms.Label();
-			this.m_portTextBox = new System.Windows.Forms.TextBox();
-			this.m_portLabel = new System.Windows.Forms.Label();
-			this.m_waitConnectCheckBox = new System.Windows.Forms.CheckBox();
-			this.m_profileTypeLabel = new System.Windows.Forms.Label();
-			this.m_hybridRadio = new System.Windows.Forms.RadioButton();
-			this.m_tracingRadio = new System.Windows.Forms.RadioButton();
-			this.m_samplingRadio = new System.Windows.Forms.RadioButton();
-			this.m_argumentsLabel = new System.Windows.Forms.Label();
-			this.m_argumentsTextBox = new System.Windows.Forms.TextBox();
-			this.m_browseExeButton = new System.Windows.Forms.Button();
-			this.m_executableTextBox = new System.Windows.Forms.TextBox();
-			this.m_executableLabel = new System.Windows.Forms.Label();
 			this.m_frontendOptionsGroupBox = new System.Windows.Forms.GroupBox();
 			this.m_visualizerLabel = new System.Windows.Forms.Label();
 			this.m_visualizerCombo = new System.Windows.Forms.ComboBox();
@@ -78,8 +62,9 @@ namespace SlimTuneUI
 			this.m_saveAsLabel = new System.Windows.Forms.Label();
 			this.m_dirBrowser = new System.Windows.Forms.FolderBrowserDialog();
 			this.m_toolTip = new System.Windows.Forms.ToolTip(this.components);
-			this.m_sampleNativeCheckBox = new System.Windows.Forms.CheckBox();
-			this.m_launchOptionsGroupBox.SuspendLayout();
+			this.m_launchPropGrid = new System.Windows.Forms.PropertyGrid();
+			this.m_appTypeLabel = new System.Windows.Forms.Label();
+			this.m_appTypeCombo = new System.Windows.Forms.ComboBox();
 			this.m_frontendOptionsGroupBox.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -104,198 +89,18 @@ namespace SlimTuneUI
 			this.m_saveResultsDialog.Filter = "Results (*.sdf)|*.sdf";
 			this.m_saveResultsDialog.Title = "Save Results...";
 			// 
-			// m_launchOptionsGroupBox
-			// 
-			this.m_launchOptionsGroupBox.Controls.Add(this.m_sampleNativeCheckBox);
-			this.m_launchOptionsGroupBox.Controls.Add(this.m_browseWorkingDirButton);
-			this.m_launchOptionsGroupBox.Controls.Add(this.m_workingDirTextBox);
-			this.m_launchOptionsGroupBox.Controls.Add(this.m_workingDirLabel);
-			this.m_launchOptionsGroupBox.Controls.Add(this.m_portTextBox);
-			this.m_launchOptionsGroupBox.Controls.Add(this.m_portLabel);
-			this.m_launchOptionsGroupBox.Controls.Add(this.m_waitConnectCheckBox);
-			this.m_launchOptionsGroupBox.Controls.Add(this.m_profileTypeLabel);
-			this.m_launchOptionsGroupBox.Controls.Add(this.m_hybridRadio);
-			this.m_launchOptionsGroupBox.Controls.Add(this.m_tracingRadio);
-			this.m_launchOptionsGroupBox.Controls.Add(this.m_samplingRadio);
-			this.m_launchOptionsGroupBox.Controls.Add(this.m_argumentsLabel);
-			this.m_launchOptionsGroupBox.Controls.Add(this.m_argumentsTextBox);
-			this.m_launchOptionsGroupBox.Controls.Add(this.m_browseExeButton);
-			this.m_launchOptionsGroupBox.Controls.Add(this.m_executableTextBox);
-			this.m_launchOptionsGroupBox.Controls.Add(this.m_executableLabel);
-			this.m_launchOptionsGroupBox.Location = new System.Drawing.Point(12, 12);
-			this.m_launchOptionsGroupBox.Name = "m_launchOptionsGroupBox";
-			this.m_launchOptionsGroupBox.Size = new System.Drawing.Size(563, 176);
-			this.m_launchOptionsGroupBox.TabIndex = 15;
-			this.m_launchOptionsGroupBox.TabStop = false;
-			this.m_launchOptionsGroupBox.Text = "Launch Options";
-			// 
-			// m_browseWorkingDirButton
-			// 
-			this.m_browseWorkingDirButton.Location = new System.Drawing.Point(483, 74);
-			this.m_browseWorkingDirButton.Name = "m_browseWorkingDirButton";
-			this.m_browseWorkingDirButton.Size = new System.Drawing.Size(75, 23);
-			this.m_browseWorkingDirButton.TabIndex = 29;
-			this.m_browseWorkingDirButton.Text = "Browse...";
-			this.m_toolTip.SetToolTip(this.m_browseWorkingDirButton, "Opens a file browser to select a working directory.");
-			this.m_browseWorkingDirButton.UseVisualStyleBackColor = true;
-			this.m_browseWorkingDirButton.Click += new System.EventHandler(this.m_browseWorkingDirButton_Click);
-			// 
-			// m_workingDirTextBox
-			// 
-			this.m_workingDirTextBox.Location = new System.Drawing.Point(70, 77);
-			this.m_workingDirTextBox.Name = "m_workingDirTextBox";
-			this.m_workingDirTextBox.Size = new System.Drawing.Size(407, 20);
-			this.m_workingDirTextBox.TabIndex = 28;
-			this.m_toolTip.SetToolTip(this.m_workingDirTextBox, "The working directory to use when launching the executable. If left blank, the co" +
-					"ntaining directory will be used.");
-			// 
-			// m_workingDirLabel
-			// 
-			this.m_workingDirLabel.AutoSize = true;
-			this.m_workingDirLabel.Location = new System.Drawing.Point(3, 80);
-			this.m_workingDirLabel.Name = "m_workingDirLabel";
-			this.m_workingDirLabel.Size = new System.Drawing.Size(66, 13);
-			this.m_workingDirLabel.TabIndex = 27;
-			this.m_workingDirLabel.Text = "Working Dir:";
-			this.m_workingDirLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			// 
-			// m_portTextBox
-			// 
-			this.m_portTextBox.Location = new System.Drawing.Point(69, 103);
-			this.m_portTextBox.Name = "m_portTextBox";
-			this.m_portTextBox.Size = new System.Drawing.Size(100, 20);
-			this.m_portTextBox.TabIndex = 26;
-			this.m_portTextBox.Text = "3000";
-			this.m_toolTip.SetToolTip(this.m_portTextBox, "The port that the profiler should use. Change this if you are profiling multiple " +
-					"applications at once.");
-			this.m_portTextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.m_portTextBox_KeyPress);
-			// 
-			// m_portLabel
-			// 
-			this.m_portLabel.AutoSize = true;
-			this.m_portLabel.Location = new System.Drawing.Point(6, 106);
-			this.m_portLabel.Name = "m_portLabel";
-			this.m_portLabel.Size = new System.Drawing.Size(60, 13);
-			this.m_portLabel.TabIndex = 25;
-			this.m_portLabel.Text = "Listen Port:";
-			// 
-			// m_waitConnectCheckBox
-			// 
-			this.m_waitConnectCheckBox.AutoSize = true;
-			this.m_waitConnectCheckBox.Location = new System.Drawing.Point(9, 129);
-			this.m_waitConnectCheckBox.Name = "m_waitConnectCheckBox";
-			this.m_waitConnectCheckBox.Size = new System.Drawing.Size(119, 17);
-			this.m_waitConnectCheckBox.TabIndex = 24;
-			this.m_waitConnectCheckBox.Text = "Wait for connection";
-			this.m_toolTip.SetToolTip(this.m_waitConnectCheckBox, "If checked, the executable will be prevented from launching until a profiler fron" +
-					"t-end connects. Not recommended (deadlock risk).");
-			this.m_waitConnectCheckBox.UseVisualStyleBackColor = true;
-			// 
-			// m_profileTypeLabel
-			// 
-			this.m_profileTypeLabel.AutoSize = true;
-			this.m_profileTypeLabel.Location = new System.Drawing.Point(6, 153);
-			this.m_profileTypeLabel.Name = "m_profileTypeLabel";
-			this.m_profileTypeLabel.Size = new System.Drawing.Size(66, 13);
-			this.m_profileTypeLabel.TabIndex = 23;
-			this.m_profileTypeLabel.Text = "Profile Type:";
-			// 
-			// m_hybridRadio
-			// 
-			this.m_hybridRadio.AutoSize = true;
-			this.m_hybridRadio.Enabled = false;
-			this.m_hybridRadio.Location = new System.Drawing.Point(219, 151);
-			this.m_hybridRadio.Name = "m_hybridRadio";
-			this.m_hybridRadio.Size = new System.Drawing.Size(55, 17);
-			this.m_hybridRadio.TabIndex = 22;
-			this.m_hybridRadio.Text = "Hybrid";
-			this.m_toolTip.SetToolTip(this.m_hybridRadio, "Use hybrid profiling mode. Starts out in sampling mode, and lets you selectively " +
-					"trace functions.");
-			this.m_hybridRadio.UseVisualStyleBackColor = true;
-			// 
-			// m_tracingRadio
-			// 
-			this.m_tracingRadio.AutoSize = true;
-			this.m_tracingRadio.Enabled = false;
-			this.m_tracingRadio.Location = new System.Drawing.Point(152, 151);
-			this.m_tracingRadio.Name = "m_tracingRadio";
-			this.m_tracingRadio.Size = new System.Drawing.Size(61, 17);
-			this.m_tracingRadio.TabIndex = 21;
-			this.m_tracingRadio.Text = "Tracing";
-			this.m_toolTip.SetToolTip(this.m_tracingRadio, "Use tracing based profiling.  Very accurate but very slow.");
-			this.m_tracingRadio.UseVisualStyleBackColor = true;
-			// 
-			// m_samplingRadio
-			// 
-			this.m_samplingRadio.AutoSize = true;
-			this.m_samplingRadio.Checked = true;
-			this.m_samplingRadio.Location = new System.Drawing.Point(78, 151);
-			this.m_samplingRadio.Name = "m_samplingRadio";
-			this.m_samplingRadio.Size = new System.Drawing.Size(68, 17);
-			this.m_samplingRadio.TabIndex = 20;
-			this.m_samplingRadio.TabStop = true;
-			this.m_samplingRadio.Text = "Sampling";
-			this.m_toolTip.SetToolTip(this.m_samplingRadio, "Use sample-based profiling. Very fast but not especially accurate. Good for getti" +
-					"ng an overview of performance.");
-			this.m_samplingRadio.UseVisualStyleBackColor = true;
-			// 
-			// m_argumentsLabel
-			// 
-			this.m_argumentsLabel.AutoSize = true;
-			this.m_argumentsLabel.Location = new System.Drawing.Point(6, 54);
-			this.m_argumentsLabel.Name = "m_argumentsLabel";
-			this.m_argumentsLabel.Size = new System.Drawing.Size(60, 13);
-			this.m_argumentsLabel.TabIndex = 19;
-			this.m_argumentsLabel.Text = "Arguments:";
-			// 
-			// m_argumentsTextBox
-			// 
-			this.m_argumentsTextBox.Location = new System.Drawing.Point(69, 51);
-			this.m_argumentsTextBox.Name = "m_argumentsTextBox";
-			this.m_argumentsTextBox.Size = new System.Drawing.Size(488, 20);
-			this.m_argumentsTextBox.TabIndex = 18;
-			this.m_toolTip.SetToolTip(this.m_argumentsTextBox, "The command line that should be passed to the executable when launched.");
-			// 
-			// m_browseExeButton
-			// 
-			this.m_browseExeButton.Location = new System.Drawing.Point(482, 21);
-			this.m_browseExeButton.Name = "m_browseExeButton";
-			this.m_browseExeButton.Size = new System.Drawing.Size(75, 23);
-			this.m_browseExeButton.TabIndex = 17;
-			this.m_browseExeButton.Text = "Browse...";
-			this.m_toolTip.SetToolTip(this.m_browseExeButton, "Opens a file browser to select an executable.");
-			this.m_browseExeButton.UseVisualStyleBackColor = true;
-			this.m_browseExeButton.Click += new System.EventHandler(this.m_browseExeButton_Click);
-			// 
-			// m_executableTextBox
-			// 
-			this.m_executableTextBox.Location = new System.Drawing.Point(69, 24);
-			this.m_executableTextBox.Name = "m_executableTextBox";
-			this.m_executableTextBox.Size = new System.Drawing.Size(407, 20);
-			this.m_executableTextBox.TabIndex = 16;
-			this.m_toolTip.SetToolTip(this.m_executableTextBox, "The path of the executable to launch for profiling.");
-			// 
-			// m_executableLabel
-			// 
-			this.m_executableLabel.AutoSize = true;
-			this.m_executableLabel.Location = new System.Drawing.Point(6, 27);
-			this.m_executableLabel.Name = "m_executableLabel";
-			this.m_executableLabel.Size = new System.Drawing.Size(63, 13);
-			this.m_executableLabel.TabIndex = 15;
-			this.m_executableLabel.Text = "Executable:";
-			this.m_executableLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			// 
 			// m_frontendOptionsGroupBox
 			// 
+			this.m_frontendOptionsGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.m_frontendOptionsGroupBox.Controls.Add(this.m_visualizerLabel);
 			this.m_frontendOptionsGroupBox.Controls.Add(this.m_visualizerCombo);
 			this.m_frontendOptionsGroupBox.Controls.Add(this.m_connectCheckBox);
 			this.m_frontendOptionsGroupBox.Controls.Add(this.m_browseDbButton);
 			this.m_frontendOptionsGroupBox.Controls.Add(this.m_resultsFileTextBox);
 			this.m_frontendOptionsGroupBox.Controls.Add(this.m_saveAsLabel);
-			this.m_frontendOptionsGroupBox.Location = new System.Drawing.Point(12, 194);
+			this.m_frontendOptionsGroupBox.Location = new System.Drawing.Point(6, 366);
 			this.m_frontendOptionsGroupBox.Name = "m_frontendOptionsGroupBox";
-			this.m_frontendOptionsGroupBox.Size = new System.Drawing.Size(563, 156);
+			this.m_frontendOptionsGroupBox.Size = new System.Drawing.Size(563, 99);
 			this.m_frontendOptionsGroupBox.TabIndex = 16;
 			this.m_frontendOptionsGroupBox.TabStop = false;
 			this.m_frontendOptionsGroupBox.Text = "Front-end Options";
@@ -320,6 +125,7 @@ namespace SlimTuneUI
 			this.m_visualizerCombo.Sorted = true;
 			this.m_visualizerCombo.TabIndex = 17;
 			this.m_toolTip.SetToolTip(this.m_visualizerCombo, "The visualizer to open when the front-end connects.");
+			this.m_visualizerCombo.SelectedIndexChanged += new System.EventHandler(this.m_visualizerCombo_SelectedIndexChanged);
 			// 
 			// m_connectCheckBox
 			// 
@@ -353,6 +159,7 @@ namespace SlimTuneUI
 			this.m_resultsFileTextBox.Size = new System.Drawing.Size(400, 20);
 			this.m_resultsFileTextBox.TabIndex = 14;
 			this.m_toolTip.SetToolTip(this.m_resultsFileTextBox, "The filename of the database to store profiling data to.");
+			this.m_resultsFileTextBox.TextChanged += new System.EventHandler(this.m_resultsFileTextBox_TextChanged);
 			// 
 			// m_saveAsLabel
 			// 
@@ -371,35 +178,55 @@ namespace SlimTuneUI
 			// 
 			this.m_toolTip.IsBalloon = true;
 			// 
-			// m_sampleNativeCheckBox
+			// m_launchPropGrid
 			// 
-			this.m_sampleNativeCheckBox.AutoSize = true;
-			this.m_sampleNativeCheckBox.Location = new System.Drawing.Point(135, 129);
-			this.m_sampleNativeCheckBox.Name = "m_sampleNativeCheckBox";
-			this.m_sampleNativeCheckBox.Size = new System.Drawing.Size(95, 17);
-			this.m_sampleNativeCheckBox.TabIndex = 30;
-			this.m_sampleNativeCheckBox.Text = "Include Native";
-			this.m_toolTip.SetToolTip(this.m_sampleNativeCheckBox, "Include native code profiling. Generally speaking, this isn\'t helpful at all.");
-			this.m_sampleNativeCheckBox.UseVisualStyleBackColor = true;
+			this.m_launchPropGrid.Anchor = ((System.Windows.Forms.AnchorStyles) ((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+						| System.Windows.Forms.AnchorStyles.Left)
+						| System.Windows.Forms.AnchorStyles.Right)));
+			this.m_launchPropGrid.Location = new System.Drawing.Point(7, 37);
+			this.m_launchPropGrid.Name = "m_launchPropGrid";
+			this.m_launchPropGrid.Size = new System.Drawing.Size(562, 323);
+			this.m_launchPropGrid.TabIndex = 17;
+			// 
+			// m_appTypeLabel
+			// 
+			this.m_appTypeLabel.AutoSize = true;
+			this.m_appTypeLabel.Location = new System.Drawing.Point(6, 13);
+			this.m_appTypeLabel.Name = "m_appTypeLabel";
+			this.m_appTypeLabel.Size = new System.Drawing.Size(123, 13);
+			this.m_appTypeLabel.TabIndex = 18;
+			this.m_appTypeLabel.Text = "Target Application Type:";
+			// 
+			// m_appTypeCombo
+			// 
+			this.m_appTypeCombo.DisplayMember = "Name";
+			this.m_appTypeCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.m_appTypeCombo.FormattingEnabled = true;
+			this.m_appTypeCombo.Location = new System.Drawing.Point(135, 10);
+			this.m_appTypeCombo.Name = "m_appTypeCombo";
+			this.m_appTypeCombo.Size = new System.Drawing.Size(433, 21);
+			this.m_appTypeCombo.TabIndex = 19;
+			this.m_appTypeCombo.ValueMember = "Type";
 			// 
 			// RunDialog
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(586, 506);
+			this.Controls.Add(this.m_appTypeCombo);
+			this.Controls.Add(this.m_appTypeLabel);
+			this.Controls.Add(this.m_launchPropGrid);
 			this.Controls.Add(this.m_frontendOptionsGroupBox);
-			this.Controls.Add(this.m_launchOptionsGroupBox);
 			this.Controls.Add(this.m_runButton);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
 			this.Name = "RunDialog";
 			this.Text = "RunDialog";
-			this.m_launchOptionsGroupBox.ResumeLayout(false);
-			this.m_launchOptionsGroupBox.PerformLayout();
 			this.m_frontendOptionsGroupBox.ResumeLayout(false);
 			this.m_frontendOptionsGroupBox.PerformLayout();
 			this.ResumeLayout(false);
+			this.PerformLayout();
 
 		}
 
@@ -408,31 +235,17 @@ namespace SlimTuneUI
 		private System.Windows.Forms.Button m_runButton;
 		private System.Windows.Forms.OpenFileDialog m_openExeDialog;
 		private System.Windows.Forms.SaveFileDialog m_saveResultsDialog;
-		private System.Windows.Forms.GroupBox m_launchOptionsGroupBox;
-		private System.Windows.Forms.CheckBox m_waitConnectCheckBox;
-		private System.Windows.Forms.Label m_profileTypeLabel;
-		private System.Windows.Forms.RadioButton m_hybridRadio;
-		private System.Windows.Forms.RadioButton m_tracingRadio;
-		private System.Windows.Forms.RadioButton m_samplingRadio;
-		private System.Windows.Forms.Label m_argumentsLabel;
-		private System.Windows.Forms.TextBox m_argumentsTextBox;
-		private System.Windows.Forms.Button m_browseExeButton;
-		private System.Windows.Forms.TextBox m_executableTextBox;
-		private System.Windows.Forms.Label m_executableLabel;
 		private System.Windows.Forms.GroupBox m_frontendOptionsGroupBox;
 		private System.Windows.Forms.Button m_browseDbButton;
 		private System.Windows.Forms.TextBox m_resultsFileTextBox;
 		private System.Windows.Forms.Label m_saveAsLabel;
 		private System.Windows.Forms.CheckBox m_connectCheckBox;
-		private System.Windows.Forms.TextBox m_portTextBox;
-		private System.Windows.Forms.Label m_portLabel;
 		private System.Windows.Forms.Label m_visualizerLabel;
 		private System.Windows.Forms.ComboBox m_visualizerCombo;
-		private System.Windows.Forms.Button m_browseWorkingDirButton;
-		private System.Windows.Forms.TextBox m_workingDirTextBox;
-		private System.Windows.Forms.Label m_workingDirLabel;
 		private System.Windows.Forms.FolderBrowserDialog m_dirBrowser;
 		private System.Windows.Forms.ToolTip m_toolTip;
-		private System.Windows.Forms.CheckBox m_sampleNativeCheckBox;
+		private System.Windows.Forms.PropertyGrid m_launchPropGrid;
+		private System.Windows.Forms.Label m_appTypeLabel;
+		private System.Windows.Forms.ComboBox m_appTypeCombo;
 	}
 }
