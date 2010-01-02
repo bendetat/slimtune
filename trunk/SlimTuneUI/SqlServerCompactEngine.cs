@@ -490,36 +490,44 @@ namespace SlimTuneUI
 
                 for(int t = 0; t < timingKvp.Value.Count; ++t)
                 {
-                    bool foundBucket = true;
+                    bool foundBin = true;
                     long time = timingKvp.Value[t];
                     if(!resultSet.Seek(DbSeekOptions.BeforeEqual, timingKvp.Key, time))
                     {
-                        foundBucket = false;
+                        foundBin = false;
                     }
 
-                    if(foundBucket)
+                    if(foundBin)
                     {
                         resultSet.Read();
                         var id = resultSet.GetInt32(funcOrdinal);
                         if(id != timingKvp.Key)
-                            resultSet.Read();
+                        {
+                            if(!resultSet.Read())
+                            {
+                                foundBin = false;
+                            }
+                        }
 
-                        var min = resultSet.GetInt64(minOrdinal);
-                        var max = resultSet.GetInt64(maxOrdinal);
-                        if(id != timingKvp.Key || time < min || time > max)
-                            foundBucket = false;
+                        if(foundBin)
+                        {
+                            var min = resultSet.GetInt64(minOrdinal);
+                            var max = resultSet.GetInt64(maxOrdinal);
+                            if(id != timingKvp.Key || time < min || time > max)
+                                foundBin = false;
+                        }
                     }
 
-                    if(foundBucket)
+                    if(foundBin)
                     {
-                        //we've got a usable bucket, increment and move on
+                        //we've got a usable bin, increment and move on
                         var hits = resultSet.GetInt32(hitsOrdinal);
                         resultSet.SetInt32(hitsOrdinal, hits + 1);
                         resultSet.Update();
                         continue;
                     }
 
-                    //didn't find a bucket, create a new one for this entry
+                    //didn't find a bin, create a new one for this entry
                     var row = resultSet.CreateRecord();
                     row[funcOrdinal] = timingKvp.Key;
                     row[minOrdinal] = time;
@@ -527,7 +535,7 @@ namespace SlimTuneUI
                     row[hitsOrdinal] = 1;
                     resultSet.Insert(row, DbInsertOptions.KeepCurrentPosition);
 
-                    //count how many buckets have been used
+                    //count how many bin have been used
                     SqlCeCommand countCmd = new SqlCeCommand(
                         "SELECT COUNT(*) FROM Timings WHERE FunctionId=@FuncId", m_sqlConn);
                     countCmd.Parameters.Add("@FuncId", timingKvp.Key);
@@ -553,9 +561,10 @@ namespace SlimTuneUI
                         long lastMin = resultSet.GetInt64(minOrdinal);
                         int lastHits = resultSet.GetInt32(hitsOrdinal);
                         resultSet.Read();
+                        //these store all the data about the best merge so far
                         long smallestRange = long.MaxValue;
-                        long indexMin = 0;
-                        long indexMax = 0;
+                        long bestMin = 0;
+                        long bestMax = 0;
                         int mergedHits = 0;
                         for(int b = 0; b < kTimingBuckets; ++b)
                         {
@@ -564,8 +573,8 @@ namespace SlimTuneUI
                             if(range < smallestRange)
                             {
                                 smallestRange = range;
-                                indexMin = lastMin;
-                                indexMax = max;
+                                bestMin = lastMin;
+                                bestMax = max;
                                 mergedHits = lastHits + resultSet.GetInt32(hitsOrdinal);
                             }
                             lastMin = resultSet.GetInt64(minOrdinal);
@@ -573,20 +582,21 @@ namespace SlimTuneUI
                             resultSet.Read();
                         }
 
-                        //seek to the lower bucket
-                        resultSet.Seek(DbSeekOptions.FirstEqual, timingKvp.Key, indexMin);
+                        //seek to the first (lower) bin
+                        resultSet.Seek(DbSeekOptions.FirstEqual, timingKvp.Key, bestMin);
                         resultSet.Read();
-                        //expand this bucket
-                        resultSet.SetInt64(maxOrdinal, indexMax);
+                        //expand this bin to include the next one
+                        resultSet.SetInt64(maxOrdinal, bestMax);
                         resultSet.SetInt32(hitsOrdinal, mergedHits);
+                        //go to the now redundant bin
                         resultSet.Update();
                         resultSet.Read();
-                        //delete this bucket
+                        //delete the bin
                         resultSet.Delete();
                     }
                 }
 
-#if DEBUG
+/*#if DEBUG
                 //DEBUG ONLY HACK: display buckets
                 if(!resultSet.Seek(DbSeekOptions.BeforeEqual, timingKvp.Key, 0.0f))
                     resultSet.ReadFirst();
@@ -606,7 +616,7 @@ namespace SlimTuneUI
                     Console.WriteLine("[{0}, {1}]: {2}", min, max, hits);
                     resultSet.Read();
                 }
-#endif
+#endif*/
             }
         }
 
