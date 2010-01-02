@@ -77,12 +77,30 @@ namespace SlimTuneUI
 			return GetTypeList(typeof(ILauncher));
 		}
 
-		/// <summary>
-		/// The main entry point for the application.
-		/// </summary>
-		[STAThread]
+        static void TimingsTest()
+        {
+            SqlServerCompactEngine engine = new SqlServerCompactEngine(Path.GetTempFileName(), true);
+            
+            //start generating random timings
+            Random rand = new Random(5);
+            for(int i = 0; i < 5000; ++i)
+            {
+                int id = rand.Next(10);
+                long time = rand.Next(1000);
+                engine.FunctionTiming(id, time);
+            }
+            engine.Flush();
+        }
+
+        /// <summary>
+        /// The main entry point for the application.
+        /// </summary>
+        [STAThread]
 		static void Main()
 		{
+            //TimingsTest();
+            //return;
+
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
 			Application.Run(new MainWindow());

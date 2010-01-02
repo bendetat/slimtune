@@ -45,12 +45,15 @@ namespace SlimTuneUI
 	{
 		private const string kCallersSchema = "(ThreadId INT NOT NULL, CallerId INT NOT NULL, CalleeId INT NOT NULL, HitCount INT NOT NULL)";
 		private const string kSamplesSchema = "(ThreadId INT NOT NULL, FunctionId INT NOT NULL, HitCount INT NOT NULL)";
+
+        private const int kTimingBuckets = 20;
+
 		//Everything is stored sorted so that we can sprint through the database quickly
 		CallGraph<int> m_callers;
 		//this is: FunctionId, ThreadId, HitCount
 		SortedDictionary<int, SortedList<int, int>> m_samples;
 		
-		//List<Pair<int, long>> m_timings;
+		Dictionary<int, List<long>> m_timings;
 
 		volatile bool m_allowFlush = true;
 		DateTime m_lastFlush;
@@ -106,7 +109,7 @@ namespace SlimTuneUI
 			CreateCommands();
 			m_callers = CallGraph<int>.Create();
 			m_samples = new SortedDictionary<int, SortedList<int, int>>();
-			//m_timings = new List<Pair<int, long>>(8192);
+            m_timings = new Dictionary<int, List<long>>(2048);
 			m_lastFlush = DateTime.Now;
 		}
 
@@ -256,11 +259,12 @@ namespace SlimTuneUI
 
 		public void FunctionTiming(int functionId, long time)
 		{
-			/*m_timings.Add(new Pair<int, long>(functionId, time));
-
-			++m_cachedTimings;
-			if(m_cachedTimings > 5000)
-				Flush();*/
+            lock (m_lock)
+            {
+                if(!m_timings.ContainsKey(functionId))
+                    m_timings.Add(functionId, new List<long>(16));
+                m_timings[functionId].Add(time);
+            }
 		}
 
 		public void Flush()
@@ -282,6 +286,11 @@ namespace SlimTuneUI
 				{
 					FlushSamples(samplesSet);
 				}
+
+                using(var timingsSet = m_timingsCmd.ExecuteResultSet(ResultSetOptions.Updatable | ResultSetOptions.Scrollable))
+                {
+                    FlushTimings(timingsSet);
+                }
 
 				m_lastFlush = DateTime.Now;
 				m_cachedSamples = 0;
@@ -344,6 +353,9 @@ namespace SlimTuneUI
 			ExecuteNonQuery("CREATE TABLE Snapshots (Id INT PRIMARY KEY IDENTITY, Name NVARCHAR (256), DateTime DATETIME)");
 			ExecuteNonQuery("CREATE TABLE Functions (Id INT PRIMARY KEY, ClassId INT, IsNative INT NOT NULL, Name NVARCHAR (1024), Signature NVARCHAR (2048))");
 			ExecuteNonQuery("CREATE TABLE Classes (Id INT PRIMARY KEY, Name NVARCHAR (1024))");
+            
+            ExecuteNonQuery("CREATE TABLE Threads (Id INT NOT NULL, IsAlive INT, Name NVARCHAR(256))");
+			ExecuteNonQuery("ALTER TABLE Threads ADD CONSTRAINT pk_Id PRIMARY KEY (Id)");
 
 			//We will look up results in CallerId order when updating this table
 			ExecuteNonQuery("CREATE TABLE Callers " + kCallersSchema);
@@ -355,8 +367,9 @@ namespace SlimTuneUI
 			ExecuteNonQuery("CREATE INDEX FunctionIndex ON Samples(FunctionId);");
 			ExecuteNonQuery("CREATE INDEX Compound ON Samples(ThreadId, FunctionId);");
 
-			ExecuteNonQuery("CREATE TABLE Threads (Id INT NOT NULL, IsAlive INT, Name NVARCHAR(256))");
-			ExecuteNonQuery("ALTER TABLE Threads ADD CONSTRAINT pk_Id PRIMARY KEY (Id)");
+            ExecuteNonQuery("CREATE TABLE Timings (FunctionId INT, RangeMin BIGINT, RangeMax BIGINT, HitCount INT)");
+            ExecuteNonQuery("CREATE INDEX FunctionIndex ON Timings(FunctionId);");
+            ExecuteNonQuery("CREATE INDEX Compound ON Timings(FunctionId, RangeMin);");
 		}
 
 		private void CreateCommands()
@@ -382,6 +395,7 @@ namespace SlimTuneUI
 			m_timingsCmd = m_sqlConn.CreateCommand();
 			m_timingsCmd.CommandType = CommandType.TableDirect;
 			m_timingsCmd.CommandText = "Timings";
+            m_timingsCmd.IndexName = "Compound";
 
 			m_threadsCmd = m_sqlConn.CreateCommand();
 			m_threadsCmd.CommandType = CommandType.TableDirect;
@@ -461,6 +475,140 @@ namespace SlimTuneUI
 				sampleKvp.Value.Clear();
 			}
 		}
+
+        private void FlushTimings(SqlCeResultSet resultSet)
+        {
+            foreach(KeyValuePair<int, List<long>> timingKvp in m_timings)
+            {
+                if(timingKvp.Value.Count == 0)
+                    continue;
+
+                int funcOrdinal = resultSet.GetOrdinal("FunctionId");
+                int minOrdinal = resultSet.GetOrdinal("RangeMin");
+                int maxOrdinal = resultSet.GetOrdinal("RangeMax");
+                int hitsOrdinal = resultSet.GetOrdinal("HitCount");
+
+                for(int t = 0; t < timingKvp.Value.Count; ++t)
+                {
+                    bool foundBucket = true;
+                    long time = timingKvp.Value[t];
+                    if(!resultSet.Seek(DbSeekOptions.BeforeEqual, timingKvp.Key, time))
+                    {
+                        foundBucket = false;
+                    }
+
+                    if(foundBucket)
+                    {
+                        resultSet.Read();
+                        var id = resultSet.GetInt32(funcOrdinal);
+                        if(id != timingKvp.Key)
+                            resultSet.Read();
+
+                        var min = resultSet.GetInt64(minOrdinal);
+                        var max = resultSet.GetInt64(maxOrdinal);
+                        if(id != timingKvp.Key || time < min || time > max)
+                            foundBucket = false;
+                    }
+
+                    if(foundBucket)
+                    {
+                        //we've got a usable bucket, increment and move on
+                        var hits = resultSet.GetInt32(hitsOrdinal);
+                        resultSet.SetInt32(hitsOrdinal, hits + 1);
+                        resultSet.Update();
+                        continue;
+                    }
+
+                    //didn't find a bucket, create a new one for this entry
+                    var row = resultSet.CreateRecord();
+                    row[funcOrdinal] = timingKvp.Key;
+                    row[minOrdinal] = time;
+                    row[maxOrdinal] = time;
+                    row[hitsOrdinal] = 1;
+                    resultSet.Insert(row, DbInsertOptions.KeepCurrentPosition);
+
+                    //count how many buckets have been used
+                    SqlCeCommand countCmd = new SqlCeCommand(
+                        "SELECT COUNT(*) FROM Timings WHERE FunctionId=@FuncId", m_sqlConn);
+                    countCmd.Parameters.Add("@FuncId", timingKvp.Key);
+                    int count = (int) countCmd.ExecuteScalar();
+                    if(count > kTimingBuckets)
+                    {
+                        //we need to bin-merge
+
+                        //start by seeking to the first record for this function
+                        if(!resultSet.Seek(DbSeekOptions.BeforeEqual, timingKvp.Key, 0.0f))
+                            resultSet.ReadFirst();
+                        else
+                            resultSet.Read();
+
+                        var id = resultSet.GetInt32(funcOrdinal);
+                        if(id != timingKvp.Key)
+                            resultSet.Read();
+                        id = resultSet.GetInt32(funcOrdinal);
+                        //we know at least one exists, cause we just inserted one
+                        Debug.Assert(id == timingKvp.Key);
+
+                        //Search for the merge that produces the smallest merged bucket
+                        long lastMin = resultSet.GetInt64(minOrdinal);
+                        int lastHits = resultSet.GetInt32(hitsOrdinal);
+                        resultSet.Read();
+                        long smallestRange = long.MaxValue;
+                        long indexMin = 0;
+                        long indexMax = 0;
+                        int mergedHits = 0;
+                        for(int b = 0; b < kTimingBuckets; ++b)
+                        {
+                            long max = resultSet.GetInt64(maxOrdinal);
+                            long range = max - lastMin;
+                            if(range < smallestRange)
+                            {
+                                smallestRange = range;
+                                indexMin = lastMin;
+                                indexMax = max;
+                                mergedHits = lastHits + resultSet.GetInt32(hitsOrdinal);
+                            }
+                            lastMin = resultSet.GetInt64(minOrdinal);
+                            lastHits = resultSet.GetInt32(hitsOrdinal);
+                            resultSet.Read();
+                        }
+
+                        //seek to the lower bucket
+                        resultSet.Seek(DbSeekOptions.FirstEqual, timingKvp.Key, indexMin);
+                        resultSet.Read();
+                        //expand this bucket
+                        resultSet.SetInt64(maxOrdinal, indexMax);
+                        resultSet.SetInt32(hitsOrdinal, mergedHits);
+                        resultSet.Update();
+                        resultSet.Read();
+                        //delete this bucket
+                        resultSet.Delete();
+                    }
+                }
+
+#if DEBUG
+                //DEBUG ONLY HACK: display buckets
+                if(!resultSet.Seek(DbSeekOptions.BeforeEqual, timingKvp.Key, 0.0f))
+                    resultSet.ReadFirst();
+                else
+                    resultSet.Read();
+
+                var tempId = resultSet.GetInt32(funcOrdinal);
+                if(tempId != timingKvp.Key)
+                    resultSet.Read();
+
+                Console.WriteLine("Buckets for function {0}:", timingKvp.Key);
+                for(int b = 0; b < kTimingBuckets; ++b)
+                {
+                    long min = resultSet.GetInt64(minOrdinal);
+                    long max = resultSet.GetInt64(maxOrdinal);
+                    int hits = resultSet.GetInt32(hitsOrdinal);
+                    Console.WriteLine("[{0}, {1}]: {2}", min, max, hits);
+                    resultSet.Read();
+                }
+#endif
+            }
+        }
 
 		private static void Increment(int key1, int key2, SortedDictionary<int, SortedList<int, int>> container)
 		{
