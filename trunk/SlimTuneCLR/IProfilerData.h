@@ -119,6 +119,9 @@ struct IProfilerData
 	virtual const ThreadInfo* GetThread(unsigned int id) = 0;
 
 	virtual void SetInstrument(unsigned int id, bool enable) = 0;
+
+	virtual bool SuspendTarget() = 0;
+	virtual bool ResumeTarget() = 0;
 };
 
 #endif

@@ -1,18 +1,18 @@
 /*****************************************************************************
- * DotNetProfiler
- * 
- * Copyright (c) 2006 Scott Hackett
- * 
- * This software is provided 'as-is', without any express or implied warranty.
- * In no event will the author be held liable for any damages arising from the
- * use of this software. Permission to use, copy, modify, distribute and sell
- * this software for any purpose is hereby granted without fee, provided that
- * the above copyright notice appear in all copies and that both that
- * copyright notice and this permission notice appear in supporting
- * documentation.
- * 
- * Scott Hackett (code@scotthackett.com)
- *****************************************************************************/
+* DotNetProfiler
+* 
+* Copyright (c) 2006 Scott Hackett
+* 
+* This software is provided 'as-is', without any express or implied warranty.
+* In no event will the author be held liable for any damages arising from the
+* use of this software. Permission to use, copy, modify, distribute and sell
+* this software for any purpose is hereby granted without fee, provided that
+* the above copyright notice appear in all copies and that both that
+* copyright notice and this permission notice appear in supporting
+* documentation.
+* 
+* Scott Hackett (code@scotthackett.com)
+*****************************************************************************/
 /*
 * Copyright (c) 2007-2009 SlimDX Group
 * 
@@ -88,7 +88,7 @@ m_instDepth(0)
 	m_modules.reserve(16);
 	m_classes.reserve(512);
 	m_functions.reserve(4096);
-	
+
 	const wchar_t* invalidName = L"$INVALID$";
 
 	FunctionInfo* invalidFunc = new FunctionInfo(0, 0);
@@ -126,12 +126,12 @@ STDMETHODIMP ClrProfiler::Initialize(IUnknown *pICorProfilerInfoUnk)
 		return E_FAIL;
 
 	//Get the COM interfaces
-    HRESULT hr = pICorProfilerInfoUnk->QueryInterface(IID_ICorProfilerInfo, (LPVOID*) &m_ProfilerInfo);
-    if (FAILED(hr))
-        return E_FAIL;
+	HRESULT hr = pICorProfilerInfoUnk->QueryInterface(IID_ICorProfilerInfo, (LPVOID*) &m_ProfilerInfo);
+	if (FAILED(hr))
+		return E_FAIL;
 
-    hr = pICorProfilerInfoUnk->QueryInterface(IID_ICorProfilerInfo2, (LPVOID*) &m_ProfilerInfo2);
-    if (FAILED(hr))
+	hr = pICorProfilerInfoUnk->QueryInterface(IID_ICorProfilerInfo2, (LPVOID*) &m_ProfilerInfo2);
+	if (FAILED(hr))
 	{
 		//we've decided not to support .NET before 2.0.
 		return E_FAIL;
@@ -148,7 +148,7 @@ STDMETHODIMP ClrProfiler::Initialize(IUnknown *pICorProfilerInfoUnk)
 
 	//set up basic profiler info
 	hr = SetInitialEventMask();
-    assert(SUCCEEDED(hr));
+	assert(SUCCEEDED(hr));
 
 	hr = m_ProfilerInfo2->SetFunctionIDMapper(StaticFunctionMapper);
 	assert(SUCCEEDED(hr));
@@ -183,7 +183,7 @@ STDMETHODIMP ClrProfiler::Initialize(IUnknown *pICorProfilerInfoUnk)
 	IoThreadFunc threadFunc(*m_server);
 	m_ioThread.reset(new boost::thread(threadFunc));
 
-    return S_OK;
+	return S_OK;
 }
 
 STDMETHODIMP ClrProfiler::Shutdown()
@@ -208,7 +208,7 @@ STDMETHODIMP ClrProfiler::Shutdown()
 	m_server->Stop();
 	m_ioThread->join();
 
-    return S_OK;
+	return S_OK;
 }
 
 void ClrProfiler::OnConnect()
@@ -219,11 +219,11 @@ void ClrProfiler::OnConnect()
 		timeBeginPeriod(1);
 		StartSampleTimer(200);
 	}
-	
+
 	m_active = true;
 
 	if(m_config.SuspendOnConnection)
-		SuspendAll();
+		SuspendTarget();
 }
 
 void ClrProfiler::OnDisconnect()
@@ -297,7 +297,7 @@ HRESULT ClrProfiler::SetInitialEventMask()
 	{
 		eventMask |= COR_PRF_ENABLE_STACK_SNAPSHOT;
 	}
-	
+
 	if(m_config.Mode & PM_Tracing)
 	{
 		eventMask |= COR_PRF_MONITOR_ENTERLEAVE;
@@ -317,7 +317,7 @@ const FunctionInfo* ClrProfiler::GetFunction(unsigned int id)
 
 	if(id >= m_functions.size())
 		return NULL;
-	
+
 	FunctionInfo* info = m_functions[id];
 	if(info->Name.size() == 0 && !m_suspended)
 	{
@@ -385,7 +385,7 @@ UINT_PTR ClrProfiler::StaticFunctionMapper(FunctionID functionID, BOOL *pbHookFu
 	if(profiler == NULL)
 		return functionID;
 
-    retVal = profiler->MapFunction(functionID, true);
+	retVal = profiler->MapFunction(functionID, true);
 
 	if(profiler->GetMode() & PM_Tracing)
 	{
@@ -604,7 +604,7 @@ unsigned int ClrProfiler::MapUnmanaged(UINT_PTR address)
 //The returned lengths INCLUDE the null terminator on the string
 //They are buffer sizes, not string lengths
 HRESULT ClrProfiler::GetMethodInfo(FunctionID functionID, LPWSTR functionName, ULONG& maxFunctionLength,
-									 unsigned int& classId, LPWSTR signature, ULONG& maxSignatureLength)
+								   unsigned int& classId, LPWSTR signature, ULONG& maxSignatureLength)
 {
 	HRESULT hr = S_OK;
 	mdToken funcToken = 0;
@@ -689,7 +689,7 @@ HRESULT ClrProfiler::GetMethodInfo(FunctionID functionID, LPWSTR functionName, U
 	return S_OK;
 }
 
-bool ClrProfiler::SuspendAll()
+bool ClrProfiler::SuspendTarget()
 {
 	LONG oldValue = InterlockedExchangeAdd(&m_suspended, 1);
 	if(oldValue < 0)
@@ -720,7 +720,7 @@ bool ClrProfiler::SuspendAll()
 	return true;
 }
 
-bool ClrProfiler::ResumeAll()
+bool ClrProfiler::ResumeTarget()
 {
 	LONG oldValue = InterlockedExchangeAdd(&m_suspended, -1);
 	if(oldValue < 1)
@@ -932,9 +932,9 @@ void ClrProfiler::OnTimer()
 	if(m_functions.size() == 0)
 		return;
 
-	if(m_suspended || !SuspendAll())
+	if(m_suspended || !SuspendTarget())
 	{
-		//epic fail, try again later
+		//already suspended or can't suspend, try again later
 		StartSampleTimer(20);
 		return;
 	}
@@ -942,7 +942,7 @@ void ClrProfiler::OnTimer()
 	if(m_instDepth > 0)
 	{
 		//We're inside the instrumenting bits of the profiler, try again later
-		ResumeAll();
+		ResumeTarget();
 		StartSampleTimer(0);
 		return;
 	}
@@ -976,7 +976,7 @@ void ClrProfiler::OnTimer()
 		//Attempt an initial stackwalk with what we've got
 		WalkData dataFirst = { this, functions, hProcess, hThread };
 		HRESULT walkResult = m_ProfilerInfo2->DoStackSnapshot(threadInfo->NativeId, StackWalkGlobal, COR_PRF_SNAPSHOT_REGISTER_CONTEXT,
-				&dataFirst, (BYTE*) &context, sizeof(CONTEXT));
+			&dataFirst, (BYTE*) &context, sizeof(CONTEXT));
 		if(SUCCEEDED(walkResult) && functions->size() > 0)
 		{
 			//it worked, let's note the correct thread entry point and move on
@@ -1087,7 +1087,7 @@ void ClrProfiler::OnTimer()
 
 	boost::singleton_pool<boost::pool_allocator_tag, sizeof(unsigned int)>::purge_memory();
 
-	ResumeAll();
+	ResumeTarget();
 	if(m_active)
 		StartSampleTimer(0);
 }

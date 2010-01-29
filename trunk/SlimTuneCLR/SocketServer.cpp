@@ -199,6 +199,17 @@ bool TcpConnection::ContinueRead(const boost::system::error_code&, size_t bytesR
 				break;
 			}
 
+		case CR_Suspend:
+			{
+				m_server.ProfilerData().SuspendTarget();
+				break;
+			}
+
+		case CR_Resume:
+			{
+				m_server.ProfilerData().ResumeTarget();
+			}
+
 		default:
 #ifdef DEBUG
 			__debugbreak();

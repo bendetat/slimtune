@@ -81,6 +81,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				RegisterOutput="true"
+				PerUserRedirection="true"
 				IgnoreImportLibrary="true"
 				AdditionalDependencies="corguids.lib winmm.lib"
 				LinkIncremental="2"
@@ -175,6 +176,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				RegisterOutput="true"
 				IgnoreImportLibrary="true"
 				AdditionalDependencies="corguids.lib winmm.lib dbghelp.lib"
 				LinkIncremental="2"
@@ -368,6 +370,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				RegisterOutput="true"
 				IgnoreImportLibrary="true"
 				AdditionalDependencies="corguids.lib winmm.lib dbghelp.lib"
 				LinkIncremental="1"

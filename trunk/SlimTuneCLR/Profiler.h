@@ -85,8 +85,8 @@ public:
 	const ThreadInfo* GetThread(unsigned int id);
 	void SetInstrument(unsigned int id, bool enable);
 
-	bool SuspendAll();
-	bool ResumeAll();
+	bool SuspendTarget();
+	bool ResumeTarget();
 
     // STARTUP/SHUTDOWN EVENTS
     STDMETHOD(Initialize)(IUnknown* pICorProfilerInfoUnk);

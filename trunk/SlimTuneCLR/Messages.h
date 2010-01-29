@@ -66,6 +66,9 @@ enum ClientRequest
 
 	CR_GetThreadInfo = 0x10,
 
+	CR_Suspend = 0x70,
+	CR_Resume,
+
 	CR_SetFunctionFlags = 0x80,
 };
 
