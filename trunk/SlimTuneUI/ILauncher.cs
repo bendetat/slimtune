@@ -20,11 +20,12 @@ namespace SlimTuneUI
 	}
 
 	[Serializable,
-	DisplayName("CLR Application (Microsoft .NET)")]
+	DisplayName("CLR Application (Microsoft .NET 2.0)")]
 	public class ClrLauncher : ILauncher
 	{
 		private const string ProfilerGuid = "{38A7EA35-B221-425a-AD07-D058C581611D}";
 
+		//NOTE: These are all in order for the property grid
 		[Editor(typeof(FileNameEditor), typeof(UITypeEditor)),
 		Category("Application"),
 		Description("The path of the executable to launch for profiling.")]
@@ -46,21 +47,6 @@ namespace SlimTuneUI
 		Description("The working directory to use when launching the executable. If left blank, the executable's directory will be used.")]
 		public string WorkingDir { get; set; }
 
-		[Category("Profiling"),
-		DisplayName("Listen port"),
-		Description("The TCP port that the profiler should use. Only change this if you are profiling multiple applications at once.")]
-		public ushort ListenPort { get; set; }
-
-		[Category("Profiling"),
-		DisplayName("Wait for connection"),
-		Description("If enabled, the executable will be prevented from launching until a profiler front-end connects. Not recommended (deadlock risk).")]
-		public bool WaitForConnection { get; set; }
-
-		[Category("Profiling"),
-		DisplayName("Include native functions"),
-		Description("Include native code profiling. Generally speaking, this isn't helpful at all.")]
-		public bool IncludeNative { get; set; }
-
 		private ProfilerMode m_profMode = ProfilerMode.Sampling;
 		[Category("Profiling"),
 		DisplayName("Profiler mode"),
@@ -75,6 +61,26 @@ namespace SlimTuneUI
 				m_profMode = value;
 			}
 		}
+
+		[Category("Profiling"),
+		DisplayName("Listen port"),
+		Description("The TCP port that the profiler should use. Only change this if you are profiling multiple applications at once.")]
+		public ushort ListenPort { get; set; }
+
+		[Category("Profiling"),
+		DisplayName("Include native functions"),
+		Description("Include native code profiling. Generally speaking, this isn't helpful at all.")]
+		public bool IncludeNative { get; set; }
+
+		[Category("Profiling"),
+		DisplayName("Wait for connection"),
+		Description("If enabled, the executable will be prevented from launching until a profiler front-end connects. Not recommended (deadlock risk).")]
+		public bool WaitForConnection { get; set; }
+
+		[Category("Profiling"),
+		DisplayName("Suspend on connect"),
+		Description("Causes the target process to suspend when a profiler connects.")]
+		public bool SuspendOnConnect { get; set; }
 
 		public ClrLauncher()
 		{

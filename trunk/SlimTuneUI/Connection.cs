@@ -76,7 +76,7 @@ namespace SlimTuneUI
 			m_clearAfterSnapshot = clearAfterSnapshot;
 			m_snapshotTimer = new System.Timers.Timer(interval);
 			m_snapshotTimer.Elapsed += new System.Timers.ElapsedEventHandler(m_snapshotTimer_Elapsed);
-			m_snapshotTimer.Start();
+			//m_snapshotTimer.Start();
 		}
 
 		/// <summary>
@@ -89,6 +89,9 @@ namespace SlimTuneUI
 
 		void m_snapshotTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
 		{
+			if(!IsConnected)
+				return;
+
 			StorageEngine.Snapshot("Auto");
 			if(m_clearAfterSnapshot)
 				StorageEngine.ClearData();

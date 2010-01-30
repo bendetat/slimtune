@@ -24,6 +24,7 @@ using System.IO;
 using System.Reflection;
 using System.Collections.Generic;
 using System.Windows.Forms;
+using System.Runtime.InteropServices;
 
 namespace SlimTuneUI
 {
@@ -92,6 +93,30 @@ namespace SlimTuneUI
             engine.Flush();
         }
 
+		static void SQLiteTest()
+		{
+			const string dbFile = "test.db";
+			if(File.Exists(dbFile))
+				File.Delete(dbFile);
+
+			using(SQLiteDatabase db = new SQLiteDatabase(dbFile))
+			{
+				db.Execute("CREATE TABLE test2 (x INT PRIMARY KEY, y INT, Z INT)");
+				db.Execute("INSERT INTO test2 (x, y, z) VALUES (1, 2, 3)");
+				db.Execute("INSERT INTO test2 (x, y, z) VALUES (3, 2, 1)");
+				db.Execute("INSERT INTO test2 (x, y, z) VALUES (5, 6, 7)");
+
+				using(var cmd = new SQLiteStatement(db, "SELECT * FROM test2 WHERE x > ?1"))
+				{
+					cmd.BindInt(1, 2);
+					while(cmd.Step())
+					{
+						Console.WriteLine("Value is: {0} | {1} | {2}", cmd.GetInt(0), cmd.GetInt(1), cmd.GetInt(2));
+					}
+				}
+			}
+		}
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -99,6 +124,7 @@ namespace SlimTuneUI
 		static void Main()
 		{
             //TimingsTest();
+			//SQLiteTest();
             //return;
 
 			Application.EnableVisualStyles();

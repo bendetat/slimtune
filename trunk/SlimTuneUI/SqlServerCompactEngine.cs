@@ -28,19 +28,6 @@ using System.Data.SqlServerCe;
 
 namespace SlimTuneUI
 {
-    struct CallGraph<T>
-    {
-        //this is: ThreadId, CallerId, CalleeId, HitCount
-        public SortedList<int, SortedDictionary<int, SortedList<int, T>>> Graph;
-
-        public static CallGraph<T> Create()
-        {
-            CallGraph<T> cg = new CallGraph<T>();
-            cg.Graph = new SortedList<int, SortedDictionary<int, SortedList<int, T>>>(8);
-            return cg;
-        }
-    }
-
     class SqlServerCompactEngine : IStorageEngine
     {
         private const string kCallersSchema = "(ThreadId INT NOT NULL, CallerId INT NOT NULL, CalleeId INT NOT NULL, HitCount INT NOT NULL)";
@@ -74,6 +61,11 @@ namespace SlimTuneUI
         object m_lock = new object();
 
         public string Name { get; private set; }
+
+		public string Extension
+		{
+			get { return "sdf"; }
+		}
 
         public bool AllowFlush
         {

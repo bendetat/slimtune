@@ -83,7 +83,8 @@ namespace SlimTuneUI
 			{
 				try
 				{
-					storage = new SqlServerCompactEngine(dbFile, true);
+					//storage = new SqlServerCompactEngine(dbFile, true);
+					storage = new SQLiteEngine(dbFile, true);
 				}
 				catch(Exception ex)
 				{

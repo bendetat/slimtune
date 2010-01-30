@@ -122,6 +122,8 @@
     <Compile Include="RunDialog.Designer.cs">
       <DependentUpon>RunDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="SQLite.cs" />
+    <Compile Include="SQLiteEngine.cs" />
     <Compile Include="SqlServerCompactEngine.cs" />
     <Compile Include="SqlVisualizer.cs">
       <SubType>Form</SubType>
@@ -129,6 +131,7 @@
     <Compile Include="SqlVisualizer.designer.cs">
       <DependentUpon>SqlVisualizer.cs</DependentUpon>
     </Compile>
+    <Compile Include="StorageEngineBase.cs" />
     <Compile Include="Utilities.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -143,6 +146,9 @@
     <Content Include="Plugins\Placeholder.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <None Include="sqlite3.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

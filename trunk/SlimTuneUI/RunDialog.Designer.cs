@@ -185,8 +185,10 @@ namespace SlimTuneUI
 						| System.Windows.Forms.AnchorStyles.Right)));
 			this.m_launchPropGrid.Location = new System.Drawing.Point(7, 37);
 			this.m_launchPropGrid.Name = "m_launchPropGrid";
+			this.m_launchPropGrid.PropertySort = System.Windows.Forms.PropertySort.Categorized;
 			this.m_launchPropGrid.Size = new System.Drawing.Size(562, 323);
 			this.m_launchPropGrid.TabIndex = 17;
+			this.m_launchPropGrid.ToolbarVisible = false;
 			// 
 			// m_appTypeLabel
 			// 

@@ -84,6 +84,7 @@ namespace SlimTuneUI
 	public interface IStorageEngine : IDisposable
 	{
 		string Name { get; }
+		string Extension { get; }
 
 		void MapFunction(FunctionInfo funcInfo);
 		void MapClass(ClassInfo classInfo);

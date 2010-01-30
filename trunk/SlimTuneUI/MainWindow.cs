@@ -57,7 +57,7 @@ namespace SlimTuneUI
 			{
 				try
 				{
-					IStorageEngine engine = new SqlServerCompactEngine(m_openDialog.FileName, false);
+					IStorageEngine engine = new SQLiteEngine(m_openDialog.FileName, false);
 
 					Connection conn = new Connection(engine);
 					ConnectionList.AddConnection(conn);
