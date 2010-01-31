@@ -48,13 +48,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ClrLauncher.cs" />
     <Compile Include="ConnectDialog.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="ConnectDialog.Designer.cs">
       <DependentUpon>ConnectDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="Connection.cs" />
     <Compile Include="ConnectionList.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -67,17 +67,12 @@
     <Compile Include="ConnectProgress.Designer.cs">
       <DependentUpon>ConnectProgress.cs</DependentUpon>
     </Compile>
-    <Compile Include="ILauncher.cs" />
-    <Compile Include="IStorageEngine.cs" />
-    <Compile Include="IVisualizer.cs" />
     <Compile Include="MainWindow.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="MainWindow.Designer.cs">
       <DependentUpon>MainWindow.cs</DependentUpon>
     </Compile>
-    <Compile Include="Messages.cs" />
-    <Compile Include="ProfilerClient.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="ConnectDialog.resx">
@@ -131,8 +126,6 @@
     <Compile Include="SqlVisualizer.designer.cs">
       <DependentUpon>SqlVisualizer.cs</DependentUpon>
     </Compile>
-    <Compile Include="StorageEngineBase.cs" />
-    <Compile Include="Utilities.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Backends\dbghelp.dll">
@@ -149,6 +142,12 @@
     <None Include="sqlite3.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="UICore\UICore.csproj">
+      <Project>{B3047427-78A7-4560-B8E7-6917B57C7E9C}</Project>
+      <Name>UICore</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

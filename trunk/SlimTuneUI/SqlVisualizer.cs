@@ -31,6 +31,8 @@ using System.Diagnostics;
 using System.Threading;
 using System.Data.SqlServerCe;
 
+using UICore;
+
 /*
  * Useful queries:
  * 
@@ -69,7 +71,7 @@ namespace SlimTuneUI
 			InitializeComponent();
 		}
 
-		public void Initialize(MainWindow mainWindow, Connection connection)
+		public void Initialize(SlimTuneWindowBase mainWindow, Connection connection)
 		{
 			if(connection == null)
 				throw new ArgumentNullException("connection");

@@ -29,6 +29,8 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 
+using UICore;
+
 namespace SlimTuneUI
 {
 	public partial class RunDialog : Form

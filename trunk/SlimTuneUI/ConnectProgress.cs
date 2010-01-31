@@ -7,6 +7,8 @@ using System.Text;
 using System.Windows.Forms;
 using System.Threading;
 
+using UICore;
+
 namespace SlimTuneUI
 {
 	public partial class ConnectProgress : Form

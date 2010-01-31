@@ -28,7 +28,7 @@ using System.Threading;
 using System.Diagnostics;
 using System.Collections.Generic;
 
-namespace SlimTuneUI
+namespace UICore
 {
 	public enum ProfilerMode
 	{

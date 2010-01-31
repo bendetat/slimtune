@@ -22,7 +22,7 @@
 using System;
 using System.Data;
 
-namespace SlimTuneUI
+namespace UICore
 {
 	public class FunctionInfo
 	{

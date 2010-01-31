@@ -2,7 +2,7 @@
 using System.Threading;
 using System.ComponentModel;
 
-namespace SlimTuneUI
+namespace UICore
 {
 	/// <summary>
 	/// A Connection combines two objects: a ProfilerClient and an IStorageEngine.

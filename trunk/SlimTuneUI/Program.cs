@@ -30,54 +30,6 @@ namespace SlimTuneUI
 {
 	static class Program
 	{
-		public static void LoadPlugins()
-		{
-			string pluginsDir = Application.StartupPath + "\\Plugins\\";
-			var plugins = Directory.GetFiles(pluginsDir, "*.dll", SearchOption.AllDirectories);
-			foreach(var file in plugins)
-			{
-				try
-				{
-					Assembly.LoadFrom(file);
-				}
-				catch
-				{
-					//okay nevermind then
-					continue;
-				}
-			}
-		}
-
-		private static IEnumerable<Type> GetTypeList(Type baseType)
-		{
-			var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-			foreach(var assembly in assemblies)
-			{
-				if(assembly.ReflectionOnly)
-					continue;
-				if(assembly.GlobalAssemblyCache)
-					continue;
-
-				foreach(var type in assembly.GetExportedTypes())
-				{
-					if(type == baseType)
-						continue;
-					if(baseType.IsAssignableFrom(type))
-						yield return type;
-				}
-			}
-		}
-
-		public static IEnumerable<Type> GetVisualizers()
-		{
-			return GetTypeList(typeof(IVisualizer));
-		}
-
-		public static IEnumerable<Type> GetLaunchers()
-		{
-			return GetTypeList(typeof(ILauncher));
-		}
-
         static void TimingsTest()
         {
             SqlServerCompactEngine engine = new SqlServerCompactEngine(Path.GetTempFileName(), true);

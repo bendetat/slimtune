@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace SlimTuneUI
+namespace UICore
 {
-	struct CallGraph<T>
+	public struct CallGraph<T>
 	{
 		//this is: ThreadId, CallerId, CalleeId, HitCount
 		public SortedList<int, SortedDictionary<int, SortedList<int, T>>> Graph;
@@ -17,7 +17,7 @@ namespace SlimTuneUI
 		}
 	}
 
-	abstract class StorageEngineBase : IStorageEngine
+	public abstract class StorageEngineBase : IStorageEngine
 	{
 		protected const string kCallersSchema = "(ThreadId INT NOT NULL, CallerId INT NOT NULL, CalleeId INT NOT NULL, HitCount INT NOT NULL)";
 		protected const string kSamplesSchema = "(ThreadId INT NOT NULL, FunctionId INT NOT NULL, HitCount INT NOT NULL)";
@@ -68,7 +68,7 @@ namespace SlimTuneUI
 			m_lastFlush = DateTime.Now;
 		}
 
-		public void ParseSample(SlimTuneUI.Messages.Sample sample)
+		public void ParseSample(Messages.Sample sample)
 		{
 			lock(m_lock)
 			{

@@ -24,7 +24,7 @@ using System.IO;
 using System.Text;
 using System.Collections.Generic;
 
-namespace SlimTuneUI
+namespace UICore
 {
 	public enum MessageId : byte
 	{

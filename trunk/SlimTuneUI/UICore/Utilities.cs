@@ -25,7 +25,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 
-namespace SlimTuneUI
+namespace UICore
 {
 	//Not in 2.0 sadly
 	public delegate void Action();
@@ -124,7 +124,7 @@ namespace SlimTuneUI
 			if(includeDummy)
 				yield return new TypeEntry("(None)", null);
 
-			foreach(var vis in Program.GetVisualizers())
+			foreach(var vis in Plugins.GetVisualizers())
 			{
 				string displayName = GetDisplayName(vis);
 				yield return new TypeEntry(displayName, vis);
@@ -133,7 +133,7 @@ namespace SlimTuneUI
 
 		public static IEnumerable<TypeEntry> GetLauncherList()
 		{
-			foreach(var launcher in Program.GetLaunchers())
+			foreach(var launcher in Plugins.GetLaunchers())
 			{
 				string displayName = GetDisplayName(launcher);
 				yield return new TypeEntry(displayName, launcher);

@@ -4,6 +4,8 @@ using System.Data;
 using System.Diagnostics;
 using System.Collections.Generic;
 
+using UICore;
+
 namespace SlimTuneUI
 {
 	class SQLiteEngine : StorageEngineBase

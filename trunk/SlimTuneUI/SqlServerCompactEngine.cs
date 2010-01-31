@@ -26,6 +26,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlServerCe;
 
+using UICore;
+
 namespace SlimTuneUI
 {
     class SqlServerCompactEngine : IStorageEngine
@@ -126,7 +128,7 @@ namespace SlimTuneUI
             resultSet.Insert(row);
         }
 
-        public void ParseSample(Messages.Sample sample)
+        public void ParseSample(UICore.Messages.Sample sample)
         {
             lock(m_lock)
             {

@@ -29,16 +29,18 @@ using System.Windows.Forms;
 
 using System.Data.SqlServerCe;
 
+using UICore;
+
 namespace SlimTuneUI
 {
-	public partial class MainWindow : Form
+	public partial class MainWindow : SlimTuneWindowBase
 	{
 		public ConnectionList ConnectionList { get; private set; }
 
 		public MainWindow()
 		{
 			InitializeComponent();
-			Program.LoadPlugins();
+			Plugins.Load();
 
 			ConnectionList = new ConnectionList(this);
 			ConnectionList.Show(DockPanel);
