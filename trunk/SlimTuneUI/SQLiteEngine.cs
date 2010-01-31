@@ -3,11 +3,13 @@ using System.IO;
 using System.Data;
 using System.Diagnostics;
 using System.Collections.Generic;
+using System.ComponentModel;
 
 using UICore;
 
 namespace SlimTuneUI
 {
+	[DisplayName("SQLite Engine (cross platform)")]
 	class SQLiteEngine : StorageEngineBase
 	{
 		SQLiteDatabase m_database;
@@ -15,6 +17,8 @@ namespace SlimTuneUI
 		SQLiteStatement m_mapFunctionCmd;
 		SQLiteStatement m_mapClassCmd;
 		SQLiteStatement m_insertThreadCmd;
+		SQLiteStatement m_updateThreadAliveCmd;
+		SQLiteStatement m_updateThreadNameCmd;
 		SQLiteStatement m_insertCallerCmd;
 		SQLiteStatement m_updateCallerCmd;
 		SQLiteStatement m_insertSampleCmd;
@@ -77,6 +81,37 @@ namespace SlimTuneUI
 
 		public override void UpdateThread(int threadId, bool? alive, string name)
 		{
+			bool insert = false;
+			if(alive.HasValue)
+			{
+				m_updateThreadAliveCmd.Reset();
+				m_updateThreadAliveCmd.BindInt(1, threadId);
+				m_updateThreadAliveCmd.BindInt(2, alive.Value ? 1 : 0);
+				m_updateThreadAliveCmd.Step();
+				if(m_updateThreadAliveCmd.GetInt(0) == 0)
+					insert = true;
+			}
+
+			if(!insert && name != null)
+			{
+				m_updateThreadNameCmd.Reset();
+				m_updateThreadNameCmd.BindInt(1, threadId);
+				m_updateThreadNameCmd.BindText(2, name);
+				m_updateThreadNameCmd.Step();
+				if(m_updateThreadNameCmd.GetInt(0) == 0)
+					insert = true;
+			}
+
+			if(insert)
+			{
+				bool aliveValue = alive.HasValue ? alive.Value : true;
+				string nameValue = name ?? string.Empty;
+				m_insertThreadCmd.Reset();
+				m_insertThreadCmd.BindInt(1, threadId);
+				m_insertThreadCmd.BindInt(2, aliveValue ? 1 : 0);
+				m_insertThreadCmd.BindText(3, nameValue);
+				m_insertThreadCmd.Step();
+			}
 		}
 
 		public override void Flush()
@@ -235,7 +270,10 @@ namespace SlimTuneUI
 		{
 			m_mapFunctionCmd = new SQLiteStatement(m_database, "INSERT INTO Functions (Id, ClassId, IsNative, Name, Signature) VALUES (?1, ?2, ?3, ?4, ?5)");
 			m_mapClassCmd = new SQLiteStatement(m_database, "INSERT INTO Classes (Id, Name) VALUES (?1, ?2)");
+
 			m_insertThreadCmd = new SQLiteStatement(m_database, "INSERT INTO Threads (Id, IsAlive, Name) VALUES (?1, ?2, ?3)");
+			m_updateThreadAliveCmd = new SQLiteStatement(m_database, "UPDATE Threads SET IsAlive = ?2 WHERE Id=?1");
+			m_updateThreadNameCmd = new SQLiteStatement(m_database, "UPDATE Threads SET Name = ?2 WHERE Id=?1");
 
 			m_insertCallerCmd = new SQLiteStatement(m_database, "INSERT INTO Callers (ThreadId, CallerId, CalleeId, HitCount) VALUES (?1, ?2, ?3, ?4)");
 			m_updateCallerCmd = new SQLiteStatement(m_database, "UPDATE Callers SET HitCount = HitCount + ?4 WHERE ThreadId=?1 AND CallerId=?2 AND CalleeId=?3");
