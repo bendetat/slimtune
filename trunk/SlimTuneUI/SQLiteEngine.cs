@@ -244,6 +244,7 @@ namespace SlimTuneUI
 		{
 			m_database.Execute("PRAGMA count_changes=TRUE");
 			m_database.Execute("PRAGMA synchronous=OFF");
+			m_database.Execute("PRAGMA journal_mode=MEMORY");
 
 			m_database.Execute("CREATE TABLE Snapshots (Id INT PRIMARY KEY, Name TEXT (256), DateTime INTEGER)");
 			m_database.Execute("CREATE TABLE Functions (Id INT PRIMARY KEY, ClassId INT, IsNative INT NOT NULL, Name TEXT (1024), Signature TEXT (2048))");
@@ -352,6 +353,8 @@ namespace SlimTuneUI
 			m_mapFunctionCmd.Dispose();
 			m_mapClassCmd.Dispose();
 			m_insertThreadCmd.Dispose();
+			m_updateThreadAliveCmd.Dispose();
+			m_updateThreadNameCmd.Dispose();
 			m_insertCallerCmd.Dispose();
 			m_updateCallerCmd.Dispose();
 			m_insertSampleCmd.Dispose();

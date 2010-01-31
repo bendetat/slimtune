@@ -30,6 +30,7 @@ using UICore;
 
 namespace SlimTuneUI
 {
+	[Obsolete]
 	class SqlServerCompactEngine : StorageEngineBase
 	{
 		private const int kTimingBuckets = 20;

@@ -83,6 +83,11 @@ namespace SlimTuneUI
 			SQLiteFunctions.CheckError(result);
 		}
 
+		~SQLiteDatabase()
+		{
+			Dispose();
+		}
+
 		public IntPtr InternalPointer
 		{
 			get { return m_database; }
@@ -107,6 +112,7 @@ namespace SlimTuneUI
 		{
 			int result = SQLiteFunctions.Close(m_database);
 			SQLiteFunctions.CheckError(result);
+			GC.SuppressFinalize(this);
 		}
 
 		#endregion
