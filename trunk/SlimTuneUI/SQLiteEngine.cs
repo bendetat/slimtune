@@ -60,6 +60,11 @@ namespace SlimTuneUI
 			PrepareCommands();
 		}
 
+		~SQLiteEngine()
+		{
+			Dispose();
+		}
+
 		public override void MapFunction(FunctionInfo funcInfo)
 		{
 			m_mapFunctionCmd.Reset();
@@ -361,6 +366,7 @@ namespace SlimTuneUI
 			m_updateSampleCmd.Dispose();
 
 			m_database.Dispose();
+			GC.SuppressFinalize(this);
 		}
 	}
 }
