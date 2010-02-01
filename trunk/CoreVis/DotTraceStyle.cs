@@ -7,10 +7,12 @@ using System.Text;
 using System.Windows.Forms;
 using System.Text.RegularExpressions;
 
+using UICore;
+
 namespace SlimTuneUI
 {
 	[DisplayName("dotTrace Style Tree")]
-	public partial class DotTraceStyle : WeifenLuo.WinFormsUI.Docking.DockContent, IVisualizer
+	public partial class DotTraceStyle : WeifenLuo.WinFormsUI.Docking.DockContent, UICore.IVisualizer
 	{
 		const string kParentHits = @"
 SELECT SUM(HitCount)
@@ -19,7 +21,7 @@ WHERE CallerId = {0} AND ThreadId = {1}
 ";
 
 		const string kTopLevelQuery = @"
-SELECT F.Id, C.ThreadId, C.HitCount, T.Name AS ""ThreadName"", F.Name + F.Signature AS ""Function""
+SELECT F.Id, C.ThreadId, C.HitCount, T.Name AS ""ThreadName"", F.Name AS ""Function"", F.Signature AS ""Signature""
 FROM Callers C
 JOIN Functions F
 	ON C.CalleeId = F.Id
@@ -30,7 +32,7 @@ ORDER BY C.HitCount DESC
 ";
 
 		const string kChildQuery = @"
-SELECT C1.CalleeId AS ""Id"", HitCount, Name + Signature AS ""Function"", CASE TotalCalls
+SELECT C1.CalleeId AS ""Id"", HitCount, Name AS ""Function"", Signature, CASE TotalCalls
 	WHEN 0 THEN 0
 	ELSE (1.0 * C1.HitCount / TotalCalls)
 	END AS ""Percent""
@@ -87,7 +89,7 @@ ORDER BY HitCount DESC
 		FontSet m_normalFonts;
 		FontSet m_filteredFonts;
 
-		MainWindow m_mainWindow;
+		SlimTuneWindowBase m_mainWindow;
 		Connection m_connection;
 
 		public DotTraceStyle()
@@ -113,7 +115,7 @@ ORDER BY HitCount DESC
 			m_filteredFonts.Add(new Font(fontName, fontSize, FontStyle.Bold), Brushes.DimGray);
 		}
 
-		public void Initialize(MainWindow mainWindow, Connection connection)
+		public void Initialize(SlimTuneWindowBase mainWindow, Connection connection)
 		{
 			if(mainWindow == null)
 				throw new ArgumentNullException("mainWindow");
@@ -190,22 +192,22 @@ ORDER BY HitCount DESC
 				int totalHits = 0;
 				foreach(DataRow row in data.Tables[0].Rows)
 				{
-					totalHits += (int) row["HitCount"];
+					totalHits += Convert.ToInt32(row["HitCount"]);
 				}
 
 				foreach(DataRow row in data.Tables[0].Rows)
 				{
-					string name = (string) row["Function"];
-					//TODO: Replace with proper filters
+					string name = Convert.ToString(row["Function"]) + Convert.ToString(row["Signature"]);
+
 					string rawString = @"{0:P2} Thread {1} - {2}{3}{4}";
 					string tipString = "{0:P2} - Thread {1}\r\nEntry point: {2}{3}{4}";
 					string niceString = @"\1{0:P3} \2Thread {1} \0- {2}\2{3}\0{4}";
 
 					string signature, funcName, classAndFunc, baseName;
 					BreakName(name, out signature, out funcName, out classAndFunc, out baseName);
-					decimal percent = totalHits == 0 ? 0 : (int) row["HitCount"] / (decimal) totalHits;
-					int threadId = (int) row["ThreadId"];
-					string threadName = row["ThreadName"] as string;
+					decimal percent = totalHits == 0 ? 0 : Convert.ToInt32(row["HitCount"]) / (decimal) totalHits;
+					int threadId = Convert.ToInt32(row["ThreadId"]);
+					string threadName = Convert.ToString(row["ThreadName"]);
 					if(string.IsNullOrEmpty(threadName))
 						threadName = "#" + threadId;
 
@@ -214,7 +216,7 @@ ORDER BY HitCount DESC
 					string formatText = string.Format(niceString, percent, threadName, baseName, classAndFunc, signature);
 
 					TreeNode newNode = new TreeNode(nodeText, new TreeNode[] { new TreeNode("dummy") });
-					newNode.Tag = new NodeData((int) row["Id"], threadId, string.Empty, 1, formatText, tipText);
+					newNode.Tag = new NodeData(Convert.ToInt32( row["Id"]), threadId, string.Empty, 1, formatText, tipText);
 					m_treeView.Nodes.Add(newNode);
 				}
 			}
@@ -228,22 +230,22 @@ ORDER BY HitCount DESC
 				var data = m_connection.StorageEngine.Query(string.Format(kChildQuery, parent.Id, parent.ThreadId));
 
 				//find out what the current number of calls by the parent is
-				var parentHits = (int) m_connection.StorageEngine.QueryScalar(string.Format(kParentHits, parent.Id, parent.ThreadId));
+				var parentHits = Convert.ToInt32(m_connection.StorageEngine.QueryScalar(string.Format(kParentHits, parent.Id, parent.ThreadId)));
 				foreach(DataRow row in data.Tables[0].Rows)
 				{
-					string name = (string) row["Function"];
+					string name = Convert.ToString(row["Function"]) + Convert.ToString(row["Signature"]);
 					string rawString = @"{0:P2} {1} - {2:P2} - {3}{4}{5}";
 					string tipString = "[Id {6}] {3}{4}{5}\r\n{0:P3} of thread - {1} calls\r\n{2:P3} of parent";
 					string niceString = @"\1{0:P2} \2{1} \0- \3{2:P2} \0- {3}\2{4}\0{5}";
 
 					string signature, funcName, classAndFunc, baseName;
 					BreakName(name, out signature, out funcName, out classAndFunc, out baseName);
-					decimal percentOfParent = (decimal) row["Percent"];
+					decimal percentOfParent = Convert.ToDecimal(row["Percent"]);
 					decimal percent = percentOfParent * parent.Percent;
-					int id = (int) row["Id"];
+					int id = Convert.ToInt32(row["Id"]);
 
 					string nodeText = string.Format(rawString, percent, funcName, percentOfParent, baseName, classAndFunc, signature);
-					string tipText = string.Format(tipString, percent, (int) row["HitCount"], percentOfParent,
+					string tipText = string.Format(tipString, percent, Convert.ToInt32(row["HitCount"]), percentOfParent,
 						baseName, classAndFunc, signature, id);
 					string formatText = string.Format(niceString, percent, funcName, percentOfParent,
 						baseName, classAndFunc, signature);
@@ -259,7 +261,9 @@ ORDER BY HitCount DESC
 		{
 			e.Node.Nodes.Clear();
 			UpdateChildren(e.Node);
-			if(e.Node.Nodes.Count == 1)
+			if(e.Node.Nodes.Count == 0)
+				e.Node.Collapse();
+			else if(e.Node.Nodes.Count == 1)
 				e.Node.Nodes[0].Expand();
 		}
 
@@ -375,6 +379,19 @@ ORDER BY HitCount DESC
 			else
 			{
 				m_extraInfoTextBox.Text = string.Empty;
+			}
+		}
+
+		private void SnapshotCombo_Click(object sender, EventArgs e)
+		{
+			//get a list of snapshots from the storage engine
+			var snapshots = m_connection.StorageEngine.Query("SELECT * FROM Snapshots");
+			SnapshotCombo.Items.Clear();
+			SnapshotCombo.Items.Add("Current");
+			foreach(DataRow row in snapshots.Tables[0].Rows)
+			{
+				string text = string.Format("{0} - {1}", row[1], row[2]);
+				SnapshotCombo.Items.Add(text);
 			}
 		}
 	}

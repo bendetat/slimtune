@@ -7,12 +7,14 @@ using System.Text;
 using System.Windows.Forms;
 using Aga.Controls.Tree;
 
+using UICore;
+
 namespace SlimTuneUI
 {
 	[DisplayName("NProf-Style TreeViews")]
 	public partial class NProfStyleVisualizer : WeifenLuo.WinFormsUI.Docking.DockContent, IVisualizer
 	{
-		MainWindow m_mainWindow;
+		SlimTuneWindowBase m_mainWindow;
 		Connection m_connection;
 
 		CalleesModel m_calleesModel;
@@ -23,7 +25,7 @@ namespace SlimTuneUI
 			InitializeComponent();
 		}
 
-		public void Initialize(MainWindow mainWindow, Connection connection)
+		public void Initialize(SlimTuneWindowBase mainWindow, Connection connection)
 		{
 			if(mainWindow == null)
 				throw new ArgumentNullException("mainWindow");
@@ -155,7 +157,7 @@ WHERE CallerId = {0} AND ThreadId = {1}
 ";
 
 		const string kTopLevelQuery = @"
-SELECT Samples.ThreadId, Id, HitCount, Name + Signature AS ""Function"", CASE TotalHits
+SELECT Samples.ThreadId, Id, HitCount, Name AS ""Function"", Signature, CASE TotalHits
 	WHEN 0 THEN 0
 	ELSE (1.0 * HitCount / TotalHits)
 	END AS ""Percent""
@@ -168,7 +170,7 @@ ORDER BY HitCount DESC
 ";
 
 		const string kChildQuery = @"
-SELECT C1.CalleeId, HitCount, Name + Signature AS ""Function"", CASE TotalCalls
+SELECT C1.CalleeId, HitCount, Name AS ""Function"", Signature, CASE TotalCalls
 	WHEN 0 THEN 0
 	ELSE (1.0 * C1.HitCount / TotalCalls)
 	END AS ""% Calls""
@@ -200,11 +202,11 @@ ORDER BY HitCount DESC
 					foreach(DataRow row in data.Tables[0].Rows)
 					{
 						var item = new FunctionItem();
-						item.Id = (int) row["Id"];
-						item.Thread = (int) row["ThreadId"];
-						item.Name = (string) row["Function"];
-						item.HitCount = (int) row["HitCount"];
-						item.PercentTime = Math.Round(100 * (decimal) row["Percent"], 3);
+						item.Id = Convert.ToInt32(row["Id"]);
+						item.Thread = Convert.ToInt32(row["ThreadId"]);
+						item.Name = Convert.ToString(row["Function"]) + Convert.ToString(row["Signature"]);
+						item.HitCount = Convert.ToInt32(row["HitCount"]);
+						item.PercentTime = Math.Round(100 * Convert.ToDecimal(row["Percent"]), 3);
 						yield return item;
 					}
 				}
@@ -218,15 +220,15 @@ ORDER BY HitCount DESC
 					foreach(DataRow row in data.Tables[0].Rows)
 					{
 						var item = new FunctionItem();
-						item.Thread = (int) parent.Thread;
-						item.Id = (int) row["CalleeId"];
-						item.Name = (string) row["Function"];
-						item.HitCount = (int) row["HitCount"];
+						item.Thread = Convert.ToInt32(parent.Thread);
+						item.Id = Convert.ToInt32(row["CalleeId"]);
+						item.Name = Convert.ToString(row["Function"]) + Convert.ToString(row["Signature"]);
+						item.HitCount = Convert.ToInt32(row["HitCount"]);
 						if(parentHits == 0)
 							item.PercentTime = 0;
 						else
 							item.PercentTime = Math.Round(100 * (decimal) item.HitCount / (decimal) parentHits, 3);
-						item.PercentCalls = Math.Round(100 * (decimal) row["% Calls"], 3);
+						item.PercentCalls = Math.Round(100 * Convert.ToDecimal(row["% Calls"]), 3);
 						yield return item;
 					}
 				}
@@ -256,7 +258,7 @@ ORDER BY HitCount DESC
 	class CallersModel : ITreeModel
 	{
 		const string kTopLevelQuery = @"
-SELECT Callers.ThreadId, Id, Name + Signature AS ""Function"", HitCount, CASE TotalHits
+SELECT Callers.ThreadId, Id, Name AS ""Function"", Signature, HitCount, CASE TotalHits
 	WHEN 0 THEN 0
 	ELSE (1.0 * HitCount / TotalHits)
 	END AS ""Percent""
@@ -270,7 +272,7 @@ ORDER BY HitCount DESC
 ";
 
 		const string kChildQuery = @"
-SELECT Id, HitCount, Name + Signature AS ""Function"", CASE TotalCalls
+SELECT Id, HitCount, Name AS ""Function"", Signature, CASE TotalCalls
 	WHEN 0 THEN 0
 	ELSE (1.0 * HitCount / TotalCalls)
 	END AS ""Percent""
@@ -302,11 +304,11 @@ ORDER BY HitCount DESC
 					foreach(DataRow row in data.Tables[0].Rows)
 					{
 						var item = new FunctionItem();
-						item.Id = (int) row["Id"];
-						item.Thread = (int) row["ThreadId"];
-						item.Name = (string) row["Function"];
-						item.HitCount = (int) row["HitCount"];
-						item.PercentTime = Math.Round(100 * (decimal) row["Percent"], 3);
+						item.Id = Convert.ToInt32(row["Id"]);
+						item.Thread = Convert.ToInt32(row["ThreadId"]);
+						item.Name = Convert.ToString(row["Function"]) + Convert.ToString(row["Signature"]);
+						item.HitCount = Convert.ToInt32(row["HitCount"]);
+						item.PercentTime = Math.Round(100 * Convert.ToDecimal(row["Percent"]), 3);
 						yield return item;
 					}
 				}
@@ -318,11 +320,11 @@ ORDER BY HitCount DESC
 					foreach(DataRow row in data.Tables[0].Rows)
 					{
 						var item = new FunctionItem();
-						item.Thread = (int) parent.Thread;
-						item.Id = (int) row["Id"];
-						item.Name = (string) row["Function"];
-						item.HitCount = (int) row["HitCount"];
-						item.PercentCalls = Math.Round(100 * (decimal) row["Percent"], 3);
+						item.Thread = Convert.ToInt32(parent.Thread);
+						item.Id = Convert.ToInt32(row["Id"]);
+						item.Name = Convert.ToString(row["Function"]) + Convert.ToString(row["Signature"]);
+						item.HitCount = Convert.ToInt32(row["HitCount"]);
+						item.PercentCalls = Math.Round(100 * Convert.ToDecimal(row["Percent"]), 3);
 						yield return item;
 					}
 				}

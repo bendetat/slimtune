@@ -36,6 +36,7 @@
 			this.m_filterButton = new System.Windows.Forms.ToolStripSplitButton();
 			this.m_filterSystemMenu = new System.Windows.Forms.ToolStripMenuItem();
 			this.m_filterMicrosoftMenu = new System.Windows.Forms.ToolStripMenuItem();
+			this.SnapshotCombo = new System.Windows.Forms.ToolStripComboBox();
 			this.m_functionsToolTip = new System.Windows.Forms.ToolTip(this.components);
 			this.m_extraInfoTextBox = new System.Windows.Forms.TextBox();
 			this.m_toolStrip.SuspendLayout();
@@ -43,12 +44,12 @@
 			// 
 			// m_treeView
 			// 
-			this.m_treeView.Anchor = ((System.Windows.Forms.AnchorStyles) ((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+			this.m_treeView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
 						| System.Windows.Forms.AnchorStyles.Left)
 						| System.Windows.Forms.AnchorStyles.Right)));
 			this.m_treeView.BackColor = System.Drawing.SystemColors.Window;
 			this.m_treeView.DrawMode = System.Windows.Forms.TreeViewDrawMode.OwnerDrawText;
-			this.m_treeView.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
+			this.m_treeView.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.m_treeView.FullRowSelect = true;
 			this.m_treeView.Location = new System.Drawing.Point(0, 28);
 			this.m_treeView.Name = "m_treeView";
@@ -65,7 +66,8 @@
 			// 
 			this.m_toolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.m_refreshButton,
-            this.m_filterButton});
+            this.m_filterButton,
+            this.SnapshotCombo});
 			this.m_toolStrip.Location = new System.Drawing.Point(0, 0);
 			this.m_toolStrip.Name = "m_toolStrip";
 			this.m_toolStrip.Size = new System.Drawing.Size(722, 25);
@@ -74,7 +76,7 @@
 			// 
 			// m_refreshButton
 			// 
-			this.m_refreshButton.Image = ((System.Drawing.Image) (resources.GetObject("m_refreshButton.Image")));
+			this.m_refreshButton.Image = ((System.Drawing.Image)(resources.GetObject("m_refreshButton.Image")));
 			this.m_refreshButton.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.m_refreshButton.Name = "m_refreshButton";
 			this.m_refreshButton.Size = new System.Drawing.Size(66, 22);
@@ -87,7 +89,7 @@
 			this.m_filterButton.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.m_filterSystemMenu,
             this.m_filterMicrosoftMenu});
-			this.m_filterButton.Image = ((System.Drawing.Image) (resources.GetObject("m_filterButton.Image")));
+			this.m_filterButton.Image = ((System.Drawing.Image)(resources.GetObject("m_filterButton.Image")));
 			this.m_filterButton.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.m_filterButton.Name = "m_filterButton";
 			this.m_filterButton.Size = new System.Drawing.Size(65, 22);
@@ -116,6 +118,15 @@
 			this.m_filterMicrosoftMenu.ToolTipText = "Check this option to gray out Microsoft functions.";
 			this.m_filterMicrosoftMenu.Click += new System.EventHandler(this.FilterMenu_Click);
 			// 
+			// SnapshotCombo
+			// 
+			this.SnapshotCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.SnapshotCombo.Items.AddRange(new object[] {
+            "Current"});
+			this.SnapshotCombo.Name = "SnapshotCombo";
+			this.SnapshotCombo.Size = new System.Drawing.Size(121, 25);
+			this.SnapshotCombo.Click += new System.EventHandler(this.SnapshotCombo_Click);
+			// 
 			// m_functionsToolTip
 			// 
 			this.m_functionsToolTip.AutoPopDelay = 5000;
@@ -126,9 +137,9 @@
 			// 
 			// m_extraInfoTextBox
 			// 
-			this.m_extraInfoTextBox.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
+			this.m_extraInfoTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
 						| System.Windows.Forms.AnchorStyles.Right)));
-			this.m_extraInfoTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
+			this.m_extraInfoTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.m_extraInfoTextBox.Location = new System.Drawing.Point(0, 457);
 			this.m_extraInfoTextBox.Multiline = true;
 			this.m_extraInfoTextBox.Name = "m_extraInfoTextBox";
@@ -144,8 +155,8 @@
 			this.Controls.Add(this.m_extraInfoTextBox);
 			this.Controls.Add(this.m_toolStrip);
 			this.Controls.Add(this.m_treeView);
-			this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
-			this.Icon = ((System.Drawing.Icon) (resources.GetObject("$this.Icon")));
+			this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.Name = "DotTraceStyle";
 			this.Text = "DotTraceStyle";
 			this.m_toolStrip.ResumeLayout(false);
@@ -165,5 +176,6 @@
 		private System.Windows.Forms.ToolStripMenuItem m_filterMicrosoftMenu;
 		private System.Windows.Forms.ToolTip m_functionsToolTip;
 		private System.Windows.Forms.TextBox m_extraInfoTextBox;
+		private System.Windows.Forms.ToolStripComboBox SnapshotCombo;
 	}
 }

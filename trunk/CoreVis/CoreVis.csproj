@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{134D450E-733B-4DE7-A051-FDFC781561DE}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -67,13 +67,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SlimTuneUI\SlimTuneUI.csproj">
-      <Project>{B18BAFF4-A8F9-489E-85A9-C5A37E4F90FB}</Project>
-      <Name>SlimTuneUI</Name>
-      <Private>False</Private>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="DotTraceStyle.resx">
       <DependentUpon>DotTraceStyle.cs</DependentUpon>
       <SubType>Designer</SubType>
@@ -82,6 +75,12 @@
       <DependentUpon>NProfStyleVisualizer.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SlimTuneUI\UICore\UICore.csproj">
+      <Project>{B3047427-78A7-4560-B8E7-6917B57C7E9C}</Project>
+      <Name>UICore</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
