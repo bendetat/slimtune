@@ -89,7 +89,7 @@ ORDER BY HitCount DESC
 		FontSet m_normalFonts;
 		FontSet m_filteredFonts;
 
-		SlimTuneWindowBase m_mainWindow;
+		ProfilerWindowBase m_mainWindow;
 		Connection m_connection;
 
 		public DotTraceStyle()
@@ -115,7 +115,7 @@ ORDER BY HitCount DESC
 			m_filteredFonts.Add(new Font(fontName, fontSize, FontStyle.Bold), Brushes.DimGray);
 		}
 
-		public void Initialize(SlimTuneWindowBase mainWindow, Connection connection)
+		public void Initialize(ProfilerWindowBase mainWindow, Connection connection)
 		{
 			if(mainWindow == null)
 				throw new ArgumentNullException("mainWindow");
@@ -230,7 +230,7 @@ ORDER BY HitCount DESC
 				var data = m_connection.StorageEngine.Query(string.Format(kChildQuery, parent.Id, parent.ThreadId));
 
 				//find out what the current number of calls by the parent is
-				var parentHits = Convert.ToInt32(m_connection.StorageEngine.QueryScalar(string.Format(kParentHits, parent.Id, parent.ThreadId)));
+				//var parentHits = Convert.ToInt32(m_connection.StorageEngine.QueryScalar(string.Format(kParentHits, parent.Id, parent.ThreadId)));
 				foreach(DataRow row in data.Tables[0].Rows)
 				{
 					string name = Convert.ToString(row["Function"]) + Convert.ToString(row["Signature"]);

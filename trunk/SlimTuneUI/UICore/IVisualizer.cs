@@ -7,7 +7,7 @@ namespace UICore
 	/// </summary>
 	public interface IVisualizer
 	{
-		void Initialize(SlimTuneWindowBase mainWindow, Connection connection);
+		void Initialize(ProfilerWindowBase mainWindow, Connection connection);
 		void Show(WeifenLuo.WinFormsUI.Docking.DockPanel parent);
 	}
 }

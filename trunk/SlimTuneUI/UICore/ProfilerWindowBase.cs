@@ -3,7 +3,7 @@ using System.Windows.Forms;
 
 namespace UICore
 {
-	public abstract class SlimTuneWindowBase : Form
+	public abstract class ProfilerWindowBase : Form
 	{
 		//nothing yet
 	}

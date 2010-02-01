@@ -33,7 +33,7 @@ using UICore;
 
 namespace SlimTuneUI
 {
-	public partial class MainWindow : SlimTuneWindowBase
+	public partial class MainWindow : ProfilerWindowBase
 	{
 		public ConnectionList ConnectionList { get; private set; }
 

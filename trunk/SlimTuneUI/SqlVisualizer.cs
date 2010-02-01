@@ -71,7 +71,7 @@ namespace SlimTuneUI
 			InitializeComponent();
 		}
 
-		public void Initialize(SlimTuneWindowBase mainWindow, Connection connection)
+		public void Initialize(ProfilerWindowBase mainWindow, Connection connection)
 		{
 			if(connection == null)
 				throw new ArgumentNullException("connection");

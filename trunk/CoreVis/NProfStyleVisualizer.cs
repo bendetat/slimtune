@@ -14,7 +14,7 @@ namespace SlimTuneUI
 	[DisplayName("NProf-Style TreeViews")]
 	public partial class NProfStyleVisualizer : WeifenLuo.WinFormsUI.Docking.DockContent, IVisualizer
 	{
-		SlimTuneWindowBase m_mainWindow;
+		ProfilerWindowBase m_mainWindow;
 		Connection m_connection;
 
 		CalleesModel m_calleesModel;
@@ -25,7 +25,7 @@ namespace SlimTuneUI
 			InitializeComponent();
 		}
 
-		public void Initialize(SlimTuneWindowBase mainWindow, Connection connection)
+		public void Initialize(ProfilerWindowBase mainWindow, Connection connection)
 		{
 			if(mainWindow == null)
 				throw new ArgumentNullException("mainWindow");
