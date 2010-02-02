@@ -20,12 +20,13 @@
 * THE SOFTWARE.
 */
 using System;
-using System.Text;
 using System.ComponentModel;
 using System.Drawing.Design;
 using System.Windows.Forms;
 using System.Windows.Forms.Design;
-using System.Runtime.InteropServices;
+using System.Diagnostics;
+using System.IO;
+using System.Threading;
 
 using UICore;
 
@@ -35,10 +36,28 @@ namespace SlimTuneUI
 	DisplayName("CLR Service (Microsoft .NET 2.0)")]
 	public class ClrServiceLauncher : ILauncher
 	{
+		private string m_name = string.Empty;
 		[Category("\tService"),
 		DisplayName("Service name"),
 		Description("The name of the service to be profiled.")]
-		public string Name { get; set; }
+		public string Name
+		{
+			get { return m_name; }
+			set
+			{
+				if(StartCommand == kDefaultStart + m_name)
+					StartCommand = kDefaultStart + value;
+				if(StopCommand == kDefaultStop + m_name)
+					StopCommand = kDefaultStop + value;
+				m_name = value;
+			}
+		}
+
+		[Browsable(false)]
+		public bool RequiresAdmin
+		{
+			get { return true; }
+		}
 
 		[Category("\tService"),
 		DisplayName("Start command"),
@@ -49,6 +68,21 @@ namespace SlimTuneUI
 		DisplayName("Stop command"),
 		Description("The command used to stop the service.")]
 		public string StopCommand { get; set; }
+
+		private ProfilerMode m_profMode = ProfilerMode.Sampling;
+		[Category("Profiling"),
+		DisplayName("Profiler mode"),
+		Description("The profiling method to use. Sampling is recommended.")]
+		public ProfilerMode ProfilingMode
+		{
+			get { return m_profMode; }
+			set
+			{
+				if(value == ProfilerMode.Disabled)
+					throw new ArgumentOutOfRangeException("value");
+				m_profMode = value;
+			}
+		}
 
 		[Category("Profiling"),
 		DisplayName("Listen port"),
@@ -70,88 +104,97 @@ namespace SlimTuneUI
 		Description("Causes the target process to suspend when a profiler connects.")]
 		public bool SuspendOnConnect { get; set; }
 
+		private const string kDefaultStart = "net start ";
+		private const string kDefaultStop = "net stop ";
+
 		public ClrServiceLauncher()
 		{
 			ListenPort = 3000;
+			StartCommand = kDefaultStart;
+			StopCommand = kDefaultStop;
 		}
 
 		public bool CheckParams()
 		{
-			return false;
+			return true;
 		}
 
 		public bool Launch()
 		{
-			string serviceAccountSid = string.Empty;
-			string serviceAccountName = GetServiceAccountName(Name);
-			if(serviceAccountName.StartsWith(@".\"))
+			StopService(Name, StopCommand);
+
+			string config = LauncherCommon.CreateConfigString(ProfilingMode, ListenPort, WaitForConnection, IncludeNative);
+			string[] profEnv = LauncherCommon.CreateProfilerEnvironment(config);
+
+			string serviceAccountSid = null;
+			string serviceAccountName = LauncherCommon.GetServiceAccountName(Name);
+			if(serviceAccountName != null && serviceAccountName.StartsWith(@".\"))
 				serviceAccountName = Environment.MachineName + serviceAccountName.Substring(1);
 			if(serviceAccountName != null && serviceAccountName != "LocalSystem")
 			{
-				serviceAccountSid = GetAccountSid(serviceAccountName);
+				serviceAccountSid = LauncherCommon.GetAccountSid(serviceAccountName);
 			}
 
 			if(serviceAccountSid != null)
 			{
 				//set environment for target account
+				LauncherCommon.SetAccountEnvironment(serviceAccountSid, profEnv);
+			}
+			else
+			{
+				string[] baseEnv = LauncherCommon.GetServicesEnvironment();
+				baseEnv = LauncherCommon.ReplaceTempDir(baseEnv, Path.GetTempPath());
+				string[] combinedEnv = LauncherCommon.CombineEnvironments(baseEnv, profEnv);
+				LauncherCommon.SetEnvironmentVariables(Name, combinedEnv);
 			}
 
-			return false;
+			bool returnVal = true;
+			StartService(Name, StartCommand);
+
+			Thread.Sleep(1000);
+			var engine = new SQLiteMemoryEngine();
+			var progress = new ConnectProgress("localhost", ListenPort, engine, 10);
+			progress.ShowDialog();
+			if(progress.Client != null)
+			{
+				progress.Client.Dispose();
+			}
+			else
+			{
+				returnVal = false;
+			}
+			engine.Dispose();
+
+			if(serviceAccountSid != null)
+			{
+				LauncherCommon.ResetAccountEnvironment(serviceAccountSid, profEnv);
+			}
+			else
+			{
+				LauncherCommon.DeleteEnvironmentVariables(Name);
+			}
+
+			return returnVal;
 		}
 
-		//Essentially a replica of the CLRProfiler code
-		[DllImport("Advapi32.dll")]
-		private static extern bool LookupAccountName(string machineName, string accountName, byte[] sid,
-								 ref int sidLen, StringBuilder domainName, ref int domainNameLen, out int peUse);
-
-		[DllImport("Kernel32.dll")]
-		private static extern bool LocalFree(IntPtr ptr);
-
-		[DllImport("Advapi32.dll")]
-		private static extern bool ConvertSidToStringSidW(byte[] sid, out IntPtr stringSid);
-
-		private static Microsoft.Win32.RegistryKey GetServiceKey(string serviceName)
+		private static void StopService(string serviceName, string stopCommand)
 		{
-			return Microsoft.Win32.Registry.LocalMachine.OpenSubKey("SYSTEM\\CurrentControlSet\\Services\\" + serviceName, true);
+			// stop service
+			ProcessStartInfo processStartInfo = new ProcessStartInfo("cmd.exe");
+			processStartInfo.Arguments = "/c " + stopCommand;
+			Process process = Process.Start(processStartInfo);
+			while(!process.HasExited)
+			{
+				Thread.Sleep(1000);
+			}
 		}
 
-		private static string GetServiceAccountName(string serviceName)
+		private static Process StartService(string serviceName, string startCommand)
 		{
-			var key = GetServiceKey(serviceName);
-			if(key == null)
-				return null;
-
-			return key.GetValue("ObjectName") as string;
+			ProcessStartInfo processStartInfo = new ProcessStartInfo("cmd.exe");
+			processStartInfo.Arguments = "/c " + startCommand;
+			Process process = Process.Start(processStartInfo);
+			return process;
 		}
-
-		private static string GetAccountSid(string accountName)
-		{
-            int sidLen = 0;
-            byte[] sid = new byte[sidLen];
-            int domainNameLen = 0;
-            int peUse;
-            StringBuilder domainName = new StringBuilder();
-            LookupAccountName(Environment.MachineName, accountName, sid, ref sidLen, domainName, ref domainNameLen, out peUse);
-
-            sid = new byte[sidLen];
-            domainName = new StringBuilder(domainNameLen);
-            string stringSid = null;
-            if (LookupAccountName(Environment.MachineName, accountName, sid, ref sidLen, domainName, ref domainNameLen, out peUse))
-            {
-                IntPtr stringSidPtr;
-                if (ConvertSidToStringSidW(sid, out stringSidPtr))
-                {
-                    try
-                    {
-                        stringSid = Marshal.PtrToStringUni(stringSidPtr);
-                    }
-                    finally
-                    {
-                        LocalFree(stringSidPtr);
-                    }
-                }
-            }
-            return stringSid;
-        }
 	}
 }

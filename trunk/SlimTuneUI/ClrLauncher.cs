@@ -33,8 +33,6 @@ namespace UICore
 	DisplayName("CLR Application (Microsoft .NET 2.0)")]
 	public class ClrLauncher : ILauncher
 	{
-		public const string ProfilerGuid = "{38A7EA35-B221-425a-AD07-D058C581611D}";
-
 		//NOTE: These are all in order for the property grid
 		[Editor(typeof(FileNameEditor), typeof(UITypeEditor)),
 		Category("Application"),
@@ -45,6 +43,12 @@ namespace UICore
 		public string Name
 		{
 			get { return Executable; }
+		}
+
+		[Browsable(false)]
+		public bool RequiresAdmin
+		{
+			get { return false; }
 		}
 
 		[Category("Application"),
@@ -116,23 +120,11 @@ namespace UICore
 
 		public bool Launch()
 		{
-			string config = string.Empty;
-			config += string.Format("Mode={0};", (int) ProfilingMode);
-			config += string.Format("Port={0};", ListenPort);
-			config += string.Format("Wait={0};", WaitForConnection ? 1 : 0);
-			config += string.Format("SampleUnmanaged={0};", IncludeNative ? 1 : 0);
-
+			string config = LauncherCommon.CreateConfigString(ProfilingMode, ListenPort, WaitForConnection, IncludeNative);
 			var psi = new ProcessStartInfo(Executable, Arguments);
-			psi.RedirectStandardOutput = false;
-			psi.RedirectStandardError = false;
-			psi.RedirectStandardInput = false;
-			psi.UseShellExecute = false;
+			LauncherCommon.SetProcessOptions(psi, config);
 			psi.WorkingDirectory = string.IsNullOrEmpty(WorkingDir) ?
 				Path.GetDirectoryName(Executable) : WorkingDir;
-
-			psi.EnvironmentVariables["COR_ENABLE_PROFILING"] = "1";
-			psi.EnvironmentVariables["COR_PROFILER"] = ProfilerGuid;
-			psi.EnvironmentVariables["SLIMTUNE_CONFIG"] = config;
 
 			try
 			{

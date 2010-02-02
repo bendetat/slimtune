@@ -59,7 +59,10 @@ namespace SlimTuneUI
 			m_appTypeCombo.SelectedIndexChanged += new EventHandler(m_appTypeCombo_SelectedIndexChanged);
 			//run the handler if necessary
 			if(m_launcher == null)
+			{
+				m_launcherIndex = -1;
 				m_appTypeCombo_SelectedIndexChanged(m_appTypeCombo, EventArgs.Empty);
+			}
 			m_launchPropGrid.SelectedObject = m_launcher;
 
 			//enumerate all the visualizers
@@ -170,6 +173,11 @@ namespace SlimTuneUI
 
 		private void m_appTypeCombo_SelectedIndexChanged(object sender, EventArgs e)
 		{
+			//this only happens when we detect admin required and revert the change
+			if(m_appTypeCombo.SelectedIndex == m_launcherIndex)
+				return;
+
+			//not sure this CAN happen
 			if(m_appTypeCombo.SelectedItem == null)
 			{
 				m_launcher = null;
@@ -178,7 +186,16 @@ namespace SlimTuneUI
 			}
 
 			Type launcherType = (m_appTypeCombo.SelectedItem as TypeEntry).Type;
-			m_launcher = (ILauncher) Activator.CreateInstance(launcherType);
+			ILauncher launcher = (ILauncher) Activator.CreateInstance(launcherType);
+			//Don't allow the user to select a launcher that will just fail due to admin privileges required
+			if(launcher.RequiresAdmin && !LauncherCommon.UserIsAdmin())
+			{
+				MessageBox.Show("You must run SlimTune as an administrator to profile the selected application type.");
+				m_appTypeCombo.SelectedIndex = m_launcherIndex;
+				return;
+			}
+
+			m_launcher = launcher;
 			m_launchPropGrid.SelectedObject = m_launcher;
 			m_launcherIndex = m_appTypeCombo.SelectedIndex;
 		}
