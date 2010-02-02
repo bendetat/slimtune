@@ -29,7 +29,6 @@ using System.Text;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.Threading;
-using System.Data.SqlServerCe;
 
 using UICore;
 

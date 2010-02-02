@@ -124,7 +124,7 @@ namespace SlimTuneUI
 				error = Marshal.PtrToStringAnsi(errorMsg);
 				SQLiteFunctions.Free(errorMsg);
 			}
-			SQLiteFunctions.CheckError(result);
+			SQLiteFunctions.CheckError(result, error);
 		}
 
 		#region IDisposable Members

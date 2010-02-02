@@ -20,6 +20,7 @@
 * THE SOFTWARE.
 */
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -40,7 +41,7 @@ namespace SlimTuneUI
 		public SlimTune()
 		{
 			InitializeComponent();
-			Plugins.Load(Application.StartupPath + "\\Plugins\\");
+			Plugins.Load(Path.Combine(Application.StartupPath, "Plugins"));
 		}
 
 		public void AddWindow(ProfilerWindow window)

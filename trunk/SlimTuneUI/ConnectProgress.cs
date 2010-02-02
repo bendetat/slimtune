@@ -46,7 +46,6 @@ namespace SlimTuneUI
 		string m_host;
 		int m_port;
 		IStorageEngine m_storage;
-		IAsyncResult m_async;
 		int m_attempts;
 
 		delegate void ConnectDelegate();
@@ -131,7 +130,7 @@ namespace SlimTuneUI
 		private void ConnectProgress_Shown(object sender, EventArgs e)
 		{
 			ConnectDelegate connector = new ConnectDelegate(Connect);
-			m_async = connector.BeginInvoke(ConnectFinished, null);
+			connector.BeginInvoke(ConnectFinished, null);
 		}
 	}
 }
