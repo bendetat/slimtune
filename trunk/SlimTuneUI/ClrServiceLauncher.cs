@@ -12,19 +12,19 @@ namespace SlimTuneUI
 {
 	[Serializable,
 	DisplayName("CLR Service (Microsoft .NET 2.0)")]
-	class ClrServiceLauncher : ILauncher
+	public class ClrServiceLauncher : ILauncher
 	{
-		[Category("Service"),
+		[Category("\tService"),
 		DisplayName("Service name"),
 		Description("The name of the service to be profiled.")]
 		public string Name { get; set; }
 
-		[Category("Service"),
+		[Category("\tService"),
 		DisplayName("Start command"),
 		Description("The command used to start the service.")]
 		public string StartCommand { get; set; }
 
-		[Category("Service"),
+		[Category("\tService"),
 		DisplayName("Stop command"),
 		Description("The command used to stop the service.")]
 		public string StopCommand { get; set; }

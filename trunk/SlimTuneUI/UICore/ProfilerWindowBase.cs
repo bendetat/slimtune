@@ -1,10 +1,27 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows.Forms;
 
 namespace UICore
 {
-	public abstract class ProfilerWindowBase : Form
+	public class ProfilerWindowBase : Form
 	{
-		//nothing yet
+		public List<IVisualizer> Visualizers
+		{
+			get;
+			private set;
+		}
+
+		public Connection Connection
+		{
+			get;
+			protected set;
+		}
+
+		public ProfilerWindowBase(Connection conn)
+		{
+			Visualizers = new List<IVisualizer>();
+			Connection = conn;
+		}
 	}
 }

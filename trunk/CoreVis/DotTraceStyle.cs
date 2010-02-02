@@ -9,10 +9,10 @@ using System.Text.RegularExpressions;
 
 using UICore;
 
-namespace SlimTuneUI
+namespace CoreVis
 {
 	[DisplayName("dotTrace Style Tree")]
-	public partial class DotTraceStyle : WeifenLuo.WinFormsUI.Docking.DockContent, UICore.IVisualizer
+	public partial class DotTraceStyle : UserControl, IVisualizer
 	{
 		const string kParentHits = @"
 SELECT SUM(HitCount)
@@ -124,23 +124,18 @@ ORDER BY HitCount DESC
 
 			m_mainWindow = mainWindow;
 			m_connection = connection;
-			m_connection.Disconnected += new EventHandler(m_connection_Disconnected);
-			m_connection.Closing += new EventHandler(m_connection_Closing);
 
 			this.Text = Utilities.GetStandardCaption(connection);
+			mainWindow.Visualizers.Add(this);
 			UpdateTopLevel();
 		}
 
-		void m_connection_Disconnected(object sender, EventArgs e)
+		public void Show(TabControl parent)
 		{
-			if(!this.IsDisposed)
-				this.Invoke((Action) delegate { this.Text = Utilities.GetStandardCaption(m_connection); });
-		}
-
-		void m_connection_Closing(object sender, EventArgs e)
-		{
-			if(!this.IsDisposed)
-				this.Invoke((Action) delegate { this.Close(); });
+			var page = new TabPage("Trace");
+			this.Dock = DockStyle.Fill;
+			page.Controls.Add(this);
+			parent.TabPages.Add(page);
 		}
 
 		private static void BreakName(string name, out string signature, out string funcName, out string classAndFunc, out string baseName)

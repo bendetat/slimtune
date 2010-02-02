@@ -12,7 +12,7 @@ using UICore;
 namespace SlimTuneUI
 {
 	[DisplayName("NProf-Style TreeViews")]
-	public partial class NProfStyleVisualizer : WeifenLuo.WinFormsUI.Docking.DockContent, IVisualizer
+	public partial class NProfStyleVisualizer : UserControl, IVisualizer
 	{
 		ProfilerWindowBase m_mainWindow;
 		Connection m_connection;
@@ -34,7 +34,6 @@ namespace SlimTuneUI
 
 			m_mainWindow = mainWindow;
 			m_connection = connection;
-			m_connection.Closing += new EventHandler(m_connection_Closing);
 
 			m_calleesModel = new CalleesModel(connection.StorageEngine);
 			m_callersModel = new CallersModel(connection.StorageEngine);
@@ -50,10 +49,12 @@ namespace SlimTuneUI
 			this.Text = Utilities.GetStandardCaption(connection);
 		}
 
-		void m_connection_Closing(object sender, EventArgs e)
+		public void Show(TabControl parent)
 		{
-			if(!this.IsDisposed)
-				this.Invoke((Action) delegate { this.Close(); });
+			var page = new TabPage("TreeViews");
+			this.Dock = DockStyle.Fill;
+			page.Controls.Add(this);
+			parent.TabPages.Add(page);
 		}
 
 		private void m_refreshButton_Click(object sender, EventArgs e)
@@ -216,7 +217,7 @@ ORDER BY HitCount DESC
 					var data = m_storage.Query(string.Format(kChildQuery, parent.Id, parent.Thread));
 
 					//find out what the current number of calls by the parent is
-					var parentHits = (int) m_storage.QueryScalar(string.Format(kParentHits, parent.Id, parent.Thread));
+					var parentHits = Convert.ToInt32(m_storage.QueryScalar(string.Format(kParentHits, parent.Id, parent.Thread)));
 					foreach(DataRow row in data.Tables[0].Rows)
 					{
 						var item = new FunctionItem();

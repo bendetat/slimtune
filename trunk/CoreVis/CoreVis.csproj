@@ -45,21 +45,16 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
-    <Reference Include="WeifenLuo.WinFormsUI.Docking, Version=2.3.1.24483, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\SlimTuneUI\WeifenLuo.WinFormsUI.Docking.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DotTraceStyle.cs">
-      <SubType>Form</SubType>
+      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="DotTraceStyle.designer.cs">
       <DependentUpon>DotTraceStyle.cs</DependentUpon>
     </Compile>
     <Compile Include="NProfStyleVisualizer.cs">
-      <SubType>Form</SubType>
+      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="NProfStyleVisualizer.designer.cs">
       <DependentUpon>NProfStyleVisualizer.cs</DependentUpon>
@@ -80,6 +75,7 @@
     <ProjectReference Include="..\SlimTuneUI\UICore\UICore.csproj">
       <Project>{B3047427-78A7-4560-B8E7-6917B57C7E9C}</Project>
       <Name>UICore</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

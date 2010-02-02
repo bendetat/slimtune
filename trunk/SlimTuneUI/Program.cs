@@ -30,58 +30,15 @@ namespace SlimTuneUI
 {
 	static class Program
 	{
-        static void TimingsTest()
-        {
-            SqlServerCompactEngine engine = new SqlServerCompactEngine(Path.GetTempFileName(), true);
-            
-            //start generating random timings
-            Random rand = new Random(5);
-            for(int i = 0; i < 5000; ++i)
-            {
-                int id = rand.Next(10);
-                long time = rand.Next(1000);
-                engine.FunctionTiming(id, time);
-            }
-            engine.Flush();
-        }
-
-		static void SQLiteTest()
-		{
-			const string dbFile = "test.db";
-			if(File.Exists(dbFile))
-				File.Delete(dbFile);
-
-			using(SQLiteDatabase db = new SQLiteDatabase(dbFile))
-			{
-				db.Execute("CREATE TABLE test2 (x INT PRIMARY KEY, y INT, Z INT)");
-				db.Execute("INSERT INTO test2 (x, y, z) VALUES (1, 2, 3)");
-				db.Execute("INSERT INTO test2 (x, y, z) VALUES (3, 2, 1)");
-				db.Execute("INSERT INTO test2 (x, y, z) VALUES (5, 6, 7)");
-
-				using(var cmd = new SQLiteStatement(db, "SELECT * FROM test2 WHERE x > ?1"))
-				{
-					cmd.BindInt(1, 2);
-					while(cmd.Step())
-					{
-						Console.WriteLine("Value is: {0} | {1} | {2}", cmd.GetInt(0), cmd.GetInt(1), cmd.GetInt(2));
-					}
-				}
-			}
-		}
-
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
 		static void Main()
 		{
-            //TimingsTest();
-			//SQLiteTest();
-            //return;
-
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
-			Application.Run(new MainWindow());
+			Application.Run(new SlimTune());
 		}
 	}
 }

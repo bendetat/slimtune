@@ -113,10 +113,8 @@ namespace SlimTuneUI
 			this.Controls.Add(this.m_dataGrid);
 			this.Controls.Add(this.m_queryButton);
 			this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
-			this.Icon = ((System.Drawing.Icon) (resources.GetObject("$this.Icon")));
 			this.Name = "SqlVisualizer";
 			this.Text = "Profiling Run";
-			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Results_FormClosing);
 			((System.ComponentModel.ISupportInitialize) (this.m_dataGrid)).EndInit();
 			this.ResumeLayout(false);
 			this.PerformLayout();

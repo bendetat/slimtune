@@ -85,6 +85,7 @@ namespace UICore
 	{
 		string Name { get; }
 		string Extension { get; }
+		bool InMemory { get; }
 
 		void MapFunction(FunctionInfo funcInfo);
 		void MapClass(ClassInfo classInfo);
@@ -98,6 +99,8 @@ namespace UICore
 		bool AllowFlush { get; set; }
 		void Flush();
 		void Snapshot(string name);
+
+		void Save(string file);
 
 		DataSet Query(string query);
 		object QueryScalar(string query);

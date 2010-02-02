@@ -62,7 +62,7 @@ ORDER BY HitCount DESC
 namespace SlimTuneUI
 {
 	[DisplayName("SQL Visualizer (for debugging)")]
-	public partial class SqlVisualizer : WeifenLuo.WinFormsUI.Docking.DockContent, IVisualizer
+	public partial class SqlVisualizer : UserControl, IVisualizer
 	{
 		Connection m_connection;
 
@@ -82,14 +82,18 @@ namespace SlimTuneUI
 			this.Text = Utilities.GetStandardCaption(connection);
 		}
 
-		void m_connection_Closing(object sender, EventArgs e)
+		public void Show(TabControl parent)
 		{
-			if(!this.IsDisposed)
-				this.Invoke((Action) delegate { this.Close(); });
+			var page = new TabPage("SQL Debugger");
+			this.Dock = DockStyle.Fill;
+			page.Controls.Add(this);
+			parent.TabPages.Add(page);
 		}
 
-		private void Results_FormClosing(object sender, FormClosingEventArgs e)
+		void m_connection_Closing(object sender, EventArgs e)
 		{
+			/*if(!this.IsDisposed)
+				this.Invoke((Action) delegate { this.Close(); });*/
 		}
 
 		private void m_queryButton_Click(object sender, EventArgs e)

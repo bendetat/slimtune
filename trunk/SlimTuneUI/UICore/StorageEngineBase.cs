@@ -45,6 +45,11 @@ namespace UICore
 			get;
 		}
 
+		public virtual bool InMemory
+		{
+			get { return false; }
+		}
+
 		public bool AllowFlush
 		{
 			get { return m_allowFlush; }
@@ -55,6 +60,7 @@ namespace UICore
 		public abstract void MapClass(ClassInfo classInfo);
 		public abstract void UpdateThread(int threadId, bool? alive, string name);
 		public abstract void Flush();
+		public abstract void Save(string file);
 		public abstract void Snapshot(string name);
 		public abstract System.Data.DataSet Query(string query);
 		public abstract object QueryScalar(string query);

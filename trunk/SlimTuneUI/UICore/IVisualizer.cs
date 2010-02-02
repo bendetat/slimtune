@@ -8,6 +8,6 @@ namespace UICore
 	public interface IVisualizer
 	{
 		void Initialize(ProfilerWindowBase mainWindow, Connection connection);
-		void Show(WeifenLuo.WinFormsUI.Docking.DockPanel parent);
+		void Show(System.Windows.Forms.TabControl parent);
 	}
 }

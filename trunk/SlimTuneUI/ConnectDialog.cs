@@ -33,9 +33,9 @@ namespace SlimTuneUI
 {
 	public partial class ConnectDialog : Form
 	{
-		MainWindow m_mainWindow;
+		SlimTune m_mainWindow;
 
-		public ConnectDialog(MainWindow mainWindow)
+		public ConnectDialog(SlimTune mainWindow)
 		{
 			InitializeComponent();
 			m_mainWindow = mainWindow;
@@ -79,15 +79,18 @@ namespace SlimTuneUI
 				Connection conn = new Connection(storage);
 				conn.RunClient(progress.Client);
 				conn.SetAutoSnapshots(10000, false);
-				m_mainWindow.ConnectionList.AddConnection(conn);
+
+				var profilerWindow = new ProfilerWindow(m_mainWindow, conn);
+				profilerWindow.Show();
 
 				TypeEntry visEntry = m_visualizerCombo.SelectedItem as TypeEntry;
 				if(visEntry != null && visEntry.Type != null)
 				{
 					IVisualizer visualizer = Activator.CreateInstance(visEntry.Type) as IVisualizer;
-					visualizer.Initialize(m_mainWindow, conn);
-					visualizer.Show(m_mainWindow.DockPanel);
+					visualizer.Initialize(profilerWindow, conn);
+					visualizer.Show(profilerWindow.VisualizerHost);
 				}
+				profilerWindow.BringToFront();
 			}
 			else
 			{

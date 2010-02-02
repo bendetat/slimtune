@@ -189,6 +189,11 @@ namespace SlimTuneUI
 			}
 		}
 
+		public override void Save(string file)
+		{
+			throw new NotImplementedException();
+		}
+
 		public override void Snapshot(string name)
 		{
 			lock(m_lock)

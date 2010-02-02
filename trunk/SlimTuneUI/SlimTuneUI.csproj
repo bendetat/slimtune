@@ -42,10 +42,6 @@
     <Reference Include="System.Drawing.Design" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
-    <Reference Include="WeifenLuo.WinFormsUI.Docking, Version=2.3.1.24483, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\WeifenLuo.WinFormsUI.Docking.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ClrLauncher.cs" />
@@ -56,37 +52,28 @@
     <Compile Include="ConnectDialog.Designer.cs">
       <DependentUpon>ConnectDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="ConnectionList.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="ConnectionList.Designer.cs">
-      <DependentUpon>ConnectionList.cs</DependentUpon>
-    </Compile>
     <Compile Include="ConnectProgress.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="ConnectProgress.Designer.cs">
       <DependentUpon>ConnectProgress.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainWindow.cs">
+    <Compile Include="ProfilerWindow.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MainWindow.Designer.cs">
-      <DependentUpon>MainWindow.cs</DependentUpon>
+    <Compile Include="ProfilerWindow.Designer.cs">
+      <DependentUpon>ProfilerWindow.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="ConnectDialog.resx">
       <DependentUpon>ConnectDialog.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ConnectionList.resx">
-      <DependentUpon>ConnectionList.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="ConnectProgress.resx">
       <DependentUpon>ConnectProgress.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MainWindow.resx">
-      <DependentUpon>MainWindow.cs</DependentUpon>
+    <EmbeddedResource Include="ProfilerWindow.resx">
+      <DependentUpon>ProfilerWindow.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -95,6 +82,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="RunDialog.resx">
       <DependentUpon>RunDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SlimTune.resx">
+      <DependentUpon>SlimTune.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="SqlVisualizer.resx">
       <DependentUpon>SqlVisualizer.cs</DependentUpon>
@@ -118,11 +108,18 @@
     <Compile Include="RunDialog.Designer.cs">
       <DependentUpon>RunDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="SlimTune.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SlimTune.Designer.cs">
+      <DependentUpon>SlimTune.cs</DependentUpon>
+    </Compile>
     <Compile Include="SQLite.cs" />
     <Compile Include="SQLiteEngine.cs" />
+    <Compile Include="SQLiteMemoryEngine.cs" />
     <Compile Include="SqlServerCompactEngine.cs" />
     <Compile Include="SqlVisualizer.cs">
-      <SubType>Form</SubType>
+      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="SqlVisualizer.designer.cs">
       <DependentUpon>SqlVisualizer.cs</DependentUpon>
