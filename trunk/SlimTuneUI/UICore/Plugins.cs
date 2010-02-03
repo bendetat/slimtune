@@ -20,9 +20,9 @@
 * THE SOFTWARE.
 */
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using System.Collections.Generic;
 
 namespace UICore
 {

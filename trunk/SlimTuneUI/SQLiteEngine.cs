@@ -20,11 +20,11 @@
 * THE SOFTWARE.
 */
 using System;
-using System.IO;
-using System.Data;
-using System.Diagnostics;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Data;
+using System.Diagnostics;
+using System.IO;
 
 using UICore;
 

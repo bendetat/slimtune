@@ -20,10 +20,10 @@
 * THE SOFTWARE.
 */
 using System;
-using System.IO;
-using System.Diagnostics;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing.Design;
+using System.IO;
 using System.Windows.Forms;
 using System.Windows.Forms.Design;
 

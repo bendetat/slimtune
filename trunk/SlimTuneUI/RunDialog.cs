@@ -20,13 +20,6 @@
 * THE SOFTWARE.
 */
 using System;
-using System.IO;
-using System.Diagnostics;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 
 using UICore;
@@ -100,7 +93,8 @@ namespace SlimTuneUI
 
 			if(!m_launcher.Launch())
 			{
-				storage.Dispose();
+				if(storage != null)
+					storage.Dispose();
 				return false;
 			}
 

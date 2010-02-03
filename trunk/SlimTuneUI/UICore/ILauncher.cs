@@ -20,11 +20,11 @@
 * THE SOFTWARE.
 */
 using System;
-using System.Net.Sockets;
-using System.Text;
-using System.Runtime.InteropServices;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Security.Principal;
+using System.Text;
 
 namespace UICore
 {
@@ -204,14 +204,6 @@ namespace UICore
 			return stringSid;
 		}
 
-		private static unsafe int wcslen(char* s)
-		{
-			char* e;
-			for(e = s; *e != '\0'; e++)
-				;
-			return (int) (e - s);
-		}
-
 		public static void SetAccountEnvironment(string serviceAccountSid, string[] profilerEnvironment)
 		{
 			Microsoft.Win32.RegistryKey key = GetAccountEnvironmentKey(serviceAccountSid);
@@ -280,31 +272,20 @@ namespace UICore
 			if(!CreateEnvironmentBlock(out environmentPtr, tokenHandle, false))
 				return new String[0];
 
-			unsafe
+			List<string> envStrings = new List<string>();
+			while(true)
 			{
-				string[] envStrings = null;
-				// rather than duplicate the code that walks over the environment, 
-				// we have this funny loop where the first iteration just counts the strings,
-				// and the second iteration fills in the strings
-				for(int i = 0; i < 2; i++)
-				{
-					char* env = (char*) environmentPtr.ToPointer();
-					int count = 0;
-					while(true)
-					{
-						int len = wcslen(env);
-						if(len == 0)
-							break;
-						if(envStrings != null)
-							envStrings[count] = new String(env);
-						count++;
-						env += len + 1;
-					}
-					if(envStrings == null)
-						envStrings = new string[count];
-				}
-				return envStrings;
+				string str = Marshal.PtrToStringUni(environmentPtr);
+				if(str.Length == 0)
+					break;
+
+				envStrings.Add(str);
+				long ptrVal = environmentPtr.ToInt64();
+				ptrVal += str.Length * 2 + 2;
+				environmentPtr = (IntPtr) ptrVal;
 			}
+
+			return envStrings.ToArray();
 		}
 
 		public static string[] ReplaceTempDir(string[] env, string newTempDir)
