@@ -101,12 +101,6 @@ namespace SlimTuneUI
 
 		public virtual bool CheckParams()
 		{
-			if(ListenPort < 1)
-			{
-				MessageBox.Show("Listen port must be between 1 and 65535.", "Configuration Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-				return false;
-			}
-
 			using(var tempEngine = new SQLiteMemoryEngine())
 			{
 				bool used = LauncherCommon.TestConnection("localhost", ListenPort, tempEngine);
@@ -117,12 +111,6 @@ namespace SlimTuneUI
 					if(result == DialogResult.No)
 						return false;
 				}
-			}
-
-			if(SamplingInterval < 1)
-			{
-				MessageBox.Show("Sampling interval must be at least 1ms.", "Configuration Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-				return false;
 			}
 
 			return true;
