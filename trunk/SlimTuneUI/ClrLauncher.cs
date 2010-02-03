@@ -76,10 +76,20 @@ namespace UICore
 			}
 		}
 
+		private ushort m_listenPort;
 		[Category("Profiling"),
 		DisplayName("Listen port"),
 		Description("The TCP port that the profiler should use. Only change this if you are profiling multiple applications at once.")]
-		public ushort ListenPort { get; set; }
+		public ushort ListenPort
+		{
+			get { return m_listenPort; }
+			set
+			{
+				if(value < 1)
+					throw new ArgumentOutOfRangeException("ListenPort", value, "Listen port must be at least 1.");
+				m_listenPort = value;
+			}
+		}
 
 		[Category("Profiling"),
 		DisplayName("Include native functions"),
@@ -96,22 +106,50 @@ namespace UICore
 		Description("Causes the target process to suspend when a profiler connects.")]
 		public bool SuspendOnConnect { get; set; }
 
+		private int m_samplingInterval;
+		[Category("Profiling"),
+		DisplayName("Sampling interval"),
+		Description("The amount of time between stack samples, in milliseconds. Raising this value reduces how much data is collected, but improves application performance.")]
+		public int SamplingInterval
+		{
+			get { return m_samplingInterval; }
+			set
+			{
+				if(value < 1)
+					throw new ArgumentOutOfRangeException("SamplingInterval", value, "Sampling interval must be at least 1ms.");
+				m_samplingInterval = value;
+			}
+		}
+
 		public ClrLauncher()
 		{
 			ListenPort = 3000;
+			SamplingInterval = 5;
 		}
 
 		public bool CheckParams()
 		{
 			if(Executable == string.Empty)
 			{
-				MessageBox.Show("You must enter an executable file to run.", "Launch Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				MessageBox.Show("You must enter an executable file to run.", "Configuration Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 				return false;
 			}
 
 			if(!File.Exists(Executable))
 			{
-				MessageBox.Show("Executable does not exist.", "Launch Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				MessageBox.Show("Executable does not exist.", "Configuration Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				return false;
+			}
+
+			if(ListenPort < 1)
+			{
+				MessageBox.Show("Listen port must be between 1 and 65535.", "Configuration Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				return false;
+			}
+
+			if(SamplingInterval < 1)
+			{
+				MessageBox.Show("Sampling interval must be at least 1ms.", "Configuration Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 				return false;
 			}
 
@@ -120,7 +158,7 @@ namespace UICore
 
 		public bool Launch()
 		{
-			string config = LauncherCommon.CreateConfigString(ProfilingMode, ListenPort, WaitForConnection, IncludeNative);
+			string config = LauncherCommon.CreateConfigString(ProfilingMode, ListenPort, WaitForConnection, IncludeNative, SamplingInterval);
 			var psi = new ProcessStartInfo(Executable, Arguments);
 			LauncherCommon.SetProcessOptions(psi, config);
 			psi.WorkingDirectory = string.IsNullOrEmpty(WorkingDir) ?

@@ -76,13 +76,15 @@ namespace UICore
 		private static extern bool DestroyEnvironmentBlock(
 				IntPtr lpEnvironment);
 
-		public static string CreateConfigString(ProfilerMode profilingMode, int listenPort, bool waitForConnection, bool includeNative)
+		public static string CreateConfigString(ProfilerMode profilingMode, int listenPort, bool waitForConnection, bool includeNative,
+			int samplingInterval)
 		{
 			string config = string.Empty;
 			config += string.Format("Mode={0};", (int) profilingMode);
 			config += string.Format("Port={0};", listenPort);
 			config += string.Format("Wait={0};", waitForConnection ? 1 : 0);
 			config += string.Format("SampleUnmanaged={0};", includeNative ? 1 : 0);
+			config += string.Format("SampleInterval={0};", samplingInterval);
 			return config;
 		}
 

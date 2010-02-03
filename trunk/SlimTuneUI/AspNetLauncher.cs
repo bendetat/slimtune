@@ -18,8 +18,7 @@ namespace SlimTuneUI
 		[Browsable(false)]
 		public string Name
 		{
-			get;
-			set;
+			get { return "ASP.NET"; }
 		}
 
 		[Browsable(false)]
@@ -43,10 +42,20 @@ namespace SlimTuneUI
 			}
 		}
 
+		private ushort m_listenPort;
 		[Category("Profiling"),
 		DisplayName("Listen port"),
 		Description("The TCP port that the profiler should use. Only change this if you are profiling multiple applications at once.")]
-		public ushort ListenPort { get; set; }
+		public ushort ListenPort
+		{
+			get { return m_listenPort; }
+			set
+			{
+				if(value < 1)
+					throw new ArgumentOutOfRangeException("ListenPort", value, "Listen port must be at least 1.");
+				m_listenPort = value;
+			}
+		}
 
 		[Category("Profiling"),
 		DisplayName("Include native functions"),
@@ -58,13 +67,48 @@ namespace SlimTuneUI
 		Description("Causes the target process to suspend when a profiler connects.")]
 		public bool SuspendOnConnect { get; set; }
 
+		private int m_samplingInterval;
+		[Category("Profiling"),
+		DisplayName("Sampling interval"),
+		Description("The amount of time between stack samples, in milliseconds. Raising this value reduces how much data is collected, but improves application performance.")]
+		public int SamplingInterval
+		{
+			get { return m_samplingInterval; }
+			set
+			{
+				if(m_samplingInterval < 1)
+					throw new ArgumentOutOfRangeException("SamplingInterval", value, "Sampling interval must be at least 1ms.");
+				m_samplingInterval = value;
+			}
+		}
+
 		public AspNetLauncher()
 		{
 			ListenPort = 3000;
+			SamplingInterval = 10;
 		}
 
 		public bool CheckParams()
 		{
+			var key = LauncherCommon.GetServiceKey("IISADMIN") ?? LauncherCommon.GetServiceKey("W3SVC") ?? LauncherCommon.GetServiceKey("WAS");
+			if(key == null)
+			{
+				MessageBox.Show("Unable to find a compatible ASP.NET installation.", "ASP.NET Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				return false;
+			}
+
+			if(ListenPort < 1)
+			{
+				MessageBox.Show("Listen port must be between 1 and 65535.", "Configuration Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				return false;
+			}
+
+			if(SamplingInterval < 1)
+			{
+				MessageBox.Show("Sampling interval must be at least 1.", "Configuration Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				return false;
+			}
+
 			return true;
 		}
 
@@ -72,7 +116,7 @@ namespace SlimTuneUI
 		{
 			StopIIS();
 
-			string config = LauncherCommon.CreateConfigString(ProfilingMode, ListenPort, false, IncludeNative);
+			string config = LauncherCommon.CreateConfigString(ProfilingMode, ListenPort, false, IncludeNative, SamplingInterval);
 			string[] profilerEnv = LauncherCommon.CreateProfilerEnvironment(config);
 			string[] baseEnv = LauncherCommon.GetServicesEnvironment();
 			baseEnv = LauncherCommon.ReplaceTempDir(baseEnv, Path.GetTempPath());
