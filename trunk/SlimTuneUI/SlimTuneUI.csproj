@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="AspNetLauncher.cs" />
     <Compile Include="ClrLauncher.cs" />
+    <Compile Include="ClrLauncherBase.cs" />
     <Compile Include="ClrServiceLauncher.cs" />
     <Compile Include="ConnectDialog.cs">
       <SubType>Form</SubType>

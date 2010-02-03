@@ -34,27 +34,33 @@ namespace SlimTuneUI
 {
 	[Serializable,
 	DisplayName("CLR Service (Microsoft .NET 2.0)")]
-	public class ClrServiceLauncher : ILauncher
+	public class ClrServiceLauncher : ClrLauncherBase
 	{
-		private string m_name = string.Empty;
+		[Browsable(false)]
+		public override string Name
+		{
+			get { return ServiceName; }
+		}
+
+		private string m_serviceName = string.Empty;
 		[Category("\tService"),
 		DisplayName("Service name"),
 		Description("The name of the service to be profiled.")]
-		public string Name
+		public string ServiceName
 		{
-			get { return m_name; }
+			get { return m_serviceName; }
 			set
 			{
-				if(StartCommand == kDefaultStart + m_name)
+				if(StartCommand == kDefaultStart + m_serviceName)
 					StartCommand = kDefaultStart + value;
-				if(StopCommand == kDefaultStop + m_name)
+				if(StopCommand == kDefaultStop + m_serviceName)
 					StopCommand = kDefaultStop + value;
-				m_name = value;
+				m_serviceName = value;
 			}
 		}
 
 		[Browsable(false)]
-		public bool RequiresAdmin
+		public override bool RequiresAdmin
 		{
 			get { return true; }
 		}
@@ -69,66 +75,6 @@ namespace SlimTuneUI
 		Description("The command used to stop the service.")]
 		public string StopCommand { get; set; }
 
-		private ProfilerMode m_profMode = ProfilerMode.Sampling;
-		[Category("Profiling"),
-		DisplayName("Profiler mode"),
-		Description("The profiling method to use. Sampling is recommended.")]
-		public ProfilerMode ProfilingMode
-		{
-			get { return m_profMode; }
-			set
-			{
-				if(value == ProfilerMode.Disabled)
-					throw new ArgumentOutOfRangeException("value");
-				m_profMode = value;
-			}
-		}
-
-		private ushort m_listenPort;
-		[Category("Profiling"),
-		DisplayName("Listen port"),
-		Description("The TCP port that the profiler should use. Only change this if you are profiling multiple applications at once.")]
-		public ushort ListenPort
-		{
-			get { return m_listenPort; }
-			set
-			{
-				if(value < 1)
-					throw new ArgumentOutOfRangeException("ListenPort", value, "Listen port must be at least 1.");
-				m_listenPort = value;
-			}
-		}
-
-		[Category("Profiling"),
-		DisplayName("Include native functions"),
-		Description("Include native code profiling. Generally speaking, this isn't helpful at all.")]
-		public bool IncludeNative { get; set; }
-
-		[Category("Profiling"),
-		DisplayName("Wait for connection"),
-		Description("If enabled, the executable will be prevented from launching until a profiler front-end connects. Not recommended (deadlock risk).")]
-		public bool WaitForConnection { get; set; }
-
-		[Category("Profiling"),
-		DisplayName("Suspend on connect"),
-		Description("Causes the target process to suspend when a profiler connects.")]
-		public bool SuspendOnConnect { get; set; }
-
-		private int m_samplingInterval;
-		[Category("Profiling"),
-		DisplayName("Sampling interval"),
-		Description("The amount of time between stack samples, in milliseconds. Raising this value reduces how much data is collected, but improves application performance.")]
-		public int SamplingInterval
-		{
-			get { return m_samplingInterval; }
-			set
-			{
-				if(m_samplingInterval < 1)
-					throw new ArgumentOutOfRangeException("SamplingInterval", value, "Sampling interval must be at least 1ms.");
-				m_samplingInterval = value;
-			}
-		}
-
 		private const string kDefaultStart = "net start ";
 		private const string kDefaultStop = "net stop ";
 
@@ -140,45 +86,33 @@ namespace SlimTuneUI
 			StopCommand = kDefaultStop;
 		}
 
-		public bool CheckParams()
+		public override bool CheckParams()
 		{
-			if(Name == string.Empty)
+			if(ServiceName == string.Empty)
 			{
 				MessageBox.Show("You must enter a service name to run.", "Configuration Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 				return false;
 			}
 
-			var key = LauncherCommon.GetServiceKey(Name);
+			var key = LauncherCommon.GetServiceKey(ServiceName);
 			if(key == null)
 			{
 				MessageBox.Show("Unable to find a service with the specified name.", "Configuration Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 				return false;
 			}
 
-			if(ListenPort < 1)
-			{
-				MessageBox.Show("Listen port must be between 1 and 65535.", "Configuration Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-				return false;
-			}
-
-			if(SamplingInterval < 1)
-			{
-				MessageBox.Show("Sampling interval must be at least 1.", "Configuration Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-				return false;
-			}
-
-			return true;
+			return base.CheckParams();
 		}
 
-		public bool Launch()
+		public override bool Launch()
 		{
-			StopService(Name, StopCommand);
+			StopService(ServiceName, StopCommand);
 
 			string config = LauncherCommon.CreateConfigString(ProfilingMode, ListenPort, WaitForConnection, IncludeNative, SamplingInterval);
 			string[] profEnv = LauncherCommon.CreateProfilerEnvironment(config);
 
 			string serviceAccountSid = null;
-			string serviceAccountName = LauncherCommon.GetServiceAccountName(Name);
+			string serviceAccountName = LauncherCommon.GetServiceAccountName(ServiceName);
 			if(serviceAccountName != null && serviceAccountName.StartsWith(@".\"))
 				serviceAccountName = Environment.MachineName + serviceAccountName.Substring(1);
 			if(serviceAccountName != null && serviceAccountName != "LocalSystem")
@@ -196,11 +130,11 @@ namespace SlimTuneUI
 				string[] baseEnv = LauncherCommon.GetServicesEnvironment();
 				baseEnv = LauncherCommon.ReplaceTempDir(baseEnv, Path.GetTempPath());
 				string[] combinedEnv = LauncherCommon.CombineEnvironments(baseEnv, profEnv);
-				LauncherCommon.SetEnvironmentVariables(Name, combinedEnv);
+				LauncherCommon.SetEnvironmentVariables(ServiceName, combinedEnv);
 			}
 
 			bool returnVal = true;
-			StartService(Name, StartCommand);
+			StartService(ServiceName, StartCommand);
 
 			Thread.Sleep(1000);
 			var engine = new SQLiteMemoryEngine();
@@ -222,7 +156,7 @@ namespace SlimTuneUI
 			}
 			else
 			{
-				LauncherCommon.DeleteEnvironmentVariables(Name);
+				LauncherCommon.DeleteEnvironmentVariables(ServiceName);
 			}
 
 			return returnVal;

@@ -27,11 +27,13 @@ using System.Drawing.Design;
 using System.Windows.Forms;
 using System.Windows.Forms.Design;
 
-namespace UICore
+using UICore;
+
+namespace SlimTuneUI
 {
 	[Serializable,
 	DisplayName("CLR Application (Microsoft .NET 2.0)")]
-	public class ClrLauncher : ILauncher
+	public class ClrLauncher : ClrLauncherBase
 	{
 		//NOTE: These are all in order for the property grid
 		[Editor(typeof(FileNameEditor), typeof(UITypeEditor)),
@@ -40,13 +42,13 @@ namespace UICore
 		public string Executable { get; set; }
 
 		[Browsable(false)]
-		public string Name
+		public override string Name
 		{
 			get { return Executable; }
 		}
 
 		[Browsable(false)]
-		public bool RequiresAdmin
+		public override bool RequiresAdmin
 		{
 			get { return false; }
 		}
@@ -61,73 +63,13 @@ namespace UICore
 		Description("The working directory to use when launching the executable. If left blank, the executable's directory will be used.")]
 		public string WorkingDir { get; set; }
 
-		private ProfilerMode m_profMode = ProfilerMode.Sampling;
-		[Category("Profiling"),
-		DisplayName("Profiler mode"),
-		Description("The profiling method to use. Sampling is recommended.")]
-		public ProfilerMode ProfilingMode
-		{
-			get { return m_profMode; }
-			set
-			{
-				if(value == ProfilerMode.Disabled)
-					throw new ArgumentOutOfRangeException("value");
-				m_profMode = value;
-			}
-		}
-
-		private ushort m_listenPort;
-		[Category("Profiling"),
-		DisplayName("Listen port"),
-		Description("The TCP port that the profiler should use. Only change this if you are profiling multiple applications at once.")]
-		public ushort ListenPort
-		{
-			get { return m_listenPort; }
-			set
-			{
-				if(value < 1)
-					throw new ArgumentOutOfRangeException("ListenPort", value, "Listen port must be at least 1.");
-				m_listenPort = value;
-			}
-		}
-
-		[Category("Profiling"),
-		DisplayName("Include native functions"),
-		Description("Include native code profiling. Generally speaking, this isn't helpful at all.")]
-		public bool IncludeNative { get; set; }
-
-		[Category("Profiling"),
-		DisplayName("Wait for connection"),
-		Description("If enabled, the executable will be prevented from launching until a profiler front-end connects. Not recommended (deadlock risk).")]
-		public bool WaitForConnection { get; set; }
-
-		[Category("Profiling"),
-		DisplayName("Suspend on connect"),
-		Description("Causes the target process to suspend when a profiler connects.")]
-		public bool SuspendOnConnect { get; set; }
-
-		private int m_samplingInterval;
-		[Category("Profiling"),
-		DisplayName("Sampling interval"),
-		Description("The amount of time between stack samples, in milliseconds. Raising this value reduces how much data is collected, but improves application performance.")]
-		public int SamplingInterval
-		{
-			get { return m_samplingInterval; }
-			set
-			{
-				if(value < 1)
-					throw new ArgumentOutOfRangeException("SamplingInterval", value, "Sampling interval must be at least 1ms.");
-				m_samplingInterval = value;
-			}
-		}
-
 		public ClrLauncher()
 		{
 			ListenPort = 3000;
 			SamplingInterval = 5;
 		}
 
-		public bool CheckParams()
+		public override bool CheckParams()
 		{
 			if(Executable == string.Empty)
 			{
@@ -141,22 +83,10 @@ namespace UICore
 				return false;
 			}
 
-			if(ListenPort < 1)
-			{
-				MessageBox.Show("Listen port must be between 1 and 65535.", "Configuration Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-				return false;
-			}
-
-			if(SamplingInterval < 1)
-			{
-				MessageBox.Show("Sampling interval must be at least 1ms.", "Configuration Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-				return false;
-			}
-
-			return true;
+			return base.CheckParams();
 		}
 
-		public bool Launch()
+		public override bool Launch()
 		{
 			string config = LauncherCommon.CreateConfigString(ProfilingMode, ListenPort, WaitForConnection, IncludeNative, SamplingInterval);
 			var psi = new ProcessStartInfo(Executable, Arguments);

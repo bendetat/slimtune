@@ -20,6 +20,7 @@
 * THE SOFTWARE.
 */
 using System;
+using System.Net.Sockets;
 using System.Text;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
@@ -116,6 +117,19 @@ namespace UICore
 			Array.Copy(envA, result, envA.Length);
 			Array.Copy(envB, 0, result, envA.Length, envB.Length);
 			return result;
+		}
+
+		public static bool TestConnection(string host, ushort port, IStorageEngine tempEngine)
+		{
+			try
+			{
+				var client = new ProfilerClient(host, port, tempEngine);
+				return true;
+			}
+			catch(System.Net.Sockets.SocketException)
+			{
+				return false;
+			}
 		}
 
 		public static ProcessStartInfo StartService(string serviceName, string startCommand)

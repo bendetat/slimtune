@@ -61,6 +61,8 @@ namespace UICore
 				{
 					if(type == baseType)
 						continue;
+					if(type.IsAbstract)
+						continue;
 					if(baseType.IsAssignableFrom(type))
 						yield return type;
 				}
