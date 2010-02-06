@@ -30,7 +30,7 @@ using Aga.Controls.Tree;
 
 using UICore;
 
-namespace SlimTuneUI
+namespace SlimTuneUI.CoreVis
 {
 	[DisplayName("NProf-Style TreeViews")]
 	public partial class NProfStyleVisualizer : UserControl, IVisualizer
