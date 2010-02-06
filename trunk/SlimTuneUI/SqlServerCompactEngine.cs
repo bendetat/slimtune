@@ -53,6 +53,11 @@ namespace SlimTuneUI
 			get { return "sdf"; }
 		}
 
+		public override string Engine
+		{
+			get { return "MS SQL Compact"; }
+		}
+
 		public SqlServerCompactEngine(string dbFile, bool createNew)
 			: base(dbFile)
 		{

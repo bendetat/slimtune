@@ -85,6 +85,7 @@ namespace UICore
 	{
 		string Name { get; }
 		string Extension { get; }
+		string Engine { get; }
 		bool InMemory { get; }
 
 		void MapFunction(FunctionInfo funcInfo);

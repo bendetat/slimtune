@@ -94,20 +94,25 @@ namespace UICore
 
 		public static string GetStandardCaption(Connection connection)
 		{
+			string caption = string.Empty;
+
 			if(!string.IsNullOrEmpty(connection.Executable))
 			{
-				return string.Format("{0} - {1}", System.IO.Path.GetFileNameWithoutExtension(connection.Executable),
+				caption = string.Format("{0} - {1}", System.IO.Path.GetFileNameWithoutExtension(connection.Executable),
 					System.IO.Path.GetFileNameWithoutExtension(connection.StorageEngine.Name));
 			}
 			else if(!string.IsNullOrEmpty(connection.HostName))
 			{
-				return string.Format("{0}:{1} - {2}", connection.HostName, connection.Port,
+				caption = string.Format("{0}:{1} - {2}", connection.HostName, connection.Port,
 					System.IO.Path.GetFileNameWithoutExtension(connection.StorageEngine.Name));
 			}
 			else
 			{
-				return System.IO.Path.GetFileName(connection.StorageEngine.Name);
+				caption = System.IO.Path.GetFileName(connection.StorageEngine.Name);
 			}
+
+			caption += string.Format(" ({0})", connection.StorageEngine.Engine);
+			return caption;
 		}
 
 		public static string GetDisplayName(Type type)

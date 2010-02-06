@@ -61,6 +61,11 @@ namespace UICore
 			private set;
 		}
 
+		public abstract string Engine
+		{
+			get;
+		}
+
 		public abstract string Extension
 		{
 			get;

@@ -50,6 +50,11 @@ namespace SlimTuneUI
 			get { return "sqlite"; }
 		}
 
+		public override string Engine
+		{
+			get { return "SQLite"; }
+		}
+
 		public SQLiteEngine()
 			: base("memory")
 		{

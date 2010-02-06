@@ -27,6 +27,14 @@ namespace SlimTuneUI
 {
 	class SQLiteMemoryEngine : SQLiteEngine
 	{
+		public override string Engine
+		{
+			get
+			{
+				return "SQLite In-Memory";
+			}
+		}
+
 		public override bool InMemory
 		{
 			get { return true; }
