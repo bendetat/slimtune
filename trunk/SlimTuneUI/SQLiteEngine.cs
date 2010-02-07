@@ -46,6 +46,9 @@ namespace SlimTuneUI
 		SQLiteStatement m_insertSampleCmd;
 		SQLiteStatement m_updateSampleCmd;
 
+		SQLiteStatement m_insertCounterCmd;
+		SQLiteStatement m_counterNameCmd;
+
 		public override string Extension
 		{
 			get { return "sqlite"; }
@@ -144,6 +147,23 @@ namespace SlimTuneUI
 				m_insertThreadCmd.BindText(3, nameValue);
 				m_insertThreadCmd.Step();
 			}
+		}
+
+		public override void CounterName(int counterId, string name)
+		{
+			m_counterNameCmd.Reset();
+			m_counterNameCmd.BindInt(1, counterId);
+			m_counterNameCmd.BindText(2, name);
+			m_counterNameCmd.Step();
+		}
+
+		public override void PerfCounter(int counterId, long time, long value)
+		{
+			m_insertCounterCmd.Reset();
+			m_insertCounterCmd.BindInt(1, counterId);
+			m_insertCounterCmd.BindLong(2, time);
+			m_insertCounterCmd.BindLong(3, value);
+			m_insertCounterCmd.Step();
 		}
 
 		public override void Flush()
@@ -302,6 +322,10 @@ namespace SlimTuneUI
 			m_database.Execute("CREATE TABLE Timings (FunctionId INT, RangeMin INT, RangeMax INT, HitCount INT)");
 			m_database.Execute("CREATE INDEX Timings_FunctionIndex ON Timings(FunctionId);");
 			m_database.Execute("CREATE INDEX Timings_Compound ON Timings(FunctionId, RangeMin);");
+
+			m_database.Execute("CREATE TABLE Counters (Id INT PRIMARY KEY, Name TEXT(256))");
+			m_database.Execute("CREATE TABLE CounterValues (CounterId INT, Time INT, Value INT)");
+			m_database.Execute("CREATE INDEX CounterValues_IdIndex ON Counters(Id);");
 		}
 
 		private void PrepareCommands()
@@ -318,6 +342,9 @@ namespace SlimTuneUI
 
 			m_insertSampleCmd = new SQLiteStatement(m_database, "INSERT INTO Samples (ThreadId, FunctionId, HitCount) VALUES (?1, ?2, ?3)");
 			m_updateSampleCmd = new SQLiteStatement(m_database, "UPDATE Samples SET HitCount = HitCount + ?3 WHERE ThreadId=?1 AND FunctionId=?2");
+
+			m_insertCounterCmd = new SQLiteStatement(m_database, "INSERT INTO CounterValues (CounterId, Time, Value) VALUES (?1, ?2, ?3)");
+			m_counterNameCmd = new SQLiteStatement(m_database, "REPLACE INTO Counters (Id, Name) VALUES (?1, ?2)");
 		}
 
 		private void FlushCallers()
@@ -387,6 +414,7 @@ namespace SlimTuneUI
 
 		public override void Dispose()
 		{
+			//and this is why C# could really use some RAII constructs
 			m_mapFunctionCmd.Dispose();
 			m_mapClassCmd.Dispose();
 			m_insertThreadCmd.Dispose();
@@ -396,6 +424,8 @@ namespace SlimTuneUI
 			m_updateCallerCmd.Dispose();
 			m_insertSampleCmd.Dispose();
 			m_updateSampleCmd.Dispose();
+			m_insertCounterCmd.Dispose();
+			m_counterNameCmd.Dispose();
 
 			m_database.Dispose();
 			GC.SuppressFinalize(this);

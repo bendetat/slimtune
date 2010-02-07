@@ -117,6 +117,7 @@ struct IProfilerData
 	virtual const FunctionInfo* GetFunction(unsigned int id) = 0;
 	virtual const ClassInfo* GetClass(unsigned int id) = 0;
 	virtual const ThreadInfo* GetThread(unsigned int id) = 0;
+	virtual const std::wstring& GetCounterName(unsigned int id) = 0;
 
 	virtual void SetInstrument(unsigned int id, bool enable) = 0;
 

@@ -65,6 +65,7 @@
 				WarningLevel="4"
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
+				DisableSpecificWarnings="4996"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -162,6 +163,7 @@
 				WarningLevel="4"
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
+				DisableSpecificWarnings="4996"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -259,6 +261,7 @@
 				WarningLevel="4"
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
+				DisableSpecificWarnings="4996"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -358,6 +361,7 @@
 				WarningLevel="4"
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
+				DisableSpecificWarnings="4996"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -458,6 +462,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PublicInterface.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\RingBuffer.cpp"
 				>
 			</File>
@@ -524,6 +532,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PublicInterface.h"
+				>
+			</File>
+			<File
 				RelativePath=".\RingBuffer.h"
 				>
 			</File>
@@ -545,6 +557,10 @@
 			</File>
 			<File
 				RelativePath=".\Utilities.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Version.h"
 				>
 			</File>
 		</Filter>

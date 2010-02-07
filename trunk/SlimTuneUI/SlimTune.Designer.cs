@@ -49,30 +49,65 @@ namespace SlimTuneUI
 		/// </summary>
 		private void InitializeComponent()
 		{
+			System.Windows.Forms.Label RunLabel;
+			System.Windows.Forms.Label ConnectLabel;
+			System.Windows.Forms.Label OpenLabel;
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SlimTune));
 			this.WindowList = new System.Windows.Forms.ListBox();
 			this.HideButton = new System.Windows.Forms.Button();
 			this.ShowButton = new System.Windows.Forms.Button();
 			this.OpenFilePanel = new System.Windows.Forms.Panel();
-			this.panel1 = new System.Windows.Forms.Panel();
-			this.panel2 = new System.Windows.Forms.Panel();
-			this.RunButton = new System.Windows.Forms.Button();
-			this.ConnectButton = new System.Windows.Forms.Button();
-			this.OpenButton = new System.Windows.Forms.Button();
 			this.CompareButton = new System.Windows.Forms.Button();
-			this.RunLabel = new System.Windows.Forms.Label();
-			this.ConnectLabel = new System.Windows.Forms.Label();
-			this.OpenLabel = new System.Windows.Forms.Label();
+			this.OpenButton = new System.Windows.Forms.Button();
+			this.panel1 = new System.Windows.Forms.Panel();
+			this.RunButton = new System.Windows.Forms.Button();
+			this.panel2 = new System.Windows.Forms.Panel();
+			this.ConnectButton = new System.Windows.Forms.Button();
+			RunLabel = new System.Windows.Forms.Label();
+			ConnectLabel = new System.Windows.Forms.Label();
+			OpenLabel = new System.Windows.Forms.Label();
 			this.OpenFilePanel.SuspendLayout();
 			this.panel1.SuspendLayout();
 			this.panel2.SuspendLayout();
 			this.SuspendLayout();
 			// 
+			// RunLabel
+			// 
+			RunLabel.Font = new System.Drawing.Font("Verdana", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			RunLabel.Location = new System.Drawing.Point(85, 21);
+			RunLabel.Name = "RunLabel";
+			RunLabel.Size = new System.Drawing.Size(328, 43);
+			RunLabel.TabIndex = 2;
+			RunLabel.Text = "Run an application, service, or web server with SlimTune profiling enabled. Optio" +
+				"nally connects to the application as well. Start here!";
+			// 
+			// ConnectLabel
+			// 
+			ConnectLabel.Font = new System.Drawing.Font("Verdana", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			ConnectLabel.Location = new System.Drawing.Point(85, 21);
+			ConnectLabel.Name = "ConnectLabel";
+			ConnectLabel.Size = new System.Drawing.Size(328, 43);
+			ConnectLabel.TabIndex = 3;
+			ConnectLabel.Text = "Connect to a running application that was launched with profiling enabled. The ta" +
+				"rget can be local or remote, with a configured firewall.";
+			// 
+			// OpenLabel
+			// 
+			OpenLabel.Font = new System.Drawing.Font("Verdana", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			OpenLabel.Location = new System.Drawing.Point(88, 21);
+			OpenLabel.Name = "OpenLabel";
+			OpenLabel.Size = new System.Drawing.Size(325, 43);
+			OpenLabel.TabIndex = 2;
+			OpenLabel.Text = "Open a previously saved set of results, or compare multiple sets of results. See " +
+				"previous runs any time, with any visualizer.";
+			// 
 			// WindowList
 			// 
-			this.WindowList.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+			this.WindowList.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
 						| System.Windows.Forms.AnchorStyles.Right)));
 			this.WindowList.DisplayMember = "Text";
 			this.WindowList.FormattingEnabled = true;
+			this.WindowList.HorizontalScrollbar = true;
 			this.WindowList.Location = new System.Drawing.Point(439, 12);
 			this.WindowList.Name = "WindowList";
 			this.WindowList.Size = new System.Drawing.Size(205, 251);
@@ -82,7 +117,7 @@ namespace SlimTuneUI
 			// 
 			// HideButton
 			// 
-			this.HideButton.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+			this.HideButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.HideButton.Enabled = false;
 			this.HideButton.Location = new System.Drawing.Point(569, 266);
 			this.HideButton.Name = "HideButton";
@@ -94,7 +129,7 @@ namespace SlimTuneUI
 			// 
 			// ShowButton
 			// 
-			this.ShowButton.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+			this.ShowButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.ShowButton.Enabled = false;
 			this.ShowButton.Location = new System.Drawing.Point(439, 266);
 			this.ShowButton.Name = "ShowButton";
@@ -107,63 +142,13 @@ namespace SlimTuneUI
 			// OpenFilePanel
 			// 
 			this.OpenFilePanel.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-			this.OpenFilePanel.Controls.Add(this.OpenLabel);
+			this.OpenFilePanel.Controls.Add(OpenLabel);
 			this.OpenFilePanel.Controls.Add(this.CompareButton);
 			this.OpenFilePanel.Controls.Add(this.OpenButton);
 			this.OpenFilePanel.Location = new System.Drawing.Point(13, 13);
 			this.OpenFilePanel.Name = "OpenFilePanel";
 			this.OpenFilePanel.Size = new System.Drawing.Size(420, 88);
 			this.OpenFilePanel.TabIndex = 5;
-			// 
-			// panel1
-			// 
-			this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-			this.panel1.Controls.Add(this.RunLabel);
-			this.panel1.Controls.Add(this.RunButton);
-			this.panel1.Location = new System.Drawing.Point(13, 107);
-			this.panel1.Name = "panel1";
-			this.panel1.Size = new System.Drawing.Size(420, 88);
-			this.panel1.TabIndex = 6;
-			// 
-			// panel2
-			// 
-			this.panel2.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-			this.panel2.Controls.Add(this.ConnectLabel);
-			this.panel2.Controls.Add(this.ConnectButton);
-			this.panel2.Location = new System.Drawing.Point(13, 201);
-			this.panel2.Name = "panel2";
-			this.panel2.Size = new System.Drawing.Size(420, 88);
-			this.panel2.TabIndex = 7;
-			// 
-			// RunButton
-			// 
-			this.RunButton.Location = new System.Drawing.Point(3, 31);
-			this.RunButton.Name = "RunButton";
-			this.RunButton.Size = new System.Drawing.Size(75, 23);
-			this.RunButton.TabIndex = 1;
-			this.RunButton.Text = "Run...";
-			this.RunButton.UseVisualStyleBackColor = true;
-			this.RunButton.Click += new System.EventHandler(this.RunButton_Click);
-			// 
-			// ConnectButton
-			// 
-			this.ConnectButton.Location = new System.Drawing.Point(3, 31);
-			this.ConnectButton.Name = "ConnectButton";
-			this.ConnectButton.Size = new System.Drawing.Size(75, 23);
-			this.ConnectButton.TabIndex = 2;
-			this.ConnectButton.Text = "Connect...";
-			this.ConnectButton.UseVisualStyleBackColor = true;
-			this.ConnectButton.Click += new System.EventHandler(this.ConnectButton_Click);
-			// 
-			// OpenButton
-			// 
-			this.OpenButton.Location = new System.Drawing.Point(3, 16);
-			this.OpenButton.Name = "OpenButton";
-			this.OpenButton.Size = new System.Drawing.Size(75, 23);
-			this.OpenButton.TabIndex = 0;
-			this.OpenButton.Text = "Open...";
-			this.OpenButton.UseVisualStyleBackColor = true;
-			this.OpenButton.Click += new System.EventHandler(this.OpenButton_Click);
 			// 
 			// CompareButton
 			// 
@@ -175,35 +160,55 @@ namespace SlimTuneUI
 			this.CompareButton.Text = "Compare...";
 			this.CompareButton.UseVisualStyleBackColor = true;
 			// 
-			// RunLabel
+			// OpenButton
 			// 
-			this.RunLabel.Font = new System.Drawing.Font("Verdana", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
-			this.RunLabel.Location = new System.Drawing.Point(85, 21);
-			this.RunLabel.Name = "RunLabel";
-			this.RunLabel.Size = new System.Drawing.Size(328, 43);
-			this.RunLabel.TabIndex = 2;
-			this.RunLabel.Text = "Run an application, service, or web server with SlimTune profiling enabled. Optio" +
-				"nally connects to the application as well. Start here!";
+			this.OpenButton.Location = new System.Drawing.Point(3, 16);
+			this.OpenButton.Name = "OpenButton";
+			this.OpenButton.Size = new System.Drawing.Size(75, 23);
+			this.OpenButton.TabIndex = 0;
+			this.OpenButton.Text = "Open...";
+			this.OpenButton.UseVisualStyleBackColor = true;
+			this.OpenButton.Click += new System.EventHandler(this.OpenButton_Click);
 			// 
-			// ConnectLabel
+			// panel1
 			// 
-			this.ConnectLabel.Font = new System.Drawing.Font("Verdana", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
-			this.ConnectLabel.Location = new System.Drawing.Point(85, 21);
-			this.ConnectLabel.Name = "ConnectLabel";
-			this.ConnectLabel.Size = new System.Drawing.Size(328, 43);
-			this.ConnectLabel.TabIndex = 3;
-			this.ConnectLabel.Text = "Connect to a running application that was launched with profiling enabled. The ta" +
-				"rget can be local or remote, with a configured firewall.";
+			this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+			this.panel1.Controls.Add(RunLabel);
+			this.panel1.Controls.Add(this.RunButton);
+			this.panel1.Location = new System.Drawing.Point(13, 107);
+			this.panel1.Name = "panel1";
+			this.panel1.Size = new System.Drawing.Size(420, 88);
+			this.panel1.TabIndex = 6;
 			// 
-			// OpenLabel
+			// RunButton
 			// 
-			this.OpenLabel.Font = new System.Drawing.Font("Verdana", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
-			this.OpenLabel.Location = new System.Drawing.Point(88, 21);
-			this.OpenLabel.Name = "OpenLabel";
-			this.OpenLabel.Size = new System.Drawing.Size(325, 43);
-			this.OpenLabel.TabIndex = 2;
-			this.OpenLabel.Text = "Open a previously saved set of results, or compare multiple sets of results. See " +
-				"previous runs any time, with any visualizer.";
+			this.RunButton.Location = new System.Drawing.Point(3, 31);
+			this.RunButton.Name = "RunButton";
+			this.RunButton.Size = new System.Drawing.Size(75, 23);
+			this.RunButton.TabIndex = 1;
+			this.RunButton.Text = "Run...";
+			this.RunButton.UseVisualStyleBackColor = true;
+			this.RunButton.Click += new System.EventHandler(this.RunButton_Click);
+			// 
+			// panel2
+			// 
+			this.panel2.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+			this.panel2.Controls.Add(ConnectLabel);
+			this.panel2.Controls.Add(this.ConnectButton);
+			this.panel2.Location = new System.Drawing.Point(13, 201);
+			this.panel2.Name = "panel2";
+			this.panel2.Size = new System.Drawing.Size(420, 88);
+			this.panel2.TabIndex = 7;
+			// 
+			// ConnectButton
+			// 
+			this.ConnectButton.Location = new System.Drawing.Point(3, 31);
+			this.ConnectButton.Name = "ConnectButton";
+			this.ConnectButton.Size = new System.Drawing.Size(75, 23);
+			this.ConnectButton.TabIndex = 2;
+			this.ConnectButton.Text = "Connect...";
+			this.ConnectButton.UseVisualStyleBackColor = true;
+			this.ConnectButton.Click += new System.EventHandler(this.ConnectButton_Click);
 			// 
 			// SlimTune
 			// 
@@ -216,8 +221,9 @@ namespace SlimTuneUI
 			this.Controls.Add(this.ShowButton);
 			this.Controls.Add(this.HideButton);
 			this.Controls.Add(this.WindowList);
+			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.Name = "SlimTune";
-			this.Text = "SlimTune";
+			this.Text = "SlimTune Profiler";
 			this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.SlimTune_FormClosed);
 			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.SlimTune_FormClosing);
 			this.OpenFilePanel.ResumeLayout(false);
@@ -239,8 +245,5 @@ namespace SlimTuneUI
 		private System.Windows.Forms.Button ConnectButton;
 		private System.Windows.Forms.Button CompareButton;
 		private System.Windows.Forms.Button OpenButton;
-		private System.Windows.Forms.Label RunLabel;
-		private System.Windows.Forms.Label ConnectLabel;
-		private System.Windows.Forms.Label OpenLabel;
 	}
 }

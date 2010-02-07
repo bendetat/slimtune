@@ -108,6 +108,9 @@ namespace UICore
 
 		void FunctionTiming(int functionId, long time);
 
+		void CounterName(int counterId, string name);
+		void PerfCounter(int counterId, long time, long value);
+
 		bool AllowFlush { get; set; }
 		void Flush();
 		void Snapshot(string name);

@@ -250,7 +250,7 @@ ORDER BY HitCount DESC
 				{
 					string name = Convert.ToString(row["Function"]) + Convert.ToString(row["Signature"]);
 					string rawString = @"{0:P2} {1} - {2:P2} - {3}{4}{5}";
-					string tipString = "[Id {6}] {3}{4}{5}\r\n{0:P3} of thread - {1} calls\r\n{2:P3} of parent";
+					string tipString = "[Id {6}] {3}{4}{5}\r\n{0:P3} of thread - {1} samples\r\n{2:P3} of parent";
 					string niceString = @"\1{0:P2} \2{1} \0- \3{2:P2} \0- {3}\2{4}\0{5}";
 
 					string signature, funcName, classAndFunc, baseName;

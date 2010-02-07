@@ -42,7 +42,7 @@
 #include "dbghelp.h"
 
 // global reference to the profiler object (ie this) used by the static functions
-ClrProfiler* g_ProfilerCallback = NULL;
+ClrProfiler* g_Profiler = NULL;
 
 #define CHECK_HR(hr) if(FAILED(hr)) return (hr);
 
@@ -122,7 +122,7 @@ STDMETHODIMP ClrProfiler::Initialize(IUnknown *pICorProfilerInfoUnk)
 {
 	//multiple active profilers are not a supported configuration
 	//this is possible with .NET 4.0
-	if(g_ProfilerCallback != NULL)
+	if(g_Profiler != NULL)
 		return E_FAIL;
 
 	//Get the COM interfaces
@@ -174,7 +174,7 @@ STDMETHODIMP ClrProfiler::Initialize(IUnknown *pICorProfilerInfoUnk)
 	InitializeTimer(m_config.CycleTiming && m_config.Version.dwMajorVersion >= 6);
 
 	// set up our global access pointer
-	g_ProfilerCallback = this;
+	g_Profiler = this;
 
 	if(m_config.WaitForConnection)
 		m_server->WaitForConnection();
@@ -197,7 +197,7 @@ STDMETHODIMP ClrProfiler::Shutdown()
 		EnterLock localLock(&m_lock);
 
 		//shut off profiling (in case we're unfortunate enough to get an activate request right here)
-		g_ProfilerCallback = NULL;
+		g_Profiler = NULL;
 		m_config.Mode = PM_Disabled;
 		m_active = false;
 
@@ -381,7 +381,7 @@ void ClrProfiler::SetInstrument(unsigned int id, bool enable)
 UINT_PTR ClrProfiler::StaticFunctionMapper(FunctionID functionID, BOOL *pbHookFunction)
 {
 	UINT_PTR retVal = functionID;
-	ClrProfiler* profiler = g_ProfilerCallback;
+	ClrProfiler* profiler = g_Profiler;
 	if(profiler == NULL)
 		return functionID;
 
@@ -1262,4 +1262,36 @@ HRESULT ClrProfiler::JITCachedFunctionSearchStarted(FunctionID functionId, BOOL*
 {
 	*pbUseCachedFunction = TRUE;
 	return S_OK;
+}
+
+void ClrProfiler::SetCounterName(unsigned int counterId, std::wstring name)
+{
+	m_counters[counterId] = name;
+
+	Messages::CounterName counterName;
+	counterName.CounterId = counterId;
+	std::copy(name.begin(), name.end(), counterName.Name);
+
+	//flag the sampler not to suspend during write
+	InterlockedIncrement(&m_instDepth);
+	counterName.Write(*m_server, name.size());
+	InterlockedDecrement(&m_instDepth);
+}
+
+const std::wstring& ClrProfiler::GetCounterName(unsigned int id)
+{
+	return m_counters[id];
+}
+
+void ClrProfiler::WritePerfCounter(unsigned int counterId, __int64 value)
+{
+	Messages::PerfCounter counter;
+	counter.CounterId = counterId;
+	counter.Value = value;
+	QueryTimer(counter.TimeStamp);
+
+	//flag the sampler not to suspend during write
+	InterlockedIncrement(&m_instDepth);
+	counter.Write(*m_server);
+	InterlockedDecrement(&m_instDepth);
 }

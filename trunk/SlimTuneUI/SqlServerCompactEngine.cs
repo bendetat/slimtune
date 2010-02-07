@@ -164,6 +164,14 @@ namespace SlimTuneUI
 			}
 		}
 
+		public override void CounterName(int counterId, string name)
+		{
+		}
+
+		public override void PerfCounter(int counterId, long time, long value)
+		{
+		}
+
 		public override void Flush()
 		{
 			if(!AllowFlush)

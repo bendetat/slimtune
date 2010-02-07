@@ -47,6 +47,7 @@ private:
 	void SendFunction(const Requests::GetFunctionMapping& request);
 	void SendClass(const Requests::GetClassMapping& request);
 	void SendThread(const Requests::GetThreadMapping& request);
+	void SendCounterName(const Requests::GetCounterName& request);
 
 public:
 	~TcpConnection();
@@ -147,6 +148,15 @@ void TcpConnection::SendThread(const Requests::GetThreadMapping& request)
 	}
 }
 
+void TcpConnection::SendCounterName(const Requests::GetCounterName& request)
+{
+	const std::wstring& name = m_server.ProfilerData().GetCounterName(request.CounterId);
+	Messages::CounterName counterName;
+	counterName.CounterId = request.CounterId;
+	std::copy(name.begin(), name.end(), counterName.Name);
+	counterName.Write(m_server, name.size());
+}
+
 bool TcpConnection::ContinueRead(const boost::system::error_code&, size_t bytesRead)
 {
 	if(bytesRead < 1)
@@ -196,6 +206,15 @@ bool TcpConnection::ContinueRead(const boost::system::error_code&, size_t bytesR
 					goto FinishRead;
 				Requests::SetFunctionFlags sffReq = Requests::SetFunctionFlags::Read(++bufPtr, bytesParsed);
 				m_server.ProfilerData().SetInstrument(sffReq.FunctionId, sffReq.Flags > 0);
+				break;
+			}
+
+		case CR_GetCounterName:
+			{
+				if(bytesToParse < 5)
+					goto FinishRead;
+				Requests::GetCounterName gcnReq = Requests::GetCounterName::Read(++bufPtr, bytesParsed);
+				SendCounterName(gcnReq);
 				break;
 			}
 

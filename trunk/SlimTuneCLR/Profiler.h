@@ -34,6 +34,8 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+#ifndef PROFILER_H
+#define PROFILER_H
 #pragma once
 
 #include "IProfilerServer.h"
@@ -77,16 +79,22 @@ public:
 	HRESULT FinalConstruct();
 	void FinalRelease();
 
+	//public interface functions
+
 	bool IsActive() const { return m_active; }
 	ProfilerMode GetMode() const { return m_config.Mode; }
 	
 	const FunctionInfo* GetFunction(unsigned int id);
 	const ClassInfo* GetClass(unsigned int id);
 	const ThreadInfo* GetThread(unsigned int id);
+	const std::wstring& GetCounterName(unsigned int id);
 	void SetInstrument(unsigned int id, bool enable);
 
 	bool SuspendTarget();
 	bool ResumeTarget();
+
+	void SetCounterName(unsigned int counterId, std::wstring name);
+	void WritePerfCounter(unsigned int counterId, __int64 value);
 
     // STARTUP/SHUTDOWN EVENTS
     STDMETHOD(Initialize)(IUnknown* pICorProfilerInfoUnk);
@@ -97,9 +105,9 @@ public:
 	void Leave(FunctionID functionID, UINT_PTR clientData, COR_PRF_FRAME_INFO frameInfo, COR_PRF_FUNCTION_ARGUMENT_RANGE* argumentRange);
 	void Tailcall(FunctionID functionID, UINT_PTR clientData, COR_PRF_FRAME_INFO frameInfo);
 
-	// mapping functions
 	static UINT_PTR _stdcall StaticFunctionMapper(FunctionID functionId, BOOL* pbHookFunction);
 
+	//overriden interface functions
 	STDMETHOD(ObjectAllocated)(ObjectID objectId, ClassID classId);
 
 	STDMETHOD(ThreadCreated)(ThreadID threadId);
@@ -157,6 +165,9 @@ private:
 	typedef std::map<GUID, ModuleInfo*> ModuleLookup;
 	ModuleLookup m_moduleLookup;
 
+	typedef std::map<unsigned int, std::wstring> CounterMap;
+	CounterMap m_counters;
+
 	HANDLE m_sampleTimer;
 
 	void OnConnect();
@@ -179,3 +190,7 @@ private:
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Profiler), ClrProfiler)
+
+extern ClrProfiler* g_Profiler;
+
+#endif

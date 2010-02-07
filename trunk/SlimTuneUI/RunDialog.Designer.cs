@@ -51,7 +51,6 @@ namespace SlimTuneUI
 		{
 			this.components = new System.ComponentModel.Container();
 			this.m_runButton = new System.Windows.Forms.Button();
-			this.m_openExeDialog = new System.Windows.Forms.OpenFileDialog();
 			this.m_saveResultsDialog = new System.Windows.Forms.SaveFileDialog();
 			this.m_frontendOptionsGroupBox = new System.Windows.Forms.GroupBox();
 			this.m_visualizerLabel = new System.Windows.Forms.Label();
@@ -60,7 +59,6 @@ namespace SlimTuneUI
 			this.m_browseDbButton = new System.Windows.Forms.Button();
 			this.m_resultsFileTextBox = new System.Windows.Forms.TextBox();
 			this.m_saveAsLabel = new System.Windows.Forms.Label();
-			this.m_dirBrowser = new System.Windows.Forms.FolderBrowserDialog();
 			this.m_toolTip = new System.Windows.Forms.ToolTip(this.components);
 			this.m_launchPropGrid = new System.Windows.Forms.PropertyGrid();
 			this.m_appTypeLabel = new System.Windows.Forms.Label();
@@ -78,10 +76,6 @@ namespace SlimTuneUI
 			this.m_toolTip.SetToolTip(this.m_runButton, "Launches the application.");
 			this.m_runButton.UseVisualStyleBackColor = true;
 			this.m_runButton.Click += new System.EventHandler(this.m_runButton_Click);
-			// 
-			// m_openExeDialog
-			// 
-			this.m_openExeDialog.Filter = "Applications (*.exe)|*.exe";
 			// 
 			// m_saveResultsDialog
 			// 
@@ -170,10 +164,6 @@ namespace SlimTuneUI
 			this.m_saveAsLabel.TabIndex = 13;
 			this.m_saveAsLabel.Text = "Results File:";
 			// 
-			// m_dirBrowser
-			// 
-			this.m_dirBrowser.Description = "Select the working directory to be used when launching the application.";
-			// 
 			// m_toolTip
 			// 
 			this.m_toolTip.IsBalloon = true;
@@ -235,7 +225,6 @@ namespace SlimTuneUI
 		#endregion
 
 		private System.Windows.Forms.Button m_runButton;
-		private System.Windows.Forms.OpenFileDialog m_openExeDialog;
 		private System.Windows.Forms.SaveFileDialog m_saveResultsDialog;
 		private System.Windows.Forms.GroupBox m_frontendOptionsGroupBox;
 		private System.Windows.Forms.Button m_browseDbButton;
@@ -244,7 +233,6 @@ namespace SlimTuneUI
 		private System.Windows.Forms.CheckBox m_connectCheckBox;
 		private System.Windows.Forms.Label m_visualizerLabel;
 		private System.Windows.Forms.ComboBox m_visualizerCombo;
-		private System.Windows.Forms.FolderBrowserDialog m_dirBrowser;
 		private System.Windows.Forms.ToolTip m_toolTip;
 		private System.Windows.Forms.PropertyGrid m_launchPropGrid;
 		private System.Windows.Forms.Label m_appTypeLabel;

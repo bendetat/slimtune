@@ -85,6 +85,8 @@ namespace UICore
 		public abstract void MapFunction(FunctionInfo funcInfo);
 		public abstract void MapClass(ClassInfo classInfo);
 		public abstract void UpdateThread(int threadId, bool? alive, string name);
+		public abstract void CounterName(int counterId, string name);
+		public abstract void PerfCounter(int counterId, long time, long value);
 		public abstract void Flush();
 		public abstract void Save(string file);
 		public abstract void Snapshot(string name);

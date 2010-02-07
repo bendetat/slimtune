@@ -119,6 +119,33 @@ namespace Messages
 
 		server.Write(buffer, bufPtr - buffer);
 	}
+
+	void PerfCounter::Write(IProfilerServer& server)
+	{
+		char buffer[24];
+		char* bufPtr = buffer + 1;
+		unsigned char* bufTmp = (unsigned char*) buffer;
+
+		*bufTmp = MID_PerfCounter;
+		bufPtr = Write7BitEncodedInt(bufPtr, CounterId);
+		bufPtr = Write7BitEncodedInt64(bufPtr, TimeStamp);
+		bufPtr = Write7BitEncodedInt64(bufPtr, *(unsigned __int64*) &Value);
+
+		server.Write(buffer, bufPtr - buffer);
+	}
+
+	void CounterName::Write(IProfilerServer& server, size_t nameCount)
+	{
+		char* const buffer = (char*) _alloca(16 + sizeof(wchar_t) * nameCount);
+		char* bufPtr = buffer + 1;
+		unsigned char* bufTmp = (unsigned char*) buffer;
+
+		*bufTmp = MID_CounterName;
+		bufPtr = Write7BitEncodedInt(bufPtr, CounterId);
+		bufPtr = WriteString(bufPtr, Name, nameCount);
+
+		server.Write(buffer, bufPtr - buffer);
+	}
 }
 
 namespace Requests
@@ -143,6 +170,14 @@ namespace Requests
 	{
 		GetThreadMapping result;
 		result.ThreadId = *(int*) buffer;
+		bytesRead += sizeof(int);
+		return result;
+	}
+
+	GetCounterName GetCounterName::Read(char* buffer, size_t& bytesRead)
+	{
+		GetCounterName result;
+		result.CounterId = *(int*) buffer;
 		bytesRead += sizeof(int);
 		return result;
 	}

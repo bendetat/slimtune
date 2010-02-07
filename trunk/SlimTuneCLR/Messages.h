@@ -50,6 +50,9 @@ enum MessageId
 
 	MID_Sample = 0x50,
 
+	MID_PerfCounter = 0xe0,
+	MID_CounterName,
+
 	MID_BeginEvent = 0xf0,
 	MID_EndEvent,
 
@@ -63,6 +66,7 @@ enum ClientRequest
 	CR_GetModuleMapping,
 	CR_GetAssemblyMapping,
 	CR_GetThreadMapping,
+	CR_GetCounterName,
 
 	CR_GetThreadInfo = 0x10,
 
@@ -151,6 +155,25 @@ namespace Messages
 
 		void Write(IProfilerServer& server);
 	};
+
+	struct PerfCounter
+	{
+		unsigned int CounterId;
+		unsigned __int64 TimeStamp;
+		__int64 Value;
+
+		void Write(IProfilerServer& server);
+	};
+
+	struct CounterName
+	{
+		static const int MaxNameSize = 256;
+
+		unsigned int CounterId;
+		wchar_t Name[MaxNameSize];
+
+		void Write(IProfilerServer& server, size_t nameCount);
+	};
 }
 
 namespace Requests
@@ -174,6 +197,13 @@ namespace Requests
 		unsigned int ThreadId;
 
 		static GetThreadMapping Read(char* buffer, size_t& bytesRead);
+	};
+
+	struct GetCounterName
+	{
+		unsigned int CounterId;
+
+		static GetCounterName Read(char* buffer, size_t& bytesRead);
 	};
 
 	struct SetFunctionFlags

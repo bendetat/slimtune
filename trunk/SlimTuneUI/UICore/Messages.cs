@@ -51,6 +51,9 @@ namespace UICore
 
 		MID_Sample = 0x50,
 
+		MID_PerfCounter = 0xe0,
+		MID_CounterName,
+
 		MID_BeginEvent = 0xf0,
 		MID_EndEvent,
 
@@ -64,6 +67,7 @@ namespace UICore
 		CR_GetModuleMapping,
 		CR_GetAssemblyMapping,
 		CR_GetThreadMapping,
+		CR_GetCounterName,
 
 		CR_GetThreadInfo = 0x10,
 
@@ -204,6 +208,38 @@ namespace UICore
 				return result;
 			}
 		}
+
+		public struct PerfCounter
+		{
+			public int CounterId;
+			public long TimeStamp;
+			public long Value;
+
+			public static PerfCounter Read(BinaryReader reader)
+			{
+				PerfCounter result = new PerfCounter();
+				result.CounterId = Utilities.Read7BitEncodedInt(reader);
+				result.TimeStamp = Utilities.Read7BitEncodedInt64(reader);
+				result.Value = Utilities.Read7BitEncodedInt64(reader);
+
+				return result;
+			}
+		}
+
+		public struct CounterName
+		{
+			public int CounterId;
+			public string Name;
+
+			public static CounterName Read(BinaryReader reader)
+			{
+				CounterName result = new CounterName();
+				result.CounterId = Utilities.Read7BitEncodedInt(reader);
+				result.Name = reader.ReadString();
+
+				return result;
+			}
+		}
 	}
 
 	namespace Requests
@@ -272,6 +308,22 @@ namespace UICore
 			{
 				writer.Write((byte) ClientRequest.CR_GetThreadMapping);
 				writer.Write(ThreadId);
+			}
+		}
+
+		struct GetCounterName
+		{
+			public int CounterId;
+
+			public GetCounterName(int counterId)
+			{
+				CounterId = counterId;
+			}
+
+			public void Write(BinaryWriter writer)
+			{
+				writer.Write((byte) ClientRequest.CR_GetCounterName);
+				writer.Write(CounterId);
 			}
 		}
 	}

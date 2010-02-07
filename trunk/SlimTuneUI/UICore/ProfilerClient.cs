@@ -64,6 +64,7 @@ namespace UICore
 		Dictionary<int, FunctionInfo> m_functions = new Dictionary<int, FunctionInfo>();
 		Dictionary<int, ClassInfo> m_classes = new Dictionary<int, ClassInfo>();
 		Dictionary<int, ThreadInfo> m_threads = new Dictionary<int, ThreadInfo>();
+		Dictionary<int, string> m_counters = new Dictionary<int, string>();
 
 		IStorageEngine m_storage;
 
@@ -151,6 +152,16 @@ namespace UICore
 					case MessageId.MID_Sample:
 						var sample = Messages.Sample.Read(m_reader, m_functions);
 						ParseSample(sample);
+						break;
+
+					case MessageId.MID_PerfCounter:
+						var counter = Messages.PerfCounter.Read(m_reader);
+						ParseCounter(counter);
+						break;
+
+					case MessageId.MID_CounterName:
+						var counterName = Messages.CounterName.Read(m_reader);
+						NameCounter(counterName);
 						break;
 
 					case MessageId.MID_KeepAlive:
@@ -291,6 +302,27 @@ namespace UICore
 			m_storage.UpdateThread(threadId, alive, name);
 		}
 
+		private void NameCounter(Messages.CounterName counterName)
+		{
+			if(!m_counters.ContainsKey(counterName.CounterId))
+				m_counters.Add(counterName.CounterId, counterName.Name);
+			else
+				m_counters[counterName.CounterId] = counterName.Name;
+
+			m_storage.CounterName(counterName.CounterId, counterName.Name);
+		}
+
+		private void ParseCounter(Messages.PerfCounter counter)
+		{
+			if(!m_counters.ContainsKey(counter.CounterId))
+			{
+				m_counters.Add(counter.CounterId, string.Empty);
+				RequestCounterName(counter.CounterId);
+			}
+
+			m_storage.PerfCounter(counter.CounterId, counter.TimeStamp, counter.Value);
+		}
+
 		private void RequestFunctionMapping(int functionId)
 		{
 			var request = new Requests.GetFunctionMapping(functionId);
@@ -306,6 +338,12 @@ namespace UICore
 		private void RequestThreadMapping(int threadId)
 		{
 			var request = new Requests.GetThreadMapping(threadId);
+			request.Write(m_writer);
+		}
+
+		private void RequestCounterName(int counterId)
+		{
+			var request = new Requests.GetCounterName(counterId);
 			request.Write(m_writer);
 		}
 

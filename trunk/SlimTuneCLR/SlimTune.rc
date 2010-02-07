@@ -22,6 +22,7 @@
 // Microsoft Visual C++ generated resource script.
 //
 #include "resource.h"
+#include "Version.h"
 
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
@@ -74,8 +75,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,2,0,0
- PRODUCTVERSION 0,2,0,0
+ FILEVERSION MAJOR_VERSION,MINOR_VERSION,REVISION_VERSION,BUILD_VERSION
+ PRODUCTVERSION MAJOR_VERSION,MINOR_VERSION,REVISION_VERSION,BUILD_VERSION
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -92,12 +93,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "SlimDX Group"
             VALUE "FileDescription", "SlimTune CLR Backend"
-            VALUE "FileVersion", "0.2.0.0"
+            VALUE "FileVersion", VERSION_STRING
             VALUE "LegalCopyright", "Copyright (c) 2007-2009 SlimDX Group.  All rights reserved."
             VALUE "InternalName", "SlimTuneCLR.dll"
             VALUE "OriginalFilename", "SlimTuneCLR.dll"
             VALUE "ProductName", "SlimTune Profiler"
-            VALUE "ProductVersion", "0.2.0.0"
+            VALUE "ProductVersion", VERSION_STRING
         END
     END
     BLOCK "VarFileInfo"
