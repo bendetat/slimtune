@@ -39,6 +39,7 @@ namespace SlimTuneUI
 			: base(conn)
 		{
 			InitializeComponent();
+			this.Text = Utilities.GetStandardCaption(conn);
 			m_mainWindow = mainWindow;
 			m_mainWindow.AddWindow(this);
 		}

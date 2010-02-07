@@ -115,13 +115,68 @@ namespace UICore
 			return caption;
 		}
 
+		/*public static string GetSaveFilter()
+		{
+			string filter = string.Empty;
+			foreach(Type t in Plugins.GetEngines())
+			{
+				string extFilter = string.Empty;
+				var handles = t.GetCustomAttributes(typeof(HandlesExtensionAttribute), false);
+				if(handles.Length == 0)
+					continue;
+
+				foreach(var ext in handles)
+				{
+					string extString = (ext as HandlesExtensionAttribute).Extension;
+					extFilter += "*.";
+					extFilter += extString;
+					extFilter += ";";
+				}
+				if(extFilter.EndsWith(";"))
+					extFilter = extFilter.Remove(extFilter.Length - 1);
+
+				string entry = string.Format("{0} file ({1})|{1}|", GetDisplayName(t), extFilter);
+				filter += entry;
+			}
+			if(filter.EndsWith("|"))
+				filter = filter.Remove(filter.Length - 1);
+
+			return filter;
+		}*/
+
+		public static Type FindEngine(string file)
+		{
+			foreach(Type t in Plugins.GetEngines())
+			{
+				var handles = t.GetCustomAttributes(typeof(HandlesExtensionAttribute), false);
+				foreach(var ext in handles)
+				{
+					string extString = (ext as HandlesExtensionAttribute).Extension;
+					if(file.EndsWith(extString))
+					{
+						return t;
+					}
+				}
+			}
+
+			return null;
+		}
+
 		public static string GetDisplayName(Type type)
 		{
-			var attribs = type.GetCustomAttributes(typeof(DisplayNameAttribute), false);
+			var name = GetAttribute<DisplayNameAttribute>(type);
+			if(name != null)
+				return name.DisplayName;
+			return null;
+		}
+
+		public static T GetAttribute<T>(Type type) where T : class
+		{
+			var attribs = type.GetCustomAttributes(typeof(T), false);
 			if(attribs.Length > 0)
-				return (attribs[0] as DisplayNameAttribute).DisplayName;
+				return attribs[0] as T;
 			else
-				return type.FullName;
+				return null;
 		}
 
 		public static IEnumerable<TypeEntry> GetVisualizerList(bool includeDummy)

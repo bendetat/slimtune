@@ -78,5 +78,10 @@ namespace UICore
 		{
 			return GetTypeList(typeof(ILauncher));
 		}
+
+		public static IEnumerable<Type> GetEngines()
+		{
+			return GetTypeList(typeof(IStorageEngine));
+		}
 	}
 }

@@ -81,6 +81,17 @@ namespace UICore
 		}
 	}
 
+	[AttributeUsage(AttributeTargets.Class)]
+	public class HandlesExtensionAttribute : Attribute
+	{
+		public string Extension { get; private set; }
+
+		public HandlesExtensionAttribute(string ext)
+		{
+			Extension = ext;
+		}
+	}
+
 	public interface IStorageEngine : IDisposable
 	{
 		string Name { get; }

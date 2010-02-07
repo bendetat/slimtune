@@ -48,18 +48,20 @@ namespace SlimTuneUI
 		{
 			m_windows.Add(window);
 			window.FormClosed += new FormClosedEventHandler(window_FormClosed);
+			WindowList.Items.Add(window);
 		}
 
 		void window_FormClosed(object sender, FormClosedEventArgs e)
 		{
 			int index = m_windows.IndexOf(sender as ProfilerWindow);
 			m_windows[index] = null;
+			WindowList.Items.Remove(sender);
 		}
 
 		private void RunButton_Click(object sender, EventArgs e)
 		{
 			var runner = new RunDialog(this);
-			runner.ShowDialog();
+			runner.Show();
 		}
 
 		private void ConnectButton_Click(object sender, EventArgs e)
@@ -109,6 +111,98 @@ namespace SlimTuneUI
 
 		private void SlimTune_FormClosed(object sender, FormClosedEventArgs e)
 		{
+		}
+
+		private void ShowButton_Click(object sender, EventArgs e)
+		{
+			if(WindowList.SelectedItem == null)
+				return;
+
+			ProfilerWindow window = WindowList.SelectedItem as ProfilerWindow;
+			window.Show();
+			window.BringToFront();
+		}
+
+		private void HideButton_Click(object sender, EventArgs e)
+		{
+			if(WindowList.SelectedItem == null)
+				return;
+
+			ProfilerWindow window = WindowList.SelectedItem as ProfilerWindow;
+			window.Hide();
+		}
+
+		private void WindowList_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			bool enable = WindowList.SelectedItem != null;
+			ShowButton.Enabled = enable;
+			HideButton.Enabled = enable;
+		}
+
+		private void OpenButton_Click(object sender, EventArgs e)
+		{
+			OpenFileDialog dialog = new OpenFileDialog();
+			dialog.CheckFileExists = true;
+			dialog.Title = "Open Fesults File";			
+			dialog.Filter = string.Format("SlimTune results ({0})|{0}", GetOpenFilter());
+
+			DialogResult result = dialog.ShowDialog(this);
+			if(result == DialogResult.OK)
+			{
+				OpenFile(dialog.FileName);
+			}
+		}
+
+		private void OpenFile(string file)
+		{
+			Type engineType = Utilities.FindEngine(file);
+			if(engineType == null)
+			{
+				//this should NOT happen.
+				MessageBox.Show("Unable to find an engine for the selected file. This is a bug and should be reported.",
+					"Error Opening File", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				return;
+			}
+
+			try
+			{
+				//arguments are filename, createNew
+				IStorageEngine engine = (IStorageEngine) Activator.CreateInstance(engineType, file, false);
+
+				var conn = new Connection(engine);
+				var window = new ProfilerWindow(this, conn);
+				window.Show();
+			}
+			catch(System.Reflection.TargetInvocationException ex)
+			{
+				MessageBox.Show("Unable to create engine: " + ex.InnerException.Message,
+					"Error Opening File", MessageBoxButtons.OK, MessageBoxIcon.Error);
+			}
+			catch(Exception ex)
+			{
+				MessageBox.Show("Unknown error: " + ex.Message, "Error Opening File",
+					MessageBoxButtons.OK, MessageBoxIcon.Error);
+			}
+		}
+
+		private static string GetOpenFilter()
+		{
+			//put together the filter string
+			string extFilter = string.Empty;
+			foreach(Type t in Plugins.GetEngines())
+			{
+				var handles = t.GetCustomAttributes(typeof(HandlesExtensionAttribute), false);
+				foreach(var ext in handles)
+				{
+					string extString = (ext as HandlesExtensionAttribute).Extension;
+					extFilter += "*.";
+					extFilter += extString;
+					extFilter += ";";
+				}
+			}
+			if(extFilter.EndsWith(";"))
+				extFilter = extFilter.Remove(extFilter.Length - 1);
+			return extFilter;
 		}
 	}
 }

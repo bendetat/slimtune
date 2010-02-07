@@ -30,8 +30,9 @@ using UICore;
 
 namespace SlimTuneUI
 {
-	[DisplayName("SQLite Engine (cross platform)")]
-	class SQLiteEngine : StorageEngineBase
+	[DisplayName("SQLite"),
+	HandlesExtension("sqlite")]
+	public class SQLiteEngine : StorageEngineBase
 	{
 		SQLiteDatabase m_database;
 

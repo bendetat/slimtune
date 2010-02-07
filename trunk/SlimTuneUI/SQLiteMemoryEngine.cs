@@ -20,12 +20,11 @@
 * THE SOFTWARE.
 */
 using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Diagnostics;
 
 namespace SlimTuneUI
 {
-	class SQLiteMemoryEngine : SQLiteEngine
+	public class SQLiteMemoryEngine : SQLiteEngine
 	{
 		public override string Engine
 		{
@@ -43,7 +42,12 @@ namespace SlimTuneUI
 		public SQLiteMemoryEngine()
 			: base()
 		{
+		}
 
+		public SQLiteMemoryEngine(string name, bool createNew)
+			: base()
+		{
+			Debug.Assert(createNew);
 		}
 	}
 }

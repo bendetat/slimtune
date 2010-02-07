@@ -194,7 +194,7 @@ namespace SlimTuneUI
 			// m_saveResultsDialog
 			// 
 			this.m_saveResultsDialog.DefaultExt = "sdf";
-			this.m_saveResultsDialog.Filter = "Results (*.sdf)|*.sdf";
+			this.m_saveResultsDialog.Filter = "Results (*.sqlite)|*.sqlite";
 			this.m_saveResultsDialog.Title = "Save Results...";
 			// 
 			// m_toolTip

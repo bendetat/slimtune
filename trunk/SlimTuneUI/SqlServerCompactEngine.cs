@@ -23,6 +23,7 @@ using System;
 using System.IO;
 using System.Diagnostics;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Data.SqlServerCe;
 
@@ -30,8 +31,10 @@ using UICore;
 
 namespace SlimTuneUI
 {
-	[Obsolete]
-	class SqlServerCompactEngine : StorageEngineBase
+	[Obsolete,
+	DisplayName("SQL Server Compact"),
+	HandlesExtension("sdf")]
+	public class SqlServerCompactEngine : StorageEngineBase
 	{
 		private const int kTimingBuckets = 20;
 
@@ -55,7 +58,7 @@ namespace SlimTuneUI
 
 		public override string Engine
 		{
-			get { return "MS SQL Compact"; }
+			get { return "SQL Server Compact"; }
 		}
 
 		public SqlServerCompactEngine(string dbFile, bool createNew)
