@@ -154,8 +154,11 @@ STDMETHODIMP ClrProfiler::Initialize(IUnknown *pICorProfilerInfoUnk)
 	assert(SUCCEEDED(hr));
 
 #ifdef X86
-	hr = m_ProfilerInfo2->SetEnterLeaveFunctionHooks2(FunctionEnterNaked, FunctionLeaveNaked, FunctionTailcallNaked);
-	assert(SUCCEEDED(hr));
+	if(m_config.Mode & PM_Tracing)
+	{
+		hr = m_ProfilerInfo2->SetEnterLeaveFunctionHooks2(FunctionEnterNaked, FunctionLeaveNaked, FunctionTailcallNaked);
+		assert(SUCCEEDED(hr));
+	}
 #endif
 
 	//set up dbghelp
