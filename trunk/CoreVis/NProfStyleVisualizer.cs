@@ -76,6 +76,7 @@ namespace SlimTuneUI.CoreVis
 			this.Dock = DockStyle.Fill;
 			page.Controls.Add(this);
 			parent.TabPages.Add(page);
+			parent.SelectedTab = page;
 		}
 
 		private void m_refreshButton_Click(object sender, EventArgs e)

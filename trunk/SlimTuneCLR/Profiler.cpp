@@ -171,7 +171,7 @@ STDMETHODIMP ClrProfiler::Initialize(IUnknown *pICorProfilerInfoUnk)
 	m_server->Start();
 
 	//initialize timing (and use cycle timing if enabled and on Vista+)
-	InitializeTimer(m_config.CycleTiming && m_config.Version.dwMajorVersion >= 6);
+	InitializeTimer(/*m_config.CycleTiming && m_config.Version.dwMajorVersion >= 6*/ false);
 
 	// set up our global access pointer
 	g_Profiler = this;

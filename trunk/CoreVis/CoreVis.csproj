@@ -44,8 +44,18 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+    <Reference Include="ZedGraph, Version=5.1.5.28844, Culture=neutral, PublicKeyToken=02a83cbd123fcd60, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>zedgraph_dll_v515\zedgraph_dll_v5.1.5\ZedGraph.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CounterGraph.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="CounterGraph.Designer.cs">
+      <DependentUpon>CounterGraph.cs</DependentUpon>
+    </Compile>
     <Compile Include="DotTraceStyle.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -61,6 +71,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="CounterGraph.resx">
+      <DependentUpon>CounterGraph.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="DotTraceStyle.resx">
       <DependentUpon>DotTraceStyle.cs</DependentUpon>
       <SubType>Designer</SubType>

@@ -87,6 +87,7 @@ namespace SlimTuneUI
 			this.Dock = DockStyle.Fill;
 			page.Controls.Add(this);
 			parent.TabPages.Add(page);
+			parent.SelectedTab = page;
 		}
 
 		void m_connection_Closing(object sender, EventArgs e)

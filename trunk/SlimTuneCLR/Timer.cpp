@@ -20,8 +20,10 @@
 * THE SOFTWARE.
 */
 #include "stdafx.h"
+#include "Timer.h"
 
 static __int64 TimerFrequency = 0;
+static unsigned __int64 BaseTime = 0;
 static bool CycleTiming = false;
 
 typedef BOOL (*QueryThreadCycleTimeFunc)(HANDLE threadHandle, PULONG64 cycleTime);
@@ -49,8 +51,9 @@ void InitializeTimer(bool useCycleTiming)
 	CycleTiming = false;
 	LARGE_INTEGER freq;
 	QueryPerformanceFrequency(&freq);
-	//we want ticks/millisecond
-	TimerFrequency = freq.QuadPart / 1000UL;
+	TimerFrequency = freq.QuadPart;
+
+	QueryPerformanceCounter((LARGE_INTEGER*) &BaseTime);
 }
 
 void QueryTimerFreq(unsigned __int64& freq)
@@ -63,11 +66,13 @@ void QueryTimer(unsigned __int64& counter)
 	if(CycleTiming)
 	{
 		QueryThreadCycleTimePtr(GetCurrentThread(), &counter);
+		counter -= BaseTime;
 	}
 	else
 	{
 		LARGE_INTEGER countStruct;
 		QueryPerformanceCounter(&countStruct);
-		counter = countStruct.QuadPart / TimerFrequency;
+		counter = countStruct.QuadPart - BaseTime;
+		counter = (1000 * counter) / TimerFrequency;
 	}
 }

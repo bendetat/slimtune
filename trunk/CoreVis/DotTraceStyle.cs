@@ -156,6 +156,7 @@ ORDER BY HitCount DESC
 			this.Dock = DockStyle.Fill;
 			page.Controls.Add(this);
 			parent.TabPages.Add(page);
+			parent.SelectedTab = page;
 		}
 
 		private static void BreakName(string name, out string signature, out string funcName, out string classAndFunc, out string baseName)

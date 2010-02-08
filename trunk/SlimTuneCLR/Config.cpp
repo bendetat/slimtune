@@ -32,7 +32,7 @@ ProfilerConfig::ProfilerConfig()
 	TrackMemory = true;
 	AllowInlining = false;
 
-	CycleTiming = true;
+	CycleTiming = false;
 	InstrumentSmallFunctions = false;
 
 	SampleInterval = 3;

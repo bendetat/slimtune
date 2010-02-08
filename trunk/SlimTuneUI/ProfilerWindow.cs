@@ -61,7 +61,6 @@ namespace SlimTuneUI
 
 			SnapshotButton.Enabled = conn.IsConnected;
 
-			Connection.Connected += new EventHandler(Connection_Connected);
 			Connection.Disconnected += new EventHandler(Connection_Disconnected);
 
 			foreach(var vis in Utilities.GetVisualizerList(true))
@@ -71,14 +70,16 @@ namespace SlimTuneUI
 			m_visualizerCombo.SelectedIndex = 0;
 		}
 
-		void Connection_Connected(object sender, EventArgs e)
-		{
-			this.Invoke((Action) delegate { StatusLabel.Text = "Status: Running"; });
-		}
-
 		void Connection_Disconnected(object sender, EventArgs e)
 		{
-			this.Invoke((Action) delegate { StatusLabel.Text = "Status: Stopped"; SnapshotButton.Enabled = false; });
+			if(!this.IsDisposed)
+			{
+				this.Invoke((Action) delegate
+				{
+					StatusLabel.Text = "Status: Stopped";
+					SnapshotButton.Enabled = false;
+				});
+			}
 		}
 
 		private void ProfilerWindow_FormClosed(object sender, FormClosedEventArgs e)
