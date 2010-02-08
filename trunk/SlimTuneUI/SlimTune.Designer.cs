@@ -54,8 +54,7 @@ namespace SlimTuneUI
 			System.Windows.Forms.Label OpenLabel;
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SlimTune));
 			this.WindowList = new System.Windows.Forms.ListBox();
-			this.HideButton = new System.Windows.Forms.Button();
-			this.ShowButton = new System.Windows.Forms.Button();
+			this.ShowHideButton = new System.Windows.Forms.Button();
 			this.OpenFilePanel = new System.Windows.Forms.Panel();
 			this.CompareButton = new System.Windows.Forms.Button();
 			this.OpenButton = new System.Windows.Forms.Button();
@@ -115,29 +114,17 @@ namespace SlimTuneUI
 			this.WindowList.ValueMember = "Text";
 			this.WindowList.SelectedIndexChanged += new System.EventHandler(this.WindowList_SelectedIndexChanged);
 			// 
-			// HideButton
+			// ShowHideButton
 			// 
-			this.HideButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.HideButton.Enabled = false;
-			this.HideButton.Location = new System.Drawing.Point(569, 266);
-			this.HideButton.Name = "HideButton";
-			this.HideButton.Size = new System.Drawing.Size(75, 23);
-			this.HideButton.TabIndex = 3;
-			this.HideButton.Text = "Hide";
-			this.HideButton.UseVisualStyleBackColor = true;
-			this.HideButton.Click += new System.EventHandler(this.HideButton_Click);
-			// 
-			// ShowButton
-			// 
-			this.ShowButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.ShowButton.Enabled = false;
-			this.ShowButton.Location = new System.Drawing.Point(439, 266);
-			this.ShowButton.Name = "ShowButton";
-			this.ShowButton.Size = new System.Drawing.Size(75, 23);
-			this.ShowButton.TabIndex = 4;
-			this.ShowButton.Text = "Show";
-			this.ShowButton.UseVisualStyleBackColor = true;
-			this.ShowButton.Click += new System.EventHandler(this.ShowButton_Click);
+			this.ShowHideButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+			this.ShowHideButton.Enabled = false;
+			this.ShowHideButton.Location = new System.Drawing.Point(504, 266);
+			this.ShowHideButton.Name = "ShowHideButton";
+			this.ShowHideButton.Size = new System.Drawing.Size(75, 23);
+			this.ShowHideButton.TabIndex = 4;
+			this.ShowHideButton.Text = "Hide";
+			this.ShowHideButton.UseVisualStyleBackColor = true;
+			this.ShowHideButton.Click += new System.EventHandler(this.ShowHideButton_Click);
 			// 
 			// OpenFilePanel
 			// 
@@ -218,8 +205,7 @@ namespace SlimTuneUI
 			this.Controls.Add(this.panel2);
 			this.Controls.Add(this.panel1);
 			this.Controls.Add(this.OpenFilePanel);
-			this.Controls.Add(this.ShowButton);
-			this.Controls.Add(this.HideButton);
+			this.Controls.Add(this.ShowHideButton);
 			this.Controls.Add(this.WindowList);
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.Name = "SlimTune";
@@ -236,8 +222,7 @@ namespace SlimTuneUI
 		#endregion
 
 		private System.Windows.Forms.ListBox WindowList;
-		private System.Windows.Forms.Button HideButton;
-		private System.Windows.Forms.Button ShowButton;
+		private System.Windows.Forms.Button ShowHideButton;
 		private System.Windows.Forms.Panel OpenFilePanel;
 		private System.Windows.Forms.Panel panel1;
 		private System.Windows.Forms.Button RunButton;

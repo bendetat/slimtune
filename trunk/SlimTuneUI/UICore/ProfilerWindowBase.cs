@@ -39,6 +39,11 @@ namespace UICore
 			protected set;
 		}
 
+		public ProfilerWindowBase()
+		{
+			//Designer really wants this ctor to be here
+		}
+
 		public ProfilerWindowBase(Connection conn)
 		{
 			Visualizers = new List<IVisualizer>();

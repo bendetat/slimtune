@@ -113,30 +113,15 @@ namespace SlimTuneUI
 		{
 		}
 
-		private void ShowButton_Click(object sender, EventArgs e)
-		{
-			if(WindowList.SelectedItem == null)
-				return;
-
-			ProfilerWindow window = WindowList.SelectedItem as ProfilerWindow;
-			window.Show();
-			window.BringToFront();
-		}
-
-		private void HideButton_Click(object sender, EventArgs e)
-		{
-			if(WindowList.SelectedItem == null)
-				return;
-
-			ProfilerWindow window = WindowList.SelectedItem as ProfilerWindow;
-			window.Hide();
-		}
-
 		private void WindowList_SelectedIndexChanged(object sender, EventArgs e)
 		{
 			bool enable = WindowList.SelectedItem != null;
-			ShowButton.Enabled = enable;
-			HideButton.Enabled = enable;
+			ShowHideButton.Enabled = enable;
+			Form form = WindowList.SelectedItem as Form;
+			if(form.Visible)
+				ShowHideButton.Text = "Hide";
+			else
+				ShowHideButton.Text = "Show";
 		}
 
 		private void OpenButton_Click(object sender, EventArgs e)
@@ -203,6 +188,23 @@ namespace SlimTuneUI
 			if(extFilter.EndsWith(";"))
 				extFilter = extFilter.Remove(extFilter.Length - 1);
 			return extFilter;
+		}
+
+		private void ShowHideButton_Click(object sender, EventArgs e)
+		{
+			if(WindowList.SelectedItem == null)
+				return;
+			Form form = WindowList.SelectedItem as Form;
+			if(form.Visible)
+			{
+				form.Hide();
+				ShowHideButton.Text = "Show";
+			}
+			else
+			{
+				form.Show();
+				ShowHideButton.Text = "Hide";
+			}
 		}
 	}
 }

@@ -101,6 +101,16 @@ namespace UICore
 			Debug.WriteLine("Successfully connected.");
 		}
 
+		public void SuspendTarget()
+		{
+			m_writer.Write((byte) ClientRequest.CR_Suspend);
+		}
+
+		public void ResumeTarget()
+		{
+			m_writer.Write((byte) ClientRequest.CR_Resume);
+		}
+
 		public string Receive()
 		{
 			try

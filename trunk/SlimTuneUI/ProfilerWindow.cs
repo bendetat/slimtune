@@ -42,6 +42,43 @@ namespace SlimTuneUI
 			this.Text = Utilities.GetStandardCaption(conn);
 			m_mainWindow = mainWindow;
 			m_mainWindow.AddWindow(this);
+
+			string host = string.IsNullOrEmpty(conn.HostName) ? "(file)" : conn.HostName;
+			HostLabel.Text = "Host: " + host;
+			string port = conn.Port == 0 ? "(file)" : conn.Port.ToString();
+			PortLabel.Text = "Port: " + port;
+			EngineLabel.Text = "Engine: " + conn.StorageEngine.Engine;
+			NameLabel.Text = "Name: " + conn.StorageEngine.Name;
+
+			string status;
+			if(conn.Port == 0)
+				status = "Opened From File";
+			else if(conn.IsConnected)
+				status = "Running";
+			else
+				status = "Stopped";
+			StatusLabel.Text = "Status: " + status;
+
+			SnapshotButton.Enabled = conn.IsConnected;
+
+			Connection.Connected += new EventHandler(Connection_Connected);
+			Connection.Disconnected += new EventHandler(Connection_Disconnected);
+
+			foreach(var vis in Utilities.GetVisualizerList(true))
+			{
+				m_visualizerCombo.Items.Add(vis);
+			}
+			m_visualizerCombo.SelectedIndex = 0;
+		}
+
+		void Connection_Connected(object sender, EventArgs e)
+		{
+			this.Invoke((Action) delegate { StatusLabel.Text = "Status: Running"; });
+		}
+
+		void Connection_Disconnected(object sender, EventArgs e)
+		{
+			this.Invoke((Action) delegate { StatusLabel.Text = "Status: Stopped"; SnapshotButton.Enabled = false; });
 		}
 
 		private void ProfilerWindow_FormClosed(object sender, FormClosedEventArgs e)
@@ -79,5 +116,48 @@ namespace SlimTuneUI
 				}
 			}
 		}
+
+		private void m_openVisualizerButton_Click(object sender, EventArgs e)
+		{
+			TypeEntry visEntry = m_visualizerCombo.SelectedItem as TypeEntry;
+			if(visEntry != null && visEntry.Type != null)
+			{
+				IVisualizer visualizer = Activator.CreateInstance(visEntry.Type) as IVisualizer;
+				visualizer.Initialize(this, Connection);
+				visualizer.Show(VisualizerHost);
+			}
+		}
+
+		private void ClearDataButton_Click(object sender, EventArgs e)
+		{
+			DialogResult result = MessageBox.Show("WARNING: This will clear all collected data, and cannot be reversed. Continue?",
+				"Clear All Data", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2);
+			if(result == DialogResult.Yes)
+				Connection.StorageEngine.ClearData();
+		}
+
+		private void SnapshotButton_Click(object sender, EventArgs e)
+		{
+			if(!Connection.IsConnected)
+			{
+				MessageBox.Show("Target must be running in order to take a snapshot.", "Take Snapshot");
+				return;
+			}
+
+			Connection.StorageEngine.Snapshot("User snapshot");
+			MessageBox.Show("Snapshot saved", "Take Snapshot");
+		}
+
+		/*private void SuspendButton_Click(object sender, EventArgs e)
+		{
+			if(Connection.Client != null)
+				Connection.Client.SuspendTarget();
+		}
+
+		private void ResumeButton_Click(object sender, EventArgs e)
+		{
+			if(Connection.Client != null)
+				Connection.Client.ResumeTarget();
+		}*/
 	}
 }
