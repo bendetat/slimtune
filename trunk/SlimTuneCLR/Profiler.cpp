@@ -180,7 +180,12 @@ STDMETHODIMP ClrProfiler::Initialize(IUnknown *pICorProfilerInfoUnk)
 	m_counter.reset(new PerfCounter());
 	for(size_t i = 0; i < m_config.Counters.size(); ++i)
 	{
-		int id = m_counter->AddProcessCounter(m_config.Counters[i]);
+		int id = 0;
+		if(m_config.Counters[i][0] == L'@')
+			id = m_counter->AddCounterRaw(m_config.Counters[i].c_str() + 1);
+		else
+			id = m_counter->AddProcessCounter(m_config.Counters[i]);
+
 		SetCounterName(id, m_config.Counters[i]);
 	}
 	if(m_config.CounterInterval < 10)
