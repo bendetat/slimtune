@@ -60,6 +60,10 @@ struct ProfilerConfig
 	unsigned int SampleInterval;
 	bool SampleUnmanaged;
 
+	//Perf counter properties
+	unsigned int CounterInterval;
+	std::vector<std::wstring> Counters;
+
 	ProfilerConfig();
 	bool LoadEnv();
 };

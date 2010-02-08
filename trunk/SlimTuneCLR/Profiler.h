@@ -43,6 +43,7 @@
 #include "IdRemapper.h"
 #include "Messages.h"
 #include "Config.h"
+#include "PerfCounter.h"
 #include "lockfree_list.h"
 
 #if defined(_WIN32_WCE) && !defined(_CE_DCOM) && !defined(_CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA)
@@ -169,14 +170,20 @@ private:
 	CounterMap m_counters;
 
 	HANDLE m_sampleTimer;
+	HANDLE m_counterTimer;
+
+	boost::scoped_ptr<PerfCounter> m_counter;
 
 	void OnConnect();
 	void OnDisconnect();
 
-	static void CALLBACK OnTimerGlobal(LPVOID lpParameter, BOOLEAN TimerOrWaitFired);
-	void OnTimer();
+	static void CALLBACK OnSampleTimerGlobal(LPVOID lpParameter, BOOLEAN TimerOrWaitFired);
+	void OnSampleTimer();
 	void StartSampleTimer(DWORD duration);
 	void StopSampleTimer();
+
+	static void CALLBACK OnCounterTimerGlobal(LPVOID lpParameter, BOOLEAN TimerOrWaitFired);
+	void OnCounterTimer();
 
 	struct WalkData
 	{

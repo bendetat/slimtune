@@ -38,6 +38,8 @@ ProfilerConfig::ProfilerConfig()
 	SampleInterval = 3;
 	SampleUnmanaged = false;
 
+	CounterInterval = 1000;
+
 	Version.dwOSVersionInfoSize = sizeof(Version);
 	GetVersionEx(&Version);
 }
@@ -88,10 +90,13 @@ void ParseVar(ProfilerConfig& config, wchar_t* var)
 		ParseRef(valueStr, config.SampleInterval);
 	else if(_wcsicmp(var, L"sampleunmanaged") == 0)
 		ParseRef(valueStr, config.SampleUnmanaged);
+	else if(_wcsicmp(var, L"counterinterval") == 0)
+		ParseRef(valueStr, config.CounterInterval);
 }
 
 bool ProfilerConfig::LoadEnv()
 {
+	//load config variables
 	const int kBufferSize = 2048;
 	wchar_t buffer[kBufferSize];
 	size_t length = 0;
@@ -109,6 +114,24 @@ bool ProfilerConfig::LoadEnv()
 		
 		*endVar = 0;
 		ParseVar(*this, beginVar);
+		beginVar = endVar + 1;
+	}
+
+	//load counters
+	length = GetEnvironmentVariable(L"SLIMTUNE_COUNTERS", buffer, kBufferSize);
+	if(length == 0 || length > kBufferSize)
+		return true;
+
+	beginVar = buffer;
+	endVar = NULL;
+	while(*beginVar)
+	{
+		endVar = wcsstr(beginVar, L";");
+		if(endVar == NULL)
+			break;
+
+		*endVar = 0;
+		Counters.push_back(beginVar);
 		beginVar = endVar + 1;
 	}
 

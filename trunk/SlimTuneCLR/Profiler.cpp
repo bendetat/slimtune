@@ -176,6 +176,18 @@ STDMETHODIMP ClrProfiler::Initialize(IUnknown *pICorProfilerInfoUnk)
 	//initialize timing (and use cycle timing if enabled and on Vista+)
 	InitializeTimer(/*m_config.CycleTiming && m_config.Version.dwMajorVersion >= 6*/ false);
 
+	//initialize counters
+	m_counter.reset(new PerfCounter());
+	for(size_t i = 0; i < m_config.Counters.size(); ++i)
+	{
+		int id = m_counter->AddProcessCounter(m_config.Counters[i]);
+		SetCounterName(id, m_config.Counters[i]);
+	}
+	if(m_config.CounterInterval < 10)
+		m_config.CounterInterval = 10;
+	CreateTimerQueueTimer(&m_counterTimer, NULL, &ClrProfiler::OnCounterTimerGlobal, this,
+		m_config.CounterInterval, m_config.CounterInterval, WT_EXECUTEDEFAULT);
+
 	// set up our global access pointer
 	g_Profiler = this;
 
@@ -755,23 +767,6 @@ bool ClrProfiler::ResumeTarget()
 	return true;
 }
 
-void ClrProfiler::StartSampleTimer(DWORD duration)
-{
-	if(duration == 0)
-		duration = m_config.SampleInterval;
-
-	CreateTimerQueueTimer(&m_sampleTimer, NULL, &ClrProfiler::OnTimerGlobal, this, duration, 0, WT_EXECUTEDEFAULT);
-}
-
-void ClrProfiler::StopSampleTimer()
-{
-	BOOL result = DeleteTimerQueueTimer(NULL, m_sampleTimer, INVALID_HANDLE_VALUE);
-	if(!result)
-	{
-		//wait a little while just in case the timer is currently running
-		Sleep(100);
-	}
-}
 
 void ClrProfiler::Enter(FunctionID functionID, UINT_PTR clientData, COR_PRF_FRAME_INFO frameInfo, COR_PRF_FUNCTION_ARGUMENT_INFO *argumentInfo)
 {
@@ -906,25 +901,43 @@ void ClrProfiler::Tailcall(FunctionID functionID, UINT_PTR clientData, COR_PRF_F
 	LeaveImpl(functionID, reinterpret_cast<FunctionInfo*>(clientData), MID_TailCall);
 }
 
-void ClrProfiler::OnTimerGlobal(LPVOID lpParameter, BOOLEAN TimerOrWaitFired)
-{
-	ClrProfiler* profiler = static_cast<ClrProfiler*>(lpParameter);
-	profiler->OnTimer();
-}
-
 HRESULT ClrProfiler::StackWalkGlobal(FunctionID funcId, UINT_PTR ip, COR_PRF_FRAME_INFO frameInfo, ULONG32 contextSize, BYTE contextBytes[], void *clientData)
 {
 	if(funcId == 0)
 		return S_OK;
 
 	WalkData* data = static_cast<WalkData*>(clientData);
-	CONTEXT* context = reinterpret_cast<CONTEXT*>(contextBytes);
+	//CONTEXT* context = reinterpret_cast<CONTEXT*>(contextBytes);
 	FunctionInfo* info = reinterpret_cast<FunctionInfo*>(data->profiler->MapFunction(funcId, true));
 	data->functions->push_back(info->Id);
 	return S_OK;
 }
 
-void ClrProfiler::OnTimer()
+void ClrProfiler::OnSampleTimerGlobal(LPVOID lpParameter, BOOLEAN TimerOrWaitFired)
+{
+	ClrProfiler* profiler = static_cast<ClrProfiler*>(lpParameter);
+	profiler->OnSampleTimer();
+}
+
+void ClrProfiler::StartSampleTimer(DWORD duration)
+{
+	if(duration == 0)
+		duration = m_config.SampleInterval;
+
+	CreateTimerQueueTimer(&m_sampleTimer, NULL, &ClrProfiler::OnSampleTimerGlobal, this, duration, 0, WT_EXECUTEDEFAULT);
+}
+
+void ClrProfiler::StopSampleTimer()
+{
+	BOOL result = DeleteTimerQueueTimer(NULL, m_sampleTimer, INVALID_HANDLE_VALUE);
+	if(!result)
+	{
+		//wait a little while just in case the timer is currently running
+		Sleep(100);
+	}
+}
+
+void ClrProfiler::OnSampleTimer()
 {
 	EnterLock localLock(&m_lock);
 
@@ -1093,6 +1106,23 @@ void ClrProfiler::OnTimer()
 	ResumeTarget();
 	if(m_active)
 		StartSampleTimer(0);
+}
+
+void ClrProfiler::OnCounterTimerGlobal(LPVOID lpParameter, BOOLEAN TimerOrWaitFired)
+{
+	ClrProfiler* profiler = static_cast<ClrProfiler*>(lpParameter);
+	profiler->OnCounterTimer();
+}
+
+void ClrProfiler::OnCounterTimer()
+{
+	m_counter->Update();
+	for(size_t i = 1; i <= m_counter->GetCounterCount(); ++i)
+	{
+		double value = m_counter->GetDouble(i);
+		__int64 fixedValue = static_cast<__int64>(value * 1000);
+		WritePerfCounter(i, fixedValue);
+	}
 }
 
 HRESULT ClrProfiler::ObjectAllocated(ObjectID objectId, ClassID classId)

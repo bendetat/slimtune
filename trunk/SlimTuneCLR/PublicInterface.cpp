@@ -42,13 +42,20 @@ void SetInstrument(unsigned int id, int enable)
 	g_Profiler->SetInstrument(id, enable != 0);
 }
 
+//CounterId less than 32 is reserved for internal use
 void SetCounterName(unsigned int counterId, const wchar_t* name)
 {
+	if(counterId < 32)
+		return;
+
 	g_Profiler->SetCounterName(counterId, name);
 }
 
 void WritePerfCounter(unsigned int counterId, __int64 value)
 {
+	if(counterId < 32)
+		return;
+
 	g_Profiler->WritePerfCounter(counterId, value);
 }
 

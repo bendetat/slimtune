@@ -84,7 +84,7 @@
 				RegisterOutput="true"
 				PerUserRedirection="true"
 				IgnoreImportLibrary="true"
-				AdditionalDependencies="corguids.lib winmm.lib"
+				AdditionalDependencies="corguids.lib winmm.lib dbghelp.lib pdh.lib"
 				Version="0.2.0.0"
 				LinkIncremental="2"
 				ModuleDefinitionFile=".\SlimTune.def"
@@ -181,7 +181,7 @@
 				Name="VCLinkerTool"
 				RegisterOutput="true"
 				IgnoreImportLibrary="true"
-				AdditionalDependencies="corguids.lib winmm.lib dbghelp.lib"
+				AdditionalDependencies="corguids.lib winmm.lib dbghelp.lib pdh.lib"
 				Version="0.2.0.0"
 				LinkIncremental="2"
 				ModuleDefinitionFile=".\SlimTune.def"
@@ -279,7 +279,7 @@
 				Name="VCLinkerTool"
 				RegisterOutput="true"
 				IgnoreImportLibrary="true"
-				AdditionalDependencies="corguids.lib winmm.lib"
+				AdditionalDependencies="corguids.lib winmm.lib dbghelp.lib pdh.lib"
 				Version="0.2.0.0"
 				LinkIncremental="1"
 				ModuleDefinitionFile=".\SlimTune.def"
@@ -379,7 +379,7 @@
 				Name="VCLinkerTool"
 				RegisterOutput="true"
 				IgnoreImportLibrary="true"
-				AdditionalDependencies="corguids.lib winmm.lib dbghelp.lib"
+				AdditionalDependencies="corguids.lib winmm.lib dbghelp.lib pdh.lib"
 				Version="0.2.0.0"
 				LinkIncremental="1"
 				ModuleDefinitionFile=".\SlimTune.def"
@@ -458,6 +458,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PerfCounter.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Profiler.cpp"
 				>
 			</File>
@@ -521,6 +525,10 @@
 			</File>
 			<File
 				RelativePath=".\NativeHooks.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PerfCounter.h"
 				>
 			</File>
 			<File

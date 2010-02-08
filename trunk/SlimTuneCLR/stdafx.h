@@ -80,6 +80,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/pool/pool_alloc.hpp>
 #include <boost/preprocessor/stringize.hpp>
+#include <boost/format.hpp>
 #pragma warning(pop)
 
 #include <stdexcept>

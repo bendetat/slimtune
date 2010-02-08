@@ -88,12 +88,37 @@ namespace SlimTuneUI
 			get { return m_samplingInterval; }
 			set
 			{
-				if(m_samplingInterval < 1)
+				if(value < 1)
 					throw new ArgumentOutOfRangeException("SamplingInterval", value, "Sampling interval must be at least 1ms.");
 				m_samplingInterval = value;
 			}
 		}
 
+		[Category("Profiling"),
+		DisplayName("Performance counters"),
+		Description("The system performance counters to track during profiling.")]
+		public string PerformanceCounters
+		{
+			get;
+			set;
+		}
+
+		private int m_counterInterval = 1000;
+		[Category("Profiling"),
+		DisplayName("Counter interval"),
+		Description("The interval to collect performance counter data at, in milliseconds.")]
+		public int CounterInterval
+		{
+			get { return m_counterInterval; }
+			set
+			{
+				if(value < 10)
+					throw new ArgumentOutOfRangeException("CounterInterval", value, "Counter interval must be at least 10ms.");
+				m_counterInterval = value;
+			}
+		}
+
+		[Browsable(false)]
 		public abstract bool RequiresAdmin
 		{
 			get;

@@ -11,18 +11,6 @@ using ZedGraph;
 
 namespace SlimTuneUI.CoreVis
 {
-	class CounterEntry
-	{
-		public int Id { get; set; }
-		public string Name { get; set; }
-
-		public CounterEntry(int id, string name)
-		{
-			Id = id;
-			Name = name;
-		}
-	}
-
 	[DisplayName("Performance Counters")]
 	public partial class CounterGraph : UserControl, IVisualizer
 	{
@@ -121,6 +109,18 @@ ORDER BY Time
 			Graph.GraphPane.Title.Text = entry.Name;
 			Graph.AxisChange();
 			Graph.Refresh();
+		}
+	}
+
+	class CounterEntry
+	{
+		public int Id { get; set; }
+		public string Name { get; set; }
+
+		public CounterEntry(int id, string name)
+		{
+			Id = id;
+			Name = name;
 		}
 	}
 }

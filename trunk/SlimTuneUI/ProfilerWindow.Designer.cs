@@ -55,6 +55,8 @@ namespace SlimTuneUI
 			this.m_visualizerCombo = new System.Windows.Forms.ComboBox();
 			this.MainSplitter = new System.Windows.Forms.SplitContainer();
 			this.TasksGroupBox = new System.Windows.Forms.GroupBox();
+			this.ClearDataButton = new System.Windows.Forms.Button();
+			this.SnapshotButton = new System.Windows.Forms.Button();
 			this.TasksLabel = new System.Windows.Forms.Label();
 			this.InfoGroupBox = new System.Windows.Forms.GroupBox();
 			this.StatusLabel = new System.Windows.Forms.Label();
@@ -63,8 +65,6 @@ namespace SlimTuneUI
 			this.PortLabel = new System.Windows.Forms.Label();
 			this.HostLabel = new System.Windows.Forms.Label();
 			this.VisualizerHost = new System.Windows.Forms.TabControl();
-			this.SnapshotButton = new System.Windows.Forms.Button();
-			this.ClearDataButton = new System.Windows.Forms.Button();
 			VisualizersGroupBox = new System.Windows.Forms.GroupBox();
 			VisualizersGroupBox.SuspendLayout();
 			this.MainSplitter.Panel1.SuspendLayout();
@@ -141,6 +141,8 @@ namespace SlimTuneUI
 			// 
 			// TasksGroupBox
 			// 
+			this.TasksGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+						| System.Windows.Forms.AnchorStyles.Right)));
 			this.TasksGroupBox.Controls.Add(this.ClearDataButton);
 			this.TasksGroupBox.Controls.Add(this.SnapshotButton);
 			this.TasksGroupBox.Controls.Add(this.TasksLabel);
@@ -149,6 +151,26 @@ namespace SlimTuneUI
 			this.TasksGroupBox.Size = new System.Drawing.Size(194, 122);
 			this.TasksGroupBox.TabIndex = 6;
 			this.TasksGroupBox.TabStop = false;
+			// 
+			// ClearDataButton
+			// 
+			this.ClearDataButton.Location = new System.Drawing.Point(92, 38);
+			this.ClearDataButton.Name = "ClearDataButton";
+			this.ClearDataButton.Size = new System.Drawing.Size(75, 23);
+			this.ClearDataButton.TabIndex = 2;
+			this.ClearDataButton.Text = "Clear Data";
+			this.ClearDataButton.UseVisualStyleBackColor = true;
+			this.ClearDataButton.Click += new System.EventHandler(this.ClearDataButton_Click);
+			// 
+			// SnapshotButton
+			// 
+			this.SnapshotButton.Location = new System.Drawing.Point(10, 38);
+			this.SnapshotButton.Name = "SnapshotButton";
+			this.SnapshotButton.Size = new System.Drawing.Size(75, 23);
+			this.SnapshotButton.TabIndex = 1;
+			this.SnapshotButton.Text = "Snapshot";
+			this.SnapshotButton.UseVisualStyleBackColor = true;
+			this.SnapshotButton.Click += new System.EventHandler(this.SnapshotButton_Click);
 			// 
 			// TasksLabel
 			// 
@@ -233,26 +255,6 @@ namespace SlimTuneUI
 			this.VisualizerHost.SelectedIndex = 0;
 			this.VisualizerHost.Size = new System.Drawing.Size(595, 507);
 			this.VisualizerHost.TabIndex = 1;
-			// 
-			// SnapshotButton
-			// 
-			this.SnapshotButton.Location = new System.Drawing.Point(10, 38);
-			this.SnapshotButton.Name = "SnapshotButton";
-			this.SnapshotButton.Size = new System.Drawing.Size(75, 23);
-			this.SnapshotButton.TabIndex = 1;
-			this.SnapshotButton.Text = "Snapshot";
-			this.SnapshotButton.UseVisualStyleBackColor = true;
-			this.SnapshotButton.Click += new System.EventHandler(this.SnapshotButton_Click);
-			// 
-			// ClearDataButton
-			// 
-			this.ClearDataButton.Location = new System.Drawing.Point(92, 38);
-			this.ClearDataButton.Name = "ClearDataButton";
-			this.ClearDataButton.Size = new System.Drawing.Size(75, 23);
-			this.ClearDataButton.TabIndex = 2;
-			this.ClearDataButton.Text = "Clear Data";
-			this.ClearDataButton.UseVisualStyleBackColor = true;
-			this.ClearDataButton.Click += new System.EventHandler(this.ClearDataButton_Click);
 			// 
 			// ProfilerWindow
 			// 

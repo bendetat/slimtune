@@ -67,6 +67,7 @@ namespace SlimTuneUI
 		{
 			ListenPort = 3000;
 			SamplingInterval = 5;
+			PerformanceCounters = "% Processor Time;";
 		}
 
 		public override bool CheckParams()
@@ -88,9 +89,9 @@ namespace SlimTuneUI
 
 		public override bool Launch()
 		{
-			string config = LauncherCommon.CreateConfigString(ProfilingMode, ListenPort, WaitForConnection, IncludeNative, SamplingInterval);
+			string config = LauncherCommon.CreateConfigString(ProfilingMode, ListenPort, WaitForConnection, IncludeNative, SamplingInterval, CounterInterval);
 			var psi = new ProcessStartInfo(Executable, Arguments);
-			LauncherCommon.SetProcessOptions(psi, config);
+			LauncherCommon.SetProcessOptions(psi, config, PerformanceCounters);
 			psi.WorkingDirectory = string.IsNullOrEmpty(WorkingDir) ?
 				Path.GetDirectoryName(Executable) : WorkingDir;
 

@@ -78,7 +78,7 @@ namespace UICore
 				IntPtr lpEnvironment);
 
 		public static string CreateConfigString(ProfilerMode profilingMode, int listenPort, bool waitForConnection, bool includeNative,
-			int samplingInterval)
+			int samplingInterval, int counterInterval)
 		{
 			string config = string.Empty;
 			config += string.Format("Mode={0};", (int) profilingMode);
@@ -86,10 +86,11 @@ namespace UICore
 			config += string.Format("Wait={0};", waitForConnection ? 1 : 0);
 			config += string.Format("SampleUnmanaged={0};", includeNative ? 1 : 0);
 			config += string.Format("SampleInterval={0};", samplingInterval);
+			config += string.Format("CounterInterval={0};", counterInterval);
 			return config;
 		}
 
-		public static void SetProcessOptions(ProcessStartInfo psi, string config)
+		public static void SetProcessOptions(ProcessStartInfo psi, string config, string counters)
 		{
 			psi.RedirectStandardOutput = false;
 			psi.RedirectStandardError = false;
@@ -99,15 +100,17 @@ namespace UICore
 			psi.EnvironmentVariables["COR_ENABLE_PROFILING"] = "1";
 			psi.EnvironmentVariables["COR_PROFILER"] = ClrProfilerGuid;
 			psi.EnvironmentVariables["SLIMTUNE_CONFIG"] = config;
+			psi.EnvironmentVariables["SLIMTUNE_COUNTERS"] = counters;
 		}
 
-		public static string[] CreateProfilerEnvironment(string config)
+		public static string[] CreateProfilerEnvironment(string config, string counters)
 		{
 			return new string[]
 			{
 				"COR_ENABLE_PROFILING=1",
 				"COR_PROFILER=" + ClrProfilerGuid,
 				"SLIMTUNE_CONFIG=" + config,
+				"SLIMTUNE_COUNTERS=" + counters,
 			};
 		}
 
