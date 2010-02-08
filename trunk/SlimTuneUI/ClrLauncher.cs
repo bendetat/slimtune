@@ -67,7 +67,9 @@ namespace SlimTuneUI
 		{
 			ListenPort = 3000;
 			SamplingInterval = 5;
-			PerformanceCounters = "% Processor Time;";
+			PerformanceCounters.Add(@"Process\% Processor Time");
+			PerformanceCounters.Add(@"Process\Private Bytes");
+			PerformanceCounters.Add(@".NET CLR Memory\# GC Handles");
 		}
 
 		public override bool CheckParams()
@@ -91,7 +93,7 @@ namespace SlimTuneUI
 		{
 			string config = LauncherCommon.CreateConfigString(ProfilingMode, ListenPort, WaitForConnection, IncludeNative, SamplingInterval, CounterInterval);
 			var psi = new ProcessStartInfo(Executable, Arguments);
-			LauncherCommon.SetProcessOptions(psi, config, PerformanceCounters);
+			LauncherCommon.SetProcessOptions(psi, config, LauncherCommon.GetCounterString(PerformanceCounters));
 			psi.WorkingDirectory = string.IsNullOrEmpty(WorkingDir) ?
 				Path.GetDirectoryName(Executable) : WorkingDir;
 

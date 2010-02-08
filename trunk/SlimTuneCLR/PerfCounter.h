@@ -9,14 +9,16 @@ class PerfCounter
 public:
 	PerfCounter();
 
-	unsigned int AddCounterRaw(std::wstring counterPath);
-	unsigned int AddProcessCounter(std::wstring counterName);
+	unsigned int AddCounterRaw(const std::wstring& counterPath);
+	unsigned int AddInstanceCounter(const std::wstring& objectName, const std::wstring& counterName);
+	unsigned int AddProcessCounter(const std::wstring& counterName) { return AddInstanceCounter(L"Process", counterName); }
 
 	void Update();
 
 	size_t GetCounterCount() { return m_counters.size(); }
 	__int64 GetRawValue(int id);
 	double GetDouble(int id);
+	__int64 GetLong(int id);
 
 private:
 	PDH_HQUERY m_query;

@@ -94,6 +94,28 @@ void ParseVar(ProfilerConfig& config, wchar_t* var)
 		ParseRef(valueStr, config.CounterInterval);
 }
 
+void ParseCounter(ProfilerConfig& config, wchar_t* counter)
+{
+	if(counter[0] == L'@')
+	{
+		config.Counters.push_back(std::make_pair(std::wstring(L""), std::wstring(counter)));
+	}
+	else
+	{
+		const wchar_t* split = wcsstr(counter, L"\\");
+		if(split)
+		{
+			std::wstring object(counter, split - counter);
+			std::wstring counter(split + 1);
+			config.Counters.push_back(std::make_pair(object, counter));
+		}
+		else
+		{
+			config.Counters.push_back(std::make_pair(std::wstring(L"Process"), std::wstring(counter)));
+		}
+	}
+}
+
 bool ProfilerConfig::LoadEnv()
 {
 	//load config variables
@@ -131,7 +153,7 @@ bool ProfilerConfig::LoadEnv()
 			break;
 
 		*endVar = 0;
-		Counters.push_back(beginVar);
+		ParseCounter(*this, beginVar);
 		beginVar = endVar + 1;
 	}
 

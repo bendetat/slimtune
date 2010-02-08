@@ -319,5 +319,10 @@ namespace UICore
 			}
 			return isAdmin;
 		}
+
+		public static string GetCounterString(List<string> counters)
+		{
+			return string.Join(";", counters.ToArray()) + ";";
+		}
 	}
 }

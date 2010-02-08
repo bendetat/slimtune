@@ -62,7 +62,7 @@ struct ProfilerConfig
 
 	//Perf counter properties
 	unsigned int CounterInterval;
-	std::vector<std::wstring> Counters;
+	std::vector<std::pair<std::wstring, std::wstring> > Counters;
 
 	ProfilerConfig();
 	bool LoadEnv();

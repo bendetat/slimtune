@@ -57,7 +57,7 @@ PerfCounter::PerfCounter()
 	}
 }
 
-unsigned int PerfCounter::AddCounterRaw(std::wstring counterPath)
+unsigned int PerfCounter::AddCounterRaw(const std::wstring& counterPath)
 {
 	PDH_HCOUNTER counter;
 	PdhAddCounter(m_query, counterPath.c_str(), NULL, &counter);
@@ -65,10 +65,10 @@ unsigned int PerfCounter::AddCounterRaw(std::wstring counterPath)
 	return m_counters.size();
 }
 
-unsigned int PerfCounter::AddProcessCounter(std::wstring counterName)
+unsigned int PerfCounter::AddInstanceCounter(const std::wstring& objectName, const std::wstring& counterName)
 {
 	PDH_HCOUNTER counter;
-	std::wstring fullCounterName = (boost::wformat(L"\\Process(%1%)\\%2%") % m_instName % counterName).str();
+	std::wstring fullCounterName = (boost::wformat(L"\\%1%(%2%)\\%3%") % objectName % m_instName % counterName).str();
 	PdhAddCounter(m_query, fullCounterName.c_str(), NULL, &counter);
 	m_counters.push_back(counter);
 	return m_counters.size();
@@ -97,4 +97,14 @@ double PerfCounter::GetDouble(int id)
 	PDH_FMT_COUNTERVALUE value;
 	PdhGetFormattedCounterValue(m_counters[id - 1], PDH_FMT_DOUBLE, NULL, &value);
 	return value.doubleValue;
+}
+
+__int64 PerfCounter::GetLong(int id)
+{
+	if(id == 0)
+		return 0;
+
+	PDH_FMT_COUNTERVALUE value;
+	PdhGetFormattedCounterValue(m_counters[id - 1], PDH_FMT_LARGE, NULL, &value);
+	return value.longValue;
 }

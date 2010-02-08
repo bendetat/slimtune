@@ -181,12 +181,14 @@ STDMETHODIMP ClrProfiler::Initialize(IUnknown *pICorProfilerInfoUnk)
 	for(size_t i = 0; i < m_config.Counters.size(); ++i)
 	{
 		int id = 0;
-		if(m_config.Counters[i][0] == L'@')
-			id = m_counter->AddCounterRaw(m_config.Counters[i].c_str() + 1);
+		std::wstring& objectName = m_config.Counters[i].first;
+		std::wstring& counterName = m_config.Counters[i].second;
+		if(objectName.size() == 0)
+			id = m_counter->AddCounterRaw(counterName);
 		else
-			id = m_counter->AddProcessCounter(m_config.Counters[i]);
+			id = m_counter->AddInstanceCounter(objectName, counterName);
 
-		SetCounterName(id, m_config.Counters[i]);
+		SetCounterName(id, (boost::wformat(L"%1%: %2%") % objectName % counterName).str());
 	}
 	if(m_config.CounterInterval < 10)
 		m_config.CounterInterval = 10;
@@ -1113,23 +1115,6 @@ void ClrProfiler::OnSampleTimer()
 		StartSampleTimer(0);
 }
 
-void ClrProfiler::OnCounterTimerGlobal(LPVOID lpParameter, BOOLEAN TimerOrWaitFired)
-{
-	ClrProfiler* profiler = static_cast<ClrProfiler*>(lpParameter);
-	profiler->OnCounterTimer();
-}
-
-void ClrProfiler::OnCounterTimer()
-{
-	m_counter->Update();
-	for(size_t i = 1; i <= m_counter->GetCounterCount(); ++i)
-	{
-		double value = m_counter->GetDouble(i);
-		__int64 fixedValue = static_cast<__int64>(value * 1000);
-		WritePerfCounter(i, fixedValue);
-	}
-}
-
 HRESULT ClrProfiler::ObjectAllocated(ObjectID objectId, ClassID classId)
 {
 	if(!m_server->Connected())
@@ -1332,4 +1317,21 @@ void ClrProfiler::WritePerfCounter(unsigned int counterId, __int64 value)
 	InterlockedIncrement(&m_instDepth);
 	counter.Write(*m_server);
 	InterlockedDecrement(&m_instDepth);
+}
+
+void ClrProfiler::OnCounterTimerGlobal(LPVOID lpParameter, BOOLEAN TimerOrWaitFired)
+{
+	ClrProfiler* profiler = static_cast<ClrProfiler*>(lpParameter);
+	profiler->OnCounterTimer();
+}
+
+void ClrProfiler::OnCounterTimer()
+{
+	m_counter->Update();
+	for(size_t i = 1; i <= m_counter->GetCounterCount(); ++i)
+	{
+		double value = m_counter->GetDouble(i);
+		__int64 fixedValue = static_cast<__int64>(value * 1000);
+		WritePerfCounter(i, fixedValue);
+	}
 }

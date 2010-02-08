@@ -20,8 +20,11 @@
 * THE SOFTWARE.
 */
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing.Design;
 using System.Windows.Forms;
+using System.Windows.Forms.Design;
 
 using UICore;
 
@@ -94,10 +97,12 @@ namespace SlimTuneUI
 			}
 		}
 
-		[Category("Profiling"),
+		[Editor("System.Windows.Forms.Design.StringCollectionEditor, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a",
+		typeof(UITypeEditor)),
+		Category("Profiling"),
 		DisplayName("Performance counters"),
 		Description("The system performance counters to track during profiling.")]
-		public string PerformanceCounters
+		public List<string> PerformanceCounters
 		{
 			get;
 			set;
@@ -122,6 +127,11 @@ namespace SlimTuneUI
 		public abstract bool RequiresAdmin
 		{
 			get;
+		}
+
+		public ClrLauncherBase()
+		{
+			PerformanceCounters = new List<string>();
 		}
 
 		public virtual bool CheckParams()
