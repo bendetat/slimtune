@@ -190,8 +190,8 @@ STDMETHODIMP ClrProfiler::Initialize(IUnknown *pICorProfilerInfoUnk)
 
 		SetCounterName(id, (boost::wformat(L"%1%: %2%") % objectName % counterName).str());
 	}
-	if(m_config.CounterInterval < 10)
-		m_config.CounterInterval = 10;
+	if(m_config.CounterInterval < 50)
+		m_config.CounterInterval = 50;
 	CreateTimerQueueTimer(&m_counterTimer, NULL, &ClrProfiler::OnCounterTimerGlobal, this,
 		m_config.CounterInterval, m_config.CounterInterval, WT_EXECUTEDEFAULT);
 

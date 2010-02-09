@@ -123,6 +123,7 @@ namespace SlimTuneUI
 			// MainSplitter
 			// 
 			this.MainSplitter.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.MainSplitter.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
 			this.MainSplitter.Location = new System.Drawing.Point(0, 0);
 			this.MainSplitter.Name = "MainSplitter";
 			// 
@@ -135,7 +136,7 @@ namespace SlimTuneUI
 			// MainSplitter.Panel2
 			// 
 			this.MainSplitter.Panel2.Controls.Add(this.VisualizerHost);
-			this.MainSplitter.Size = new System.Drawing.Size(799, 507);
+			this.MainSplitter.Size = new System.Drawing.Size(968, 501);
 			this.MainSplitter.SplitterDistance = 200;
 			this.MainSplitter.TabIndex = 1;
 			// 
@@ -253,14 +254,14 @@ namespace SlimTuneUI
 			this.VisualizerHost.Location = new System.Drawing.Point(0, 0);
 			this.VisualizerHost.Name = "VisualizerHost";
 			this.VisualizerHost.SelectedIndex = 0;
-			this.VisualizerHost.Size = new System.Drawing.Size(595, 507);
+			this.VisualizerHost.Size = new System.Drawing.Size(764, 501);
 			this.VisualizerHost.TabIndex = 1;
 			// 
 			// ProfilerWindow
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(799, 507);
+			this.ClientSize = new System.Drawing.Size(968, 501);
 			this.Controls.Add(this.MainSplitter);
 			this.Name = "ProfilerWindow";
 			this.Text = "ProfilerWindow";

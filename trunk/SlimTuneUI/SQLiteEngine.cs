@@ -295,6 +295,8 @@ namespace SlimTuneUI
 		{
 			QueryScalar("UPDATE Callers SET HitCount = 0");
 			QueryScalar("UPDATE Samples SET HitCount = 0");
+			QueryScalar("DELETE FROM CounterValues");
+			QueryScalar("DELETE FROM Counters");
 		}
 
 		private void CreateSchema()

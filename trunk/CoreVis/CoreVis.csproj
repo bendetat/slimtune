@@ -50,6 +50,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ColorRotator.cs" />
     <Compile Include="CounterGraph.cs">
       <SubType>UserControl</SubType>
     </Compile>

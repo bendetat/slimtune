@@ -15,7 +15,9 @@ namespace SlimTuneUI.CoreVis
 	public partial class CounterGraph : UserControl, IVisualizer
 	{
 		const string kCountersQuery = @"
-SELECT * FROM Counters
+SELECT *
+FROM Counters
+ORDER BY Id
 ";
 
 		const string kValuesQuery = @"
@@ -27,6 +29,8 @@ ORDER BY Time
 
 		ProfilerWindowBase m_mainWindow;
 		Connection m_connection;
+		ColorRotator m_colors = new ColorRotator();
+		bool m_redrawGraph = true;
 
 		public CounterGraph()
 		{
@@ -45,7 +49,7 @@ ORDER BY Time
 
 			mainWindow.Visualizers.Add(this);
 
-			Graph.GraphPane.Title.Text = "Counter";
+			Graph.GraphPane.Title.Text = "Performance Counters";
 			Graph.GraphPane.XAxis.Title.Text = "Time";
 			Graph.GraphPane.YAxis.Title.Text = "Value";
 
@@ -63,7 +67,12 @@ ORDER BY Time
 
 		private void UpdateCounters()
 		{
-			CounterCombo.Items.Clear();
+			for(int i = 0; i < m_counterListBox.Items.Count; ++i)
+			{
+				var entry = m_counterListBox.Items[i] as CounterEntry;
+				entry.Tagged = false;
+			}
+
 			using(var transact = new TransactionHandle(m_connection.StorageEngine))
 			{
 				var data = m_connection.StorageEngine.Query(kCountersQuery);
@@ -74,41 +83,90 @@ ORDER BY Time
 					if(string.IsNullOrEmpty(name))
 						name = string.Format("Counter #{0}", id);
 
-					CounterCombo.Items.Add(new CounterEntry(id, name));
+					var newEntry = new CounterEntry(id, name);
+					int existingEntryIndex = m_counterListBox.Items.IndexOf(newEntry);
+					if(existingEntryIndex >= 0)
+					{
+						var existingEntry = m_counterListBox.Items[existingEntryIndex] as CounterEntry;
+						existingEntry.Name = name;
+						existingEntry.Tagged = true;
+					}
+					else
+					{
+						m_counterListBox.Items.Add(new CounterEntry(id, name));
+					}
 				}
 			}
-			if(CounterCombo.Items.Count > 0)
-				CounterCombo.SelectedIndex = 0;
-		}
 
-		private void RefreshButton_Click(object sender, EventArgs e)
-		{
-			UpdateCounters();
-		}
-
-		private void CounterCombo_SelectedIndexChanged(object sender, EventArgs e)
-		{
-			if(CounterCombo.SelectedItem == null)
-				return;
-
-			var entry = CounterCombo.SelectedItem as CounterEntry;
-			var points = new PointPairList();
-			using(var transact = new TransactionHandle(m_connection.StorageEngine))
+			int index = 0;
+			while(index < m_counterListBox.Items.Count)
 			{
-				var data = m_connection.StorageEngine.Query(string.Format(kValuesQuery, entry.Id));
-				foreach(DataRow row in data.Tables[0].Rows)
+				var entry = m_counterListBox.Items[index] as CounterEntry;
+				if(!entry.Tagged)
 				{
-					long time = Convert.ToInt64(row["Time"]);
-					long value = Convert.ToInt64(row["Value"]);
-					points.Add(time / 1000.0, value / 1000.0);
+					//this is a stale entry, so remove it
+					m_counterListBox.Items.RemoveAt(index);
+				}
+				else
+				{
+					//it's fine, keep going
+					++index;
 				}
 			}
+		}
 
-			Graph.GraphPane.CurveList.Clear();
-			Graph.GraphPane.AddCurve("Values", points, Color.Blue, SymbolType.None);
-			Graph.GraphPane.Title.Text = entry.Name;
+		private void UpdateGraph()
+		{
+			m_redrawGraph = false;
+			for(int i = 0; i < m_counterListBox.Items.Count; ++i)
+			{
+				if(m_counterListBox.GetItemChecked(i))
+				{
+					//cheat and simply toggle the check
+					m_counterListBox.SetItemChecked(i, false);
+					m_counterListBox.SetItemChecked(i, true);
+				}
+			}
+			m_redrawGraph = true;
 			Graph.AxisChange();
 			Graph.Refresh();
+		}
+
+		private void m_counterListBox_ItemCheck(object sender, ItemCheckEventArgs e)
+		{
+			var entry = m_counterListBox.Items[e.Index] as CounterEntry;
+			if(e.NewValue == CheckState.Checked)
+			{
+				var points = new PointPairList();
+				using(var transact = new TransactionHandle(m_connection.StorageEngine))
+				{
+					var data = m_connection.StorageEngine.Query(string.Format(kValuesQuery, entry.Id));
+					foreach(DataRow row in data.Tables[0].Rows)
+					{
+						long time = Convert.ToInt64(row["Time"]);
+						long value = Convert.ToInt64(row["Value"]);
+						points.Add(time / 1000.0, value / 1000.0);
+					}
+				}
+
+				Graph.GraphPane.AddCurve(entry.Name, points, m_colors.ColorForIndex(entry.Id), SymbolType.None);
+			}
+			else if(e.NewValue == CheckState.Unchecked)
+			{
+				Graph.GraphPane.CurveList.Remove(Graph.GraphPane.CurveList[entry.Name]);
+			}
+
+			if(m_redrawGraph)
+			{
+				Graph.AxisChange();
+				Graph.Refresh();
+			}
+		}
+
+		private void m_refreshTimer_Tick(object sender, EventArgs e)
+		{
+			UpdateCounters();
+			UpdateGraph();
 		}
 	}
 
@@ -116,11 +174,32 @@ ORDER BY Time
 	{
 		public int Id { get; set; }
 		public string Name { get; set; }
+		public bool Tagged { get; set; }
 
 		public CounterEntry(int id, string name)
 		{
 			Id = id;
 			Name = name;
+			Tagged = true;
+		}
+
+		public override string ToString()
+		{
+			return Name;
+		}
+
+		public override bool Equals(object obj)
+		{
+			var other = obj as CounterEntry;
+			if(other == null)
+				return false;
+
+			return Id == other.Id;
+		}
+
+		public override int GetHashCode()
+		{
+			return Id;
 		}
 	}
 }

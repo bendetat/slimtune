@@ -117,8 +117,8 @@ namespace SlimTuneUI
 			get { return m_counterInterval; }
 			set
 			{
-				if(value < 10)
-					throw new ArgumentOutOfRangeException("CounterInterval", value, "Counter interval must be at least 10ms.");
+				if(value < 50)
+					throw new ArgumentOutOfRangeException("CounterInterval", value, "Counter interval must be at least 50ms.");
 				m_counterInterval = value;
 			}
 		}
