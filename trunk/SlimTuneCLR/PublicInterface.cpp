@@ -51,12 +51,20 @@ void SetCounterName(unsigned int counterId, const wchar_t* name)
 	g_Profiler->SetCounterName(counterId, name);
 }
 
-void WritePerfCounter(unsigned int counterId, __int64 value)
+void WritePerfCounterInt(unsigned int counterId, __int64 value)
 {
 	if(counterId < 32)
 		return;
 
-	g_Profiler->WritePerfCounter(counterId, value);
+	g_Profiler->WritePerfCounter(counterId, value * 1000);
+}
+
+void WritePerfCounterFloat(unsigned int counterId, double value)
+{
+	if(counterId < 32)
+		return;
+
+	g_Profiler->WritePerfCounter(counterId, static_cast<__int64>(value * 1000));
 }
 
 }

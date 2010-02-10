@@ -188,7 +188,10 @@ STDMETHODIMP ClrProfiler::Initialize(IUnknown *pICorProfilerInfoUnk)
 		else
 			id = m_counter->AddInstanceCounter(objectName, counterName);
 
-		SetCounterName(id, (boost::wformat(L"%1%: %2%") % objectName % counterName).str());
+		if(objectName.size() > 0)
+			SetCounterName(id, (boost::wformat(L"%1%: %2%") % objectName % counterName).str());
+		else
+			SetCounterName(id, counterName);
 	}
 	if(m_config.CounterInterval < 50)
 		m_config.CounterInterval = 50;
