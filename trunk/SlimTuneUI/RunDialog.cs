@@ -120,7 +120,10 @@ namespace SlimTuneUI
 					{
 						IVisualizer visualizer = Activator.CreateInstance(visEntry.Type) as IVisualizer;
 						visualizer.Initialize(profilerWindow, conn);
-						visualizer.Show(profilerWindow.VisualizerHost);
+						TabPage page = new TabPage(visualizer.DisplayName);
+						visualizer.Show(page.Controls);
+						profilerWindow.VisualizerHost.TabPages.Add(page);
+						profilerWindow.VisualizerHost.SelectedTab = page;
 					}
 					profilerWindow.BringToFront();
 				}

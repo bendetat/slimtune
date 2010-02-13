@@ -24,13 +24,22 @@ ORDER BY Id
 SELECT Time, Value
 FROM CounterValues
 WHERE CounterId = {0}
-ORDER BY Time
+ORDER BY Time DESC
+LIMIT 3600
 ";
 
 		ProfilerWindowBase m_mainWindow;
 		Connection m_connection;
 		ColorRotator m_colors = new ColorRotator();
 		bool m_redrawGraph = true;
+
+		public string DisplayName
+		{
+			get
+			{
+				return "Performance Counters";
+			}
+		}
 
 		public CounterGraph()
 		{
@@ -56,13 +65,10 @@ ORDER BY Time
 			UpdateCounters();
 		}
 
-		public void Show(TabControl parent)
+		public void Show(Control.ControlCollection parent)
 		{
-			var page = new TabPage("Counters");
 			this.Dock = DockStyle.Fill;
-			page.Controls.Add(this);
-			parent.TabPages.Add(page);
-			parent.SelectedTab = page;
+			parent.Add(this);
 		}
 
 		private void UpdateCounters()

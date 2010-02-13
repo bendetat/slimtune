@@ -41,6 +41,11 @@ namespace SlimTuneUI.CoreVis
 		CalleesModel m_calleesModel;
 		CallersModel m_callersModel;
 
+		public string DisplayName
+		{
+			get { return "Tree Views"; }
+		}
+
 		public NProfStyleVisualizer()
 		{
 			InitializeComponent();
@@ -66,17 +71,12 @@ namespace SlimTuneUI.CoreVis
 			ColumnClicked(m_callees, new TreeColumnEventArgs(m_calleesPercentParentColumn));
 			ColumnClicked(m_callers, new TreeColumnEventArgs(m_callersPercentTimeColumn));
 			ColumnClicked(m_callers, new TreeColumnEventArgs(m_callersPercentTimeColumn));
-
-			this.Text = Utilities.GetStandardCaption(connection);
 		}
 
-		public void Show(TabControl parent)
+		public void Show(Control.ControlCollection parent)
 		{
-			var page = new TabPage("TreeViews");
 			this.Dock = DockStyle.Fill;
-			page.Controls.Add(this);
-			parent.TabPages.Add(page);
-			parent.SelectedTab = page;
+			parent.Add(this);
 		}
 
 		private void m_refreshButton_Click(object sender, EventArgs e)

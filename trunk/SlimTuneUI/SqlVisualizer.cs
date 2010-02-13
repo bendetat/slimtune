@@ -60,10 +60,15 @@ ORDER BY HitCount DESC
 
 namespace SlimTuneUI
 {
-	[DisplayName("SQL Visualizer (for debugging)")]
+	[DisplayName("Raw SQL View (debug use)")]
 	public partial class SqlVisualizer : UserControl, IVisualizer
 	{
 		Connection m_connection;
+
+		public string DisplayName
+		{
+			get { return "Raw SQL View"; }
+		}
 
 		public SqlVisualizer()
 		{
@@ -81,13 +86,10 @@ namespace SlimTuneUI
 			this.Text = Utilities.GetStandardCaption(connection);
 		}
 
-		public void Show(TabControl parent)
+		public void Show(Control.ControlCollection parent)
 		{
-			var page = new TabPage("SQL Debugger");
 			this.Dock = DockStyle.Fill;
-			page.Controls.Add(this);
-			parent.TabPages.Add(page);
-			parent.SelectedTab = page;
+			parent.Add(this);
 		}
 
 		void m_connection_Closing(object sender, EventArgs e)

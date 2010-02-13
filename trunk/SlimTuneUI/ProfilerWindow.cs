@@ -63,7 +63,7 @@ namespace SlimTuneUI
 
 			Connection.Disconnected += new EventHandler(Connection_Disconnected);
 
-			foreach(var vis in Utilities.GetVisualizerList(true))
+			foreach(var vis in Utilities.GetVisualizerList(false))
 			{
 				m_visualizerCombo.Items.Add(vis);
 			}
@@ -125,7 +125,10 @@ namespace SlimTuneUI
 			{
 				IVisualizer visualizer = Activator.CreateInstance(visEntry.Type) as IVisualizer;
 				visualizer.Initialize(this, Connection);
-				visualizer.Show(VisualizerHost);
+				TabPage page = new TabPage(visualizer.DisplayName);
+				visualizer.Show(page.Controls);
+				VisualizerHost.TabPages.Add(page);
+				VisualizerHost.SelectedTab = page;
 			}
 		}
 

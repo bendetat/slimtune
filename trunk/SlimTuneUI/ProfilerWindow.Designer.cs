@@ -117,6 +117,7 @@ namespace SlimTuneUI
 			this.m_visualizerCombo.Location = new System.Drawing.Point(6, 37);
 			this.m_visualizerCombo.Name = "m_visualizerCombo";
 			this.m_visualizerCombo.Size = new System.Drawing.Size(183, 21);
+			this.m_visualizerCombo.Sorted = true;
 			this.m_visualizerCombo.TabIndex = 5;
 			this.m_visualizerCombo.ValueMember = "Name";
 			// 

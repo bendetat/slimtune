@@ -31,7 +31,7 @@ using UICore;
 
 namespace SlimTuneUI.CoreVis
 {
-	[DisplayName("dotTrace Style Tree")]
+	[DisplayName("Per-Thread Call Trees")]
 	public partial class DotTraceStyle : UserControl, IVisualizer
 	{
 		const string kParentHits = @"
@@ -112,6 +112,11 @@ ORDER BY HitCount DESC
 		ProfilerWindowBase m_mainWindow;
 		Connection m_connection;
 
+		public string DisplayName
+		{
+			get { return "Thread Calls"; }
+		}
+
 		public DotTraceStyle()
 		{
 			InitializeComponent();
@@ -150,13 +155,10 @@ ORDER BY HitCount DESC
 			UpdateTopLevel();
 		}
 
-		public void Show(TabControl parent)
+		public void Show(Control.ControlCollection parent)
 		{
-			var page = new TabPage("Trace");
 			this.Dock = DockStyle.Fill;
-			page.Controls.Add(this);
-			parent.TabPages.Add(page);
-			parent.SelectedTab = page;
+			parent.Add(this);
 		}
 
 		private static void BreakName(string name, out string signature, out string funcName, out string classAndFunc, out string baseName)

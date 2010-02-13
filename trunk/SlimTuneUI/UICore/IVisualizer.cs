@@ -28,7 +28,9 @@ namespace UICore
 	/// </summary>
 	public interface IVisualizer
 	{
+		string DisplayName { get; }
+
 		void Initialize(ProfilerWindowBase mainWindow, Connection connection);
-		void Show(System.Windows.Forms.TabControl parent);
+		void Show(System.Windows.Forms.Control.ControlCollection parent);
 	}
 }
