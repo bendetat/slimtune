@@ -168,7 +168,7 @@ STDMETHODIMP ClrProfiler::Initialize(IUnknown *pICorProfilerInfoUnk)
 	SymInitializePtr(GetCurrentProcess(), NULL, TRUE);
 
 	//CONFIG: Server type?
-	m_active = false;
+	m_samplerActive = false;
 	m_server.reset(IProfilerServer::CreateSocketServer(*this, m_config.ListenPort, m_lock));
 	m_server->SetCallbacks(boost::bind(&ClrProfiler::OnConnect, this), boost::bind(&ClrProfiler::OnDisconnect, this));
 	m_server->Start();
@@ -201,6 +201,7 @@ STDMETHODIMP ClrProfiler::Initialize(IUnknown *pICorProfilerInfoUnk)
 	// set up our global access pointer
 	g_Profiler = this;
 
+	m_samplerActive = (m_config.Mode & PM_Sampling) != 0;
 	if(m_config.WaitForConnection)
 		m_server->WaitForConnection();
 
@@ -224,7 +225,7 @@ STDMETHODIMP ClrProfiler::Shutdown()
 		//shut off profiling (in case we're unfortunate enough to get an activate request right here)
 		g_Profiler = NULL;
 		m_config.Mode = PM_Disabled;
-		m_active = false;
+		m_samplerActive = false;
 
 		timeEndPeriod(1);
 	}
@@ -238,14 +239,14 @@ STDMETHODIMP ClrProfiler::Shutdown()
 
 void ClrProfiler::OnConnect()
 {
-	//Hybrid will pass both of these conditionals
+	//Hybrid will pass this conditional
 	if(m_config.Mode & PM_Sampling)
 	{
 		timeBeginPeriod(1);
 		StartSampleTimer(200);
 	}
 
-	m_active = true;
+	m_connected = true;
 
 	if(m_config.SuspendOnConnection)
 		SuspendTarget();
@@ -253,7 +254,7 @@ void ClrProfiler::OnConnect()
 
 void ClrProfiler::OnDisconnect()
 {
-	m_active = false;
+	m_connected = false;
 }
 
 HRESULT ClrProfiler::SetInitialEventMask()
@@ -335,7 +336,7 @@ HRESULT ClrProfiler::SetInitialEventMask()
 
 const FunctionInfo* ClrProfiler::GetFunction(unsigned int id)
 {
-	if(!m_active)
+	if(!IsConnected())
 		return 0;
 
 	EnterLock localLock(&m_lock);
@@ -358,7 +359,7 @@ const FunctionInfo* ClrProfiler::GetFunction(unsigned int id)
 
 const ClassInfo* ClrProfiler::GetClass(unsigned int id)
 {
-	if(!m_active)
+	if(!IsConnected())
 		return 0;
 
 	EnterLock localLock(&m_lock);
@@ -377,7 +378,7 @@ const ClassInfo* ClrProfiler::GetClass(unsigned int id)
 
 const ThreadInfo* ClrProfiler::GetThread(unsigned int id)
 {
-	if(!m_active)
+	if(!IsConnected())
 		return 0;
 
 	EnterLock localLock(&m_lock);
@@ -391,7 +392,7 @@ const ThreadInfo* ClrProfiler::GetThread(unsigned int id)
 
 void ClrProfiler::SetInstrument(unsigned int id, bool enable)
 {
-	if(!m_active)
+	if(!IsConnected())
 		return;
 
 	EnterLock localLock(&m_lock);
@@ -839,7 +840,8 @@ void ClrProfiler::Enter(FunctionID functionID, UINT_PTR clientData, COR_PRF_FRAM
 	//update the shadow stack
 	context.ShadowStack.push_back(info->Id);
 	//write the message
-	enterMsg.Write(*m_server, MID_EnterFunction);
+	if(IsConnected())
+		enterMsg.Write(*m_server, MID_EnterFunction);
 	//Safe again
 	InterlockedDecrement(&m_instDepth);
 }
@@ -895,8 +897,8 @@ void ClrProfiler::LeaveImpl(FunctionID functionId, FunctionInfo* info, MessageId
 	//update shadow stack
 	context.ShadowStack.pop_back();
 	//write the message
-	leaveMsg.Write(*m_server, message);
-
+	if(IsConnected())
+		leaveMsg.Write(*m_server, message);
 	//Safe again
 	InterlockedDecrement(&m_instDepth);
 }
@@ -951,12 +953,21 @@ void ClrProfiler::OnSampleTimer()
 {
 	EnterLock localLock(&m_lock);
 
-	//in case we get triggered after the profiler has been activated
-	if(!m_active)
+	//don't sample if we're not connected or not active
+	if(!IsSamplerActive() || !IsConnected())
+	{
+		//but keep the timer alive if we are connected
+		if(IsConnected())
+			StartSampleTimer(0);
 		return;
+	}
+
 	//in case we get activated during start up, wait for function mapping to start
 	if(m_functions.size() == 0)
+	{
+		StartSampleTimer(0);
 		return;
+	}
 
 	if(m_suspended || !SuspendTarget())
 	{
@@ -1114,7 +1125,8 @@ void ClrProfiler::OnSampleTimer()
 	boost::singleton_pool<boost::pool_allocator_tag, sizeof(unsigned int)>::purge_memory();
 
 	ResumeTarget();
-	if(m_active)
+	//keep the timer going if connected, regardless of whether profiling is active
+	if(IsConnected())
 		StartSampleTimer(0);
 }
 

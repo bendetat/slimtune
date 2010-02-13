@@ -82,7 +82,9 @@ public:
 
 	//public interface functions
 
-	bool IsActive() const { return m_active; }
+	bool IsSamplerActive() const { return m_samplerActive; }
+	bool IsConnected() const { return m_connected; }
+	void SetSamplerActive(bool active) { m_samplerActive = active; }
 	ProfilerMode GetMode() const { return m_config.Mode; }
 	
 	const FunctionInfo* GetFunction(unsigned int id);
@@ -142,7 +144,8 @@ private:
 
 	boost::scoped_ptr<IProfilerServer> m_server;
 	boost::scoped_ptr<boost::thread> m_ioThread;
-	volatile bool m_active;
+	volatile bool m_samplerActive;
+	volatile bool m_connected;
 	volatile LONG m_suspended;
 	volatile LONG m_instDepth;
 

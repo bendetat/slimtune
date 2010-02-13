@@ -32,9 +32,20 @@ int IsProfilerAvailable()
 	return g_Profiler != NULL;
 }
 
-int IsProfilerActive()
+int IsProfilerConnected()
 {
-	return g_Profiler && g_Profiler->IsActive();
+	return g_Profiler && g_Profiler->IsConnected();
+}
+
+int IsSamplerActive()
+{
+	return g_Profiler && g_Profiler->IsSamplerActive();
+}
+
+int SetSamplerActive(int active)
+{
+	if(g_Profiler)
+		g_Profiler->SetSamplerActive(active != 0);
 }
 
 void SetInstrument(unsigned int id, int enable)

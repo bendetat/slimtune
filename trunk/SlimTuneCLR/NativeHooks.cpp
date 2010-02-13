@@ -26,19 +26,19 @@
 //These three functions are called by the appropriate native assembly hook for the platform
 void __stdcall FunctionEnterGlobal(FunctionID functionID, UINT_PTR clientData, COR_PRF_FRAME_INFO frameInfo, COR_PRF_FUNCTION_ARGUMENT_INFO *argInfo)
 {
-    if (g_Profiler != NULL && g_Profiler->IsActive() && (g_Profiler->GetMode() & PM_Tracing))
+    if (g_Profiler != NULL && (g_Profiler->GetMode() & PM_Tracing))
         g_Profiler->Enter(functionID, clientData, frameInfo, argInfo);
 }
 
 void __stdcall FunctionLeaveGlobal(FunctionID functionID, UINT_PTR clientData, COR_PRF_FRAME_INFO frameInfo, COR_PRF_FUNCTION_ARGUMENT_RANGE *retvalRange)
 {
-    if (g_Profiler != NULL && g_Profiler->IsActive() && (g_Profiler->GetMode() & PM_Tracing))
+    if (g_Profiler != NULL && (g_Profiler->GetMode() & PM_Tracing))
         g_Profiler->Leave(functionID,clientData,frameInfo,retvalRange);
 }
 
 void __stdcall FunctionTailcallGlobal(FunctionID functionID, UINT_PTR clientData, COR_PRF_FRAME_INFO frameInfo)
 {
-    if (g_Profiler != NULL && g_Profiler->IsActive() && (g_Profiler->GetMode() & PM_Tracing))
+    if (g_Profiler != NULL && (g_Profiler->GetMode() & PM_Tracing))
         g_Profiler->Tailcall(functionID,clientData,frameInfo);
 }
 
