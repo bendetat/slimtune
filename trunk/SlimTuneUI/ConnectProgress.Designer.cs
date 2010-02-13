@@ -124,7 +124,6 @@ namespace SlimTuneUI
 			this.ShowIcon = false;
 			this.ShowInTaskbar = false;
 			this.Text = "Connecting to Target";
-			this.TopMost = true;
 			this.Shown += new System.EventHandler(this.ConnectProgress_Shown);
 			this.ResumeLayout(false);
 			this.PerformLayout();
