@@ -40,7 +40,8 @@ namespace SlimTuneUI
 		private ProfilerMode m_profMode = ProfilerMode.Sampling;
 		[Category("Profiling"),
 		DisplayName("Profiler mode"),
-		Description("The profiling method to use. Sampling is recommended.")]
+		Description("The profiling method to use. Sampling is recommended."),
+		Browsable(false)]
 		public ProfilerMode ProfilingMode
 		{
 			get { return m_profMode; }
