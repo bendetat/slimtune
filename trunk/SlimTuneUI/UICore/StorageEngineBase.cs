@@ -91,6 +91,7 @@ namespace UICore
 		public abstract void Save(string file);
 		public abstract void Snapshot(string name);
 		public abstract System.Data.DataSet Query(string query);
+		public abstract System.Data.DataSet Query(string query, int limit);
 		public abstract object QueryScalar(string query);
 		protected abstract void DoClearData();
 

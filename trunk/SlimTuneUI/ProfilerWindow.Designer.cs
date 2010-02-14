@@ -150,7 +150,7 @@ namespace SlimTuneUI
 			this.TasksGroupBox.Controls.Add(this.TasksLabel);
 			this.TasksGroupBox.Location = new System.Drawing.Point(3, 240);
 			this.TasksGroupBox.Name = "TasksGroupBox";
-			this.TasksGroupBox.Size = new System.Drawing.Size(194, 122);
+			this.TasksGroupBox.Size = new System.Drawing.Size(194, 67);
 			this.TasksGroupBox.TabIndex = 6;
 			this.TasksGroupBox.TabStop = false;
 			// 

@@ -118,6 +118,7 @@ namespace UICore
 		void Save(string file);
 
 		DataSet Query(string query);
+		DataSet Query(string query, int limit);
 		object QueryScalar(string query);
 	}
 }

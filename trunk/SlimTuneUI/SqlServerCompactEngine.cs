@@ -229,6 +229,13 @@ namespace SlimTuneUI
 			}
 		}
 
+		public override DataSet Query(string query, int limit)
+		{
+			query = query.Substring(query.IndexOf("SELECT" + 6));
+			query = "SELECT TOP " + limit.ToString() + query;
+			return Query(query);
+		}
+
 		public override DataSet Query(string query)
 		{
 			var command = new SqlCeCommand(query, m_sqlConn);

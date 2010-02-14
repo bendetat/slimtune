@@ -150,7 +150,6 @@ ORDER BY HitCount DESC
 			m_mainWindow = mainWindow;
 			m_connection = connection;
 
-			this.Text = Utilities.GetStandardCaption(connection);
 			mainWindow.Visualizers.Add(this);
 			UpdateTopLevel();
 		}

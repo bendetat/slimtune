@@ -7,13 +7,13 @@ namespace SlimTuneUI.CoreVis
 	class ColorRotator
 	{
 		Color[] m_colors = new Color[]{
-			Color.Blue,
-			Color.Green,
+			Color.ForestGreen,
 			Color.DarkOrange,
 			Color.DarkSlateBlue,
+			Color.Blue,
 			Color.Sienna,
 			Color.Yellow,
-			Color.ForestGreen,
+			Color.Violet,
 			Color.Navy,
 			Color.SlateGray,
 			Color.MediumVioletRed,

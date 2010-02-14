@@ -209,6 +209,12 @@ namespace SlimTuneUI
 			}
 		}
 
+		public override DataSet Query(string query, int limit)
+		{
+			query += "\nLIMIT " + limit.ToString();
+			return Query(query);
+		}
+
 		public override DataSet Query(string query)
 		{
 			using(SQLiteStatement cmd = new SQLiteStatement(m_database, query))

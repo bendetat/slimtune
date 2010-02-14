@@ -37,7 +37,7 @@ LIMIT 3600
 		{
 			get
 			{
-				return "Performance Counters";
+				return Utilities.GetDisplayName(typeof(CounterGraph));
 			}
 		}
 
