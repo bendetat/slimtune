@@ -113,6 +113,18 @@ namespace SlimTuneUI
 		{
 		}
 
+		protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+		{
+			if(keyData == (Keys.Control | Keys.O))
+				OpenButton_Click(OpenButton, EventArgs.Empty);
+			else if(keyData == (Keys.Control | Keys.R))
+				RunButton_Click(RunButton, EventArgs.Empty);
+			else if(keyData == (Keys.Control | Keys.N))
+				ConnectButton_Click(ConnectButton, EventArgs.Empty);
+
+			return false;
+		}
+
 		private void WindowList_SelectedIndexChanged(object sender, EventArgs e)
 		{
 			bool enable = WindowList.SelectedItem != null;
