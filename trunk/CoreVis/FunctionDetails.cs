@@ -57,7 +57,7 @@ ORDER BY HitCount DESC
 
 		public FunctionDetails()
 		{
-			InitializeComponent();
+			InitializeComponent();		
 		}
 
 		public void Initialize(ProfilerWindowBase mainWindow, Connection connection)
@@ -69,8 +69,8 @@ ORDER BY HitCount DESC
 
 			m_mainWindow = mainWindow;
 			m_connection = connection;
-			UpdateFunctionList();
 
+			UpdateFunctionList();
 			mainWindow.Visualizers.Add(this);
 		}
 
@@ -89,6 +89,16 @@ ORDER BY HitCount DESC
 				int id = Convert.ToInt32(row["Id"]);
 				string name = Convert.ToString(row["Name"]);
 				FunctionList.Items.Add(new FunctionEntry(id, name));
+			}
+
+			if(FunctionList.Items.Count > 0)
+			{
+				FunctionList.SelectedIndex = 0;
+				DetailsGraph.Visible = true;
+			}
+			else
+			{
+				DetailsGraph.Visible = false;
 			}
 		}
 

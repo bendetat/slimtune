@@ -65,6 +65,22 @@ WHERE C1.CallerId = {0} AND ThreadId = {1}
 ORDER BY HitCount DESC
 ";
 
+		const string kExclusiveQuery = @"
+SELECT HitCount, CASE TotalCalls
+	WHEN 0 THEN 0
+	ELSE (1.0 * C1.HitCount / TotalCalls)
+	END AS ""Percent""
+FROM Callers C1
+JOIN (
+	SELECT CallerId, SUM(HitCount) AS ""TotalCalls""
+	FROM Callers
+	WHERE ThreadId = {1}
+	GROUP BY CallerId
+) C2
+	ON C1.CallerId = C2.CallerId
+WHERE C1.CallerId = {0} AND C1.CalleeId = 0 AND C1.ThreadId = {1}
+";
+
 		class NodeData
 		{
 			public int Id;
@@ -252,7 +268,7 @@ ORDER BY HitCount DESC
 				{
 					string name = Convert.ToString(row["Function"]) + Convert.ToString(row["Signature"]);
 					string rawString = @"{0:P2} {1} - {2:P2} - {3}{4}{5}";
-					string tipString = "[Id {6}] {3}{4}{5}\r\n{0:P3} of thread - {1} samples\r\n{2:P3} of parent";
+					string tipString = "[Id {6}] {3}{4}{5}\r\n{0:P3} of thread - {1} samples - {2:P3} of parent\r\n{7:P3} outside children - {8} samples";
 					string niceString = @"\1{0:P2} \2{1} \0- \3{2:P2} \0- {3}\2{4}\0{5}";
 
 					string signature, funcName, classAndFunc, baseName;
@@ -261,9 +277,17 @@ ORDER BY HitCount DESC
 					decimal percent = percentOfParent * parent.Percent;
 					int id = Convert.ToInt32(row["Id"]);
 
+					//find out how much time was spent exclusive of children
+					//we don't have children at this point so we have to query separately
+					var excl = m_connection.StorageEngine.Query(string.Format(kExclusiveQuery, id, parent.ThreadId));
+					var hasExcl = excl.Tables[0].Rows.Count > 0;
+					var exclRow = hasExcl ? excl.Tables[0].Rows[0] : null;
+					double exclPercent = exclRow != null ? Convert.ToDouble(exclRow["Percent"]) : 0.0;
+					int exclHits = exclRow != null ? Convert.ToInt32(exclRow["HitCount"]) : 0;
+
 					string nodeText = string.Format(rawString, percent, funcName, percentOfParent, baseName, classAndFunc, signature);
 					string tipText = string.Format(tipString, percent, Convert.ToInt32(row["HitCount"]), percentOfParent,
-						baseName, classAndFunc, signature, id);
+						baseName, classAndFunc, signature, id, exclPercent, exclHits);
 					string formatText = string.Format(niceString, percent, funcName, percentOfParent,
 						baseName, classAndFunc, signature);
 
