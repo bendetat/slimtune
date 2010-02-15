@@ -91,13 +91,18 @@ public:
 	const ClassInfo* GetClass(unsigned int id);
 	const ThreadInfo* GetThread(unsigned int id);
 	const std::wstring& GetCounterName(unsigned int id);
+	const std::wstring& GetEventName(unsigned int id);
 	void SetInstrument(unsigned int id, bool enable);
 
 	bool SuspendTarget();
 	bool ResumeTarget();
 
-	void SetCounterName(unsigned int counterId, std::wstring name);
+	void SetCounterName(unsigned int counterId, const std::wstring& name);
 	void WritePerfCounter(unsigned int counterId, __int64 value);
+
+	void SetEventName(unsigned int eventId, const std::wstring& name);
+	void BeginEvent(unsigned int eventId);
+	void EndEvent(unsigned int eventId);
 
     // STARTUP/SHUTDOWN EVENTS
     STDMETHOD(Initialize)(IUnknown* pICorProfilerInfoUnk);
@@ -171,6 +176,9 @@ private:
 
 	typedef std::map<unsigned int, std::wstring> CounterMap;
 	CounterMap m_counters;
+
+	typedef std::map<unsigned int, std::wstring> EventMap;
+	EventMap m_events;
 
 	HANDLE m_sampleTimer;
 	HANDLE m_counterTimer;

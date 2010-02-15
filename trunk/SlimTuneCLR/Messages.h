@@ -55,6 +55,7 @@ enum MessageId
 
 	MID_BeginEvent = 0xf0,
 	MID_EndEvent,
+	MID_EventName,
 
 	MID_KeepAlive = 0xff,
 };
@@ -67,6 +68,7 @@ enum ClientRequest
 	CR_GetAssemblyMapping,
 	CR_GetThreadMapping,
 	CR_GetCounterName,
+	CR_GetEventName,
 
 	CR_GetThreadInfo = 0x10,
 
@@ -174,6 +176,24 @@ namespace Messages
 
 		void Write(IProfilerServer& server, size_t nameCount);
 	};
+
+	struct EventName
+	{
+		static const int MaxNameSize = 256;
+
+		unsigned int EventId;
+		wchar_t Name[MaxNameSize];
+
+		void Write(IProfilerServer& server, size_t nameCount);
+	};
+
+	struct Event
+	{
+		unsigned int EventId;
+		unsigned __int64 TimeStamp;
+
+		void Write(IProfilerServer& server, MessageId id);
+	};
 }
 
 namespace Requests
@@ -204,6 +224,13 @@ namespace Requests
 		unsigned int CounterId;
 
 		static GetCounterName Read(char* buffer, size_t& bytesRead);
+	};
+
+	struct GetEventName
+	{
+		unsigned int EventId;
+
+		static GetEventName Read(char* buffer, size_t& bytesRead);
 	};
 
 	struct SetFunctionFlags

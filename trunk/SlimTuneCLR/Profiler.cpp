@@ -1302,7 +1302,7 @@ HRESULT ClrProfiler::JITCachedFunctionSearchStarted(FunctionID functionId, BOOL*
 	return S_OK;
 }
 
-void ClrProfiler::SetCounterName(unsigned int counterId, std::wstring name)
+void ClrProfiler::SetCounterName(unsigned int counterId, const std::wstring& name)
 {
 	m_counters[counterId] = name;
 
@@ -1349,4 +1349,44 @@ void ClrProfiler::OnCounterTimer()
 		__int64 fixedValue = static_cast<__int64>(value * 1000);
 		WritePerfCounter(i, fixedValue);
 	}
+}
+
+void ClrProfiler::SetEventName(unsigned int eventId, const std::wstring& name)
+{
+	m_events[eventId] = name;
+
+	Messages::EventName eventName;
+	eventName.EventId = eventId;
+	std::copy(name.begin(), name.end(), eventName.Name);
+
+	InterlockedIncrement(&m_instDepth);
+	eventName.Write(*m_server, name.size());
+	InterlockedDecrement(&m_instDepth);
+}
+
+const std::wstring& ClrProfiler::GetEventName(unsigned int id)
+{
+	return m_events[id];
+}
+
+void ClrProfiler::BeginEvent(unsigned int id)
+{
+	Messages::Event beginEvent;
+	beginEvent.EventId = id;
+	QueryTimer(beginEvent.TimeStamp);
+
+	InterlockedIncrement(&m_instDepth);
+	beginEvent.Write(*m_server, MID_BeginEvent);
+	InterlockedDecrement(&m_instDepth);
+}
+
+void ClrProfiler::EndEvent(unsigned int id)
+{
+	Messages::Event endEvent;
+	endEvent.EventId = id;
+	QueryTimer(endEvent.TimeStamp);
+
+	InterlockedIncrement(&m_instDepth);
+	endEvent.Write(*m_server, MID_EndEvent);
+	InterlockedDecrement(&m_instDepth);
 }

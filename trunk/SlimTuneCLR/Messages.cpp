@@ -146,6 +146,32 @@ namespace Messages
 
 		server.Write(buffer, bufPtr - buffer);
 	}
+
+	void EventName::Write(IProfilerServer& server, size_t nameCount)
+	{
+		char* const buffer = (char*) _alloca(16 + sizeof(wchar_t) * nameCount);
+		char* bufPtr = buffer + 1;
+		unsigned char* bufTmp = (unsigned char*) buffer;
+
+		*bufTmp = MID_EventName;
+		bufPtr = Write7BitEncodedInt(bufPtr, EventId);
+		bufPtr = WriteString(bufPtr, Name, nameCount);
+
+		server.Write(buffer, bufPtr - buffer);
+	}
+
+	void Event::Write(IProfilerServer& server, MessageId id)
+	{
+		char buffer[32];
+		char* bufPtr = buffer + 1;
+		unsigned char* bufTmp = (unsigned char*) buffer;
+
+		*bufTmp = (unsigned char) id;
+		bufPtr = Write7BitEncodedInt(bufPtr, EventId);
+		bufPtr = Write7BitEncodedInt64(bufPtr, TimeStamp);
+
+		server.Write(buffer, bufPtr - buffer);
+	}
 }
 
 namespace Requests
@@ -178,6 +204,14 @@ namespace Requests
 	{
 		GetCounterName result;
 		result.CounterId = *(int*) buffer;
+		bytesRead += sizeof(int);
+		return result;
+	}
+
+	GetEventName GetEventName::Read(char* buffer, size_t& bytesRead)
+	{
+		GetEventName result;
+		result.EventId = *(int*) buffer;
 		bytesRead += sizeof(int);
 		return result;
 	}

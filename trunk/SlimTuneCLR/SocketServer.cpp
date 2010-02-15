@@ -48,6 +48,7 @@ private:
 	void SendClass(const Requests::GetClassMapping& request);
 	void SendThread(const Requests::GetThreadMapping& request);
 	void SendCounterName(const Requests::GetCounterName& request);
+	void SendEventName(const Requests::GetEventName& request);
 
 public:
 	~TcpConnection();
@@ -157,6 +158,15 @@ void TcpConnection::SendCounterName(const Requests::GetCounterName& request)
 	counterName.Write(m_server, name.size());
 }
 
+void TcpConnection::SendEventName(const Requests::GetEventName& request)
+{
+	const std::wstring& name = m_server.ProfilerData().GetEventName(request.EventId);
+	Messages::EventName eventName;
+	eventName.EventId = request.EventId;
+	std::copy(name.begin(), name.end(), eventName.Name);
+	eventName.Write(m_server, name.size());
+}
+
 bool TcpConnection::ContinueRead(const boost::system::error_code&, size_t bytesRead)
 {
 	if(bytesRead < 1)
@@ -215,6 +225,15 @@ bool TcpConnection::ContinueRead(const boost::system::error_code&, size_t bytesR
 					goto FinishRead;
 				Requests::GetCounterName gcnReq = Requests::GetCounterName::Read(++bufPtr, bytesParsed);
 				SendCounterName(gcnReq);
+				break;
+			}
+
+		case CR_GetEventName:
+			{
+				if(bytesToParse < 5)
+					goto FinishRead;
+				Requests::GetEventName genReq = Requests::GetEventName::Read(++bufPtr, bytesParsed);
+				SendEventName(genReq);
 				break;
 			}
 
