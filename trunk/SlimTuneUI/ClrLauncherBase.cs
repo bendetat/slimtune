@@ -137,7 +137,7 @@ namespace SlimTuneUI
 
 		public virtual bool CheckParams()
 		{
-			using(var tempEngine = new SQLiteMemoryEngine())
+			using(var tempEngine = new DummyStorageEngine())
 			{
 				bool used = LauncherCommon.TestConnection("localhost", ListenPort, tempEngine);
 				if(used)

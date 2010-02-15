@@ -95,7 +95,7 @@ namespace SlimTuneUI
 				Thread.Sleep(1000);
 
 				//we need to create a connection in order to know when CLR has been loaded
-				IStorageEngine engine = new SQLiteMemoryEngine();
+				IStorageEngine engine = new DummyStorageEngine();
 				ConnectProgress progress = new ConnectProgress("localhost", ListenPort, engine, 20);
 				progress.ShowDialog();
 				if(progress.Client != null)
