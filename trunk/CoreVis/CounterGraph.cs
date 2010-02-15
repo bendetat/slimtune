@@ -25,7 +25,6 @@ SELECT Time, Value
 FROM CounterValues
 WHERE CounterId = {0}
 ORDER BY Time DESC
-LIMIT 3600
 ";
 
 		ProfilerWindowBase m_mainWindow;
@@ -146,7 +145,7 @@ LIMIT 3600
 				var points = new PointPairList();
 				using(var transact = new TransactionHandle(m_connection.StorageEngine))
 				{
-					var data = m_connection.StorageEngine.Query(string.Format(kValuesQuery, entry.Id));
+					var data = m_connection.StorageEngine.Query(string.Format(kValuesQuery, entry.Id), 3600);
 					foreach(DataRow row in data.Tables[0].Rows)
 					{
 						long time = Convert.ToInt64(row["Time"]);
