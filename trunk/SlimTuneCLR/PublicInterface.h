@@ -15,7 +15,7 @@ DLLEXPORT int STDCALL GetProfilerMode();
 DLLEXPORT int STDCALL IsProfilerAvailable();
 DLLEXPORT int STDCALL IsProfilerConnected();
 DLLEXPORT int STDCALL IsSamplerActive();
-DLLEXPORT int STDCALL SetSamplerActive(int active);
+DLLEXPORT void STDCALL SetSamplerActive(int active);
 DLLEXPORT void STDCALL SetInstrument(unsigned int id, int enable);
 DLLEXPORT void STDCALL SetCounterName(unsigned int counterId, const wchar_t* name);
 DLLEXPORT void STDCALL WritePerfCounterInt(unsigned int counterId, __int64 value);
