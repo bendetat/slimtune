@@ -36,9 +36,12 @@ OutputDir=.
 OutputBaseFilename=SlimTune-0.2.0
 Compression=lzma
 SolidCompression=yes
-VersionInfoVersion=0.2.0.0
 UsePreviousAppDir=yes
 MinVersion=0,5.01
+VersionInfoVersion=0.2.0.0
+VersionInfoCompany=SlimDX Group
+VersionInfoCopyright=Copyright © SlimDX Group 2010
+VersionInfoProductName=SlimTune Profiler v0.2.0
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
