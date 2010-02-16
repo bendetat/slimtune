@@ -29,7 +29,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("SlimTuneUI.CoreVis")]
 [assembly: AssemblyDescription("Core visualization plugins for SlimTune Profiler.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Microsoft")]
+[assembly: AssemblyCompany("SlimDX Group")]
 [assembly: AssemblyProduct("SlimTune Profiler")]
 [assembly: AssemblyCopyright("Copyright © SlimDX Group 2010")]
 [assembly: AssemblyTrademark("")]
