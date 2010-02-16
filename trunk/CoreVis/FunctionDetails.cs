@@ -102,12 +102,7 @@ ORDER BY HitCount DESC
 			}
 		}
 
-		private void SearchBox_TextChanged(object sender, EventArgs e)
-		{
-			UpdateFunctionList();
-		}
-
-		private void FunctionList_SelectedIndexChanged(object sender, EventArgs e)
+		private void RefreshGraph()
 		{
 			var entry = FunctionList.SelectedItem as FunctionEntry;
 			if(entry == null)
@@ -140,6 +135,24 @@ ORDER BY HitCount DESC
 
 			pane.AxisChange();
 			DetailsGraph.Refresh();
+		}
+
+		private void SearchBox_TextChanged(object sender, EventArgs e)
+		{
+			UpdateFunctionList();
+		}
+
+		private void FunctionList_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			RefreshGraph();
+		}
+
+		private void m_refreshTimer_Tick(object sender, EventArgs e)
+		{
+			if(FunctionList.Items.Count < 1)
+				UpdateFunctionList();
+			else
+				RefreshGraph();
 		}
 	}
 

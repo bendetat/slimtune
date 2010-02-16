@@ -33,6 +33,7 @@
 			this.FunctionList = new System.Windows.Forms.ListBox();
 			this.SearchBox = new System.Windows.Forms.TextBox();
 			this.DetailsGraph = new ZedGraph.ZedGraphControl();
+			this.m_refreshTimer = new System.Windows.Forms.Timer(this.components);
 			this.Splitter.Panel1.SuspendLayout();
 			this.Splitter.Panel2.SuspendLayout();
 			this.Splitter.SuspendLayout();
@@ -100,6 +101,12 @@
 			this.DetailsGraph.Size = new System.Drawing.Size(560, 483);
 			this.DetailsGraph.TabIndex = 0;
 			// 
+			// m_refreshTimer
+			// 
+			this.m_refreshTimer.Enabled = true;
+			this.m_refreshTimer.Interval = 2000;
+			this.m_refreshTimer.Tick += new System.EventHandler(this.m_refreshTimer_Tick);
+			// 
 			// FunctionDetails
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -121,5 +128,6 @@
 		private System.Windows.Forms.ListBox FunctionList;
 		private System.Windows.Forms.TextBox SearchBox;
 		private ZedGraph.ZedGraphControl DetailsGraph;
+		private System.Windows.Forms.Timer m_refreshTimer;
 	}
 }

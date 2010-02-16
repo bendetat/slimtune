@@ -17,6 +17,7 @@ namespace SlimTuneUI.CoreVis
 			Color.Navy,
 			Color.SlateGray,
 			Color.MediumVioletRed,
+			Color.Firebrick,
 		};
 		int m_index = 0;
 

@@ -59,8 +59,7 @@ namespace SlimTuneUI
 				status = "Stopped";
 			StatusLabel.Text = "Status: " + status;
 
-			SnapshotButton.Enabled = conn.IsConnected;
-
+			//SnapshotButton.Enabled = conn.IsConnected;
 			Connection.Disconnected += new EventHandler(Connection_Disconnected);
 
 			foreach(var vis in Utilities.GetVisualizerList(false))
