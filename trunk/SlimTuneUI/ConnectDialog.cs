@@ -151,7 +151,7 @@ namespace SlimTuneUI
 			bool result = true;
 			using(IStorageEngine engine = new DummyStorageEngine())
 			{
-				ConnectProgress progress = new ConnectProgress("localhost", port, engine, 1);
+				ConnectProgress progress = new ConnectProgress(m_hostNameTextBox.Text, port, engine, 1);
 				progress.ShowDialog();
 				if(progress.Client != null)
 				{
