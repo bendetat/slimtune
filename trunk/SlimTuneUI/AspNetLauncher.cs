@@ -95,18 +95,19 @@ namespace SlimTuneUI
 				Thread.Sleep(1000);
 
 				//we need to create a connection in order to know when CLR has been loaded
-				IStorageEngine engine = new DummyStorageEngine();
-				ConnectProgress progress = new ConnectProgress("localhost", ListenPort, engine, 20);
-				progress.ShowDialog();
-				if(progress.Client != null)
+				using(IStorageEngine engine = new DummyStorageEngine())
 				{
-					progress.Client.Dispose();
+					ConnectProgress progress = new ConnectProgress("localhost", ListenPort, engine, 20);
+					progress.ShowDialog();
+					if(progress.Client != null)
+					{
+						progress.Client.Dispose();
+					}
+					else
+					{
+						returnVal = false;
+					}
 				}
-				else
-				{
-					returnVal = false;
-				}
-				engine.Dispose();
 			}
 
 			LauncherCommon.DeleteEnvironmentVariables("IISADMIN");

@@ -63,12 +63,14 @@ namespace SlimTuneUI
 			this.m_launchPropGrid = new System.Windows.Forms.PropertyGrid();
 			this.m_appTypeLabel = new System.Windows.Forms.Label();
 			this.m_appTypeCombo = new System.Windows.Forms.ComboBox();
+			this.m_sqliteMemoryRadio = new System.Windows.Forms.RadioButton();
+			this.m_sqliteRadio = new System.Windows.Forms.RadioButton();
 			this.m_frontendOptionsGroupBox.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// m_runButton
 			// 
-			this.m_runButton.Location = new System.Drawing.Point(256, 471);
+			this.m_runButton.Location = new System.Drawing.Point(256, 511);
 			this.m_runButton.Name = "m_runButton";
 			this.m_runButton.Size = new System.Drawing.Size(75, 23);
 			this.m_runButton.TabIndex = 9;
@@ -86,15 +88,17 @@ namespace SlimTuneUI
 			// m_frontendOptionsGroupBox
 			// 
 			this.m_frontendOptionsGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.m_frontendOptionsGroupBox.Controls.Add(this.m_sqliteMemoryRadio);
+			this.m_frontendOptionsGroupBox.Controls.Add(this.m_sqliteRadio);
 			this.m_frontendOptionsGroupBox.Controls.Add(this.m_visualizerLabel);
 			this.m_frontendOptionsGroupBox.Controls.Add(this.m_visualizerCombo);
 			this.m_frontendOptionsGroupBox.Controls.Add(this.m_connectCheckBox);
 			this.m_frontendOptionsGroupBox.Controls.Add(this.m_browseDbButton);
 			this.m_frontendOptionsGroupBox.Controls.Add(this.m_resultsFileTextBox);
 			this.m_frontendOptionsGroupBox.Controls.Add(this.m_saveAsLabel);
-			this.m_frontendOptionsGroupBox.Location = new System.Drawing.Point(6, 366);
+			this.m_frontendOptionsGroupBox.Location = new System.Drawing.Point(6, 387);
 			this.m_frontendOptionsGroupBox.Name = "m_frontendOptionsGroupBox";
-			this.m_frontendOptionsGroupBox.Size = new System.Drawing.Size(563, 99);
+			this.m_frontendOptionsGroupBox.Size = new System.Drawing.Size(563, 118);
 			this.m_frontendOptionsGroupBox.TabIndex = 16;
 			this.m_frontendOptionsGroupBox.TabStop = false;
 			this.m_frontendOptionsGroupBox.Text = "Front-end Options";
@@ -102,7 +106,7 @@ namespace SlimTuneUI
 			// m_visualizerLabel
 			// 
 			this.m_visualizerLabel.AutoSize = true;
-			this.m_visualizerLabel.Location = new System.Drawing.Point(9, 72);
+			this.m_visualizerLabel.Location = new System.Drawing.Point(6, 95);
 			this.m_visualizerLabel.Name = "m_visualizerLabel";
 			this.m_visualizerLabel.Size = new System.Drawing.Size(54, 13);
 			this.m_visualizerLabel.TabIndex = 18;
@@ -113,7 +117,7 @@ namespace SlimTuneUI
 			this.m_visualizerCombo.DisplayMember = "Name";
 			this.m_visualizerCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.m_visualizerCombo.FormattingEnabled = true;
-			this.m_visualizerCombo.Location = new System.Drawing.Point(76, 69);
+			this.m_visualizerCombo.Location = new System.Drawing.Point(73, 92);
 			this.m_visualizerCombo.Name = "m_visualizerCombo";
 			this.m_visualizerCombo.Size = new System.Drawing.Size(400, 21);
 			this.m_visualizerCombo.Sorted = true;
@@ -137,7 +141,7 @@ namespace SlimTuneUI
 			// 
 			// m_browseDbButton
 			// 
-			this.m_browseDbButton.Location = new System.Drawing.Point(482, 40);
+			this.m_browseDbButton.Location = new System.Drawing.Point(479, 63);
 			this.m_browseDbButton.Name = "m_browseDbButton";
 			this.m_browseDbButton.Size = new System.Drawing.Size(75, 23);
 			this.m_browseDbButton.TabIndex = 15;
@@ -148,7 +152,7 @@ namespace SlimTuneUI
 			// 
 			// m_resultsFileTextBox
 			// 
-			this.m_resultsFileTextBox.Location = new System.Drawing.Point(76, 42);
+			this.m_resultsFileTextBox.Location = new System.Drawing.Point(73, 65);
 			this.m_resultsFileTextBox.Name = "m_resultsFileTextBox";
 			this.m_resultsFileTextBox.Size = new System.Drawing.Size(400, 20);
 			this.m_resultsFileTextBox.TabIndex = 14;
@@ -158,7 +162,7 @@ namespace SlimTuneUI
 			// m_saveAsLabel
 			// 
 			this.m_saveAsLabel.AutoSize = true;
-			this.m_saveAsLabel.Location = new System.Drawing.Point(9, 45);
+			this.m_saveAsLabel.Location = new System.Drawing.Point(6, 68);
 			this.m_saveAsLabel.Name = "m_saveAsLabel";
 			this.m_saveAsLabel.Size = new System.Drawing.Size(64, 13);
 			this.m_saveAsLabel.TabIndex = 13;
@@ -176,7 +180,7 @@ namespace SlimTuneUI
 			this.m_launchPropGrid.Location = new System.Drawing.Point(7, 37);
 			this.m_launchPropGrid.Name = "m_launchPropGrid";
 			this.m_launchPropGrid.PropertySort = System.Windows.Forms.PropertySort.Categorized;
-			this.m_launchPropGrid.Size = new System.Drawing.Size(562, 323);
+			this.m_launchPropGrid.Size = new System.Drawing.Size(562, 344);
 			this.m_launchPropGrid.TabIndex = 17;
 			this.m_launchPropGrid.ToolbarVisible = false;
 			// 
@@ -200,16 +204,40 @@ namespace SlimTuneUI
 			this.m_appTypeCombo.TabIndex = 19;
 			this.m_appTypeCombo.ValueMember = "Type";
 			// 
+			// m_sqliteMemoryRadio
+			// 
+			this.m_sqliteMemoryRadio.AutoSize = true;
+			this.m_sqliteMemoryRadio.Location = new System.Drawing.Point(73, 42);
+			this.m_sqliteMemoryRadio.Name = "m_sqliteMemoryRadio";
+			this.m_sqliteMemoryRadio.Size = new System.Drawing.Size(109, 17);
+			this.m_sqliteMemoryRadio.TabIndex = 24;
+			this.m_sqliteMemoryRadio.Text = "SQLite In-Memory";
+			this.m_sqliteMemoryRadio.UseVisualStyleBackColor = true;
+			this.m_sqliteMemoryRadio.CheckedChanged += new System.EventHandler(this.EngineChanged);
+			// 
+			// m_sqliteRadio
+			// 
+			this.m_sqliteRadio.AutoSize = true;
+			this.m_sqliteRadio.Checked = true;
+			this.m_sqliteRadio.Location = new System.Drawing.Point(9, 42);
+			this.m_sqliteRadio.Name = "m_sqliteRadio";
+			this.m_sqliteRadio.Size = new System.Drawing.Size(57, 17);
+			this.m_sqliteRadio.TabIndex = 23;
+			this.m_sqliteRadio.TabStop = true;
+			this.m_sqliteRadio.Text = "SQLite";
+			this.m_sqliteRadio.UseVisualStyleBackColor = true;
+			this.m_sqliteRadio.CheckedChanged += new System.EventHandler(this.EngineChanged);
+			// 
 			// RunDialog
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(586, 506);
+			this.ClientSize = new System.Drawing.Size(586, 539);
+			this.Controls.Add(this.m_runButton);
 			this.Controls.Add(this.m_appTypeCombo);
 			this.Controls.Add(this.m_appTypeLabel);
 			this.Controls.Add(this.m_launchPropGrid);
 			this.Controls.Add(this.m_frontendOptionsGroupBox);
-			this.Controls.Add(this.m_runButton);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
@@ -237,5 +265,7 @@ namespace SlimTuneUI
 		private System.Windows.Forms.PropertyGrid m_launchPropGrid;
 		private System.Windows.Forms.Label m_appTypeLabel;
 		private System.Windows.Forms.ComboBox m_appTypeCombo;
+		private System.Windows.Forms.RadioButton m_sqliteMemoryRadio;
+		private System.Windows.Forms.RadioButton m_sqliteRadio;
 	}
 }

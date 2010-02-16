@@ -63,7 +63,12 @@ namespace SlimTuneUI
 			try
 			{
 				//storage = new SqlServerCompactEngine(dbFile, true);
-				storage = new SQLiteEngine(dbFile, true);
+				if(SQLiteRadio.Checked)
+					storage = new SQLiteEngine(dbFile, true);
+				else if(SQLiteMemoryRadio.Checked)
+					storage = new SQLiteMemoryEngine();
+				else
+					throw new NotImplementedException();
 			}
 			catch(Exception ex)
 			{
@@ -120,7 +125,7 @@ namespace SlimTuneUI
 				return;
 			}
 
-			if(m_resultsFileTextBox.Text == string.Empty)
+			if(m_resultsFileTextBox.Enabled && m_resultsFileTextBox.Text == string.Empty)
 			{
 				MessageBox.Show("You must enter a file to save the results to.", "Launch Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 				return;
@@ -131,6 +136,48 @@ namespace SlimTuneUI
 				return;
 
 			this.Close();
+		}
+
+		private void m_testConnectionButton_Click(object sender, EventArgs e)
+		{
+			int port = 0;
+			int.TryParse(m_portTextBox.Text, out port);
+			if(port < 1 || port > ushort.MaxValue)
+			{
+				MessageBox.Show("Port must be between 1 and 65535.", "Launch Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				return;
+			}
+
+			bool result = true;
+			using(IStorageEngine engine = new DummyStorageEngine())
+			{
+				ConnectProgress progress = new ConnectProgress("localhost", port, engine, 1);
+				progress.ShowDialog();
+				if(progress.Client != null)
+				{
+					result = true;
+					progress.Client.Dispose();
+				}
+				else
+				{
+					result = false;
+				}
+			}
+
+			if(result)
+				MessageBox.Show("Connection test was successful.", "Connection Test", MessageBoxButtons.OK, MessageBoxIcon.Information);
+		}
+
+		private void EngineChanged(object sender, EventArgs e)
+		{
+			if(SQLiteRadio.Checked)
+			{
+				m_resultsFileTextBox.Enabled = true;
+			}
+			else if(SQLiteMemoryRadio.Checked)
+			{
+				m_resultsFileTextBox.Enabled = false;
+			}
 		}
 	}
 }

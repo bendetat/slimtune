@@ -82,7 +82,12 @@ namespace SlimTuneUI
 				try
 				{
 					//storage = new SqlServerCompactEngine(dbFile, true);
-					storage = new SQLiteEngine(dbFile, true);
+					if(m_sqliteRadio.Checked)
+						storage = new SQLiteEngine(dbFile, true);
+					else if(m_sqliteMemoryRadio.Checked)
+						storage = new SQLiteMemoryEngine();
+					else
+						throw new NotImplementedException();
 				}
 				catch(Exception ex)
 				{
@@ -139,7 +144,7 @@ namespace SlimTuneUI
 
 		private void m_runButton_Click(object sender, EventArgs e)
 		{
-			if(m_connectCheckBox.Checked && m_resultsFileTextBox.Text == string.Empty)
+			if(m_connectCheckBox.Checked && m_resultsFileTextBox.Enabled && m_resultsFileTextBox.Text == string.Empty)
 			{
 				MessageBox.Show("You must enter a file to save the results to.", "Launch Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 				return;
@@ -163,6 +168,8 @@ namespace SlimTuneUI
 		private void m_connectCheckBox_CheckedChanged(object sender, EventArgs e)
 		{
 			m_connect = m_connectCheckBox.Checked;
+			m_sqliteRadio.Enabled = m_connectCheckBox.Checked;
+			m_sqliteMemoryRadio.Enabled = m_connectCheckBox.Checked;
 			m_resultsFileTextBox.Enabled = m_connectCheckBox.Checked;
 			m_browseDbButton.Enabled = m_connectCheckBox.Checked;
 			m_visualizerCombo.Enabled = m_connectCheckBox.Checked;
@@ -205,6 +212,18 @@ namespace SlimTuneUI
 		private void m_resultsFileTextBox_TextChanged(object sender, EventArgs e)
 		{
 			m_resultsFile = m_resultsFileTextBox.Text;
+		}
+
+		private void EngineChanged(object sender, EventArgs e)
+		{
+			if(m_sqliteRadio.Checked)
+			{
+				m_resultsFileTextBox.Enabled = true;
+			}
+			else if(m_sqliteMemoryRadio.Checked)
+			{
+				m_resultsFileTextBox.Enabled = false;
+			}
 		}
 	}
 }
