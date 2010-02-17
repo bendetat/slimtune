@@ -425,14 +425,21 @@ WHERE C1.CallerId = {0} AND C1.CalleeId = 0 AND C1.ThreadId = {1}
 
 		private void SnapshotCombo_Click(object sender, EventArgs e)
 		{
-			//get a list of snapshots from the storage engine
-			var snapshots = m_connection.StorageEngine.Query("SELECT * FROM Snapshots");
 			SnapshotCombo.Items.Clear();
 			SnapshotCombo.Items.Add("Current");
-			foreach(DataRow row in snapshots.Tables[0].Rows)
+			//get a list of snapshots from the storage engine -- this can fail on 0.1.x files
+			try
 			{
-				string text = string.Format("{0} - {1}", row[1], row[2]);
-				SnapshotCombo.Items.Add(text);
+				var snapshots = m_connection.StorageEngine.Query("SELECT * FROM Snapshots");
+				foreach(DataRow row in snapshots.Tables[0].Rows)
+				{
+					string text = string.Format("{0} - {1}", row[1], row[2]);
+					SnapshotCombo.Items.Add(text);
+				}
+			}
+			catch
+			{
+				//no need to do anything
 			}
 		}
 	}
