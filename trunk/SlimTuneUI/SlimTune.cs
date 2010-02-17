@@ -129,11 +129,14 @@ namespace SlimTuneUI
 		{
 			bool enable = WindowList.SelectedItem != null;
 			ShowHideButton.Enabled = enable;
-			Form form = WindowList.SelectedItem as Form;
-			if(form.Visible)
-				ShowHideButton.Text = "Hide";
-			else
-				ShowHideButton.Text = "Show";
+			if(enable)
+			{
+				Form form = WindowList.SelectedItem as Form;
+				if(form.Visible)
+					ShowHideButton.Text = "Hide";
+				else
+					ShowHideButton.Text = "Show";
+			}
 		}
 
 		private void OpenButton_Click(object sender, EventArgs e)
