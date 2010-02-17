@@ -53,29 +53,22 @@ void STDCALL SetInstrument(unsigned int id, int enable)
 	g_Profiler->SetInstrument(id, enable != 0);
 }
 
-//CounterId less than 32 is reserved for internal use
+//CounterId is automatically offset for user counters
+static const unsigned int USER_COUNTER_OFFSET = 32;
+
 void STDCALL SetCounterName(unsigned int counterId, const wchar_t* name)
 {
-	if(counterId < 32)
-		return;
-
-	g_Profiler->SetCounterName(counterId, name);
+	g_Profiler->SetCounterName(counterId + USER_COUNTER_OFFSET, name);
 }
 
 void STDCALL WritePerfCounterInt(unsigned int counterId, __int64 value)
 {
-	if(counterId < 32)
-		return;
-
-	g_Profiler->WritePerfCounter(counterId, value * 1000);
+	g_Profiler->WritePerfCounter(counterId + USER_COUNTER_OFFSET, value * 1000);
 }
 
 void STDCALL WritePerfCounterFloat(unsigned int counterId, double value)
 {
-	if(counterId < 32)
-		return;
-
-	g_Profiler->WritePerfCounter(counterId, static_cast<__int64>(value * 1000));
+	g_Profiler->WritePerfCounter(counterId + USER_COUNTER_OFFSET, static_cast<__int64>(value * 1000));
 }
 
 }
