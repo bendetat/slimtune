@@ -231,8 +231,8 @@ namespace SlimTuneUI
 
 		public override DataSet Query(string query, int limit)
 		{
-			query = query.Substring(query.IndexOf("SELECT" + 6));
-			query = "SELECT TOP " + limit.ToString() + query;
+			query = query.Substring(query.IndexOf("SELECT") + 6);
+			query = string.Format("SELECT TOP ({0}) {1}", limit.ToString(), query);
 			return Query(query);
 		}
 
