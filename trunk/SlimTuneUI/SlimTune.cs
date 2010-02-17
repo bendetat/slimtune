@@ -158,8 +158,7 @@ namespace SlimTuneUI
 			Type engineType = Utilities.FindEngine(file);
 			if(engineType == null)
 			{
-				//this should NOT happen.
-				MessageBox.Show("Unable to find an engine for the selected file. This is a bug and should be reported.",
+				MessageBox.Show(string.Format("Unable to find an engine for {0}.", file),
 					"Error Opening File", MessageBoxButtons.OK, MessageBoxIcon.Error);
 				return;
 			}
@@ -219,6 +218,39 @@ namespace SlimTuneUI
 			{
 				form.Show();
 				ShowHideButton.Text = "Hide";
+			}
+		}
+
+		private void SlimTune_DragEnter(object sender, DragEventArgs e)
+		{
+			e.Effect = DragDropEffects.None;
+			if(!e.Data.GetDataPresent(DataFormats.FileDrop))
+				return;
+
+			var files = (string[]) e.Data.GetData(DataFormats.FileDrop);
+			foreach(var file in files)
+			{
+				var engine = Utilities.FindEngine(file);
+				if(engine == null)
+					return;
+			}
+
+			e.Effect = DragDropEffects.Move;
+		}
+
+		private void SlimTune_DragDrop(object sender, DragEventArgs e)
+		{
+			if(!e.Data.GetDataPresent(DataFormats.FileDrop))
+				return;
+
+			var files = (string[]) e.Data.GetData(DataFormats.FileDrop);
+			foreach(var file in files)
+			{
+				var engine = Utilities.FindEngine(file);
+				if(engine == null)
+					continue;
+
+				OpenFile(file);
 			}
 		}
 	}

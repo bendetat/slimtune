@@ -72,7 +72,7 @@ namespace SlimTuneUI
 			// 
 			// RunLabel
 			// 
-			RunLabel.Font = new System.Drawing.Font("Verdana", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			RunLabel.Font = new System.Drawing.Font("Verdana", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
 			RunLabel.Location = new System.Drawing.Point(85, 21);
 			RunLabel.Name = "RunLabel";
 			RunLabel.Size = new System.Drawing.Size(328, 43);
@@ -82,7 +82,7 @@ namespace SlimTuneUI
 			// 
 			// ConnectLabel
 			// 
-			ConnectLabel.Font = new System.Drawing.Font("Verdana", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			ConnectLabel.Font = new System.Drawing.Font("Verdana", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
 			ConnectLabel.Location = new System.Drawing.Point(85, 21);
 			ConnectLabel.Name = "ConnectLabel";
 			ConnectLabel.Size = new System.Drawing.Size(328, 43);
@@ -92,7 +92,7 @@ namespace SlimTuneUI
 			// 
 			// OpenLabel
 			// 
-			OpenLabel.Font = new System.Drawing.Font("Verdana", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			OpenLabel.Font = new System.Drawing.Font("Verdana", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
 			OpenLabel.Location = new System.Drawing.Point(88, 21);
 			OpenLabel.Name = "OpenLabel";
 			OpenLabel.Size = new System.Drawing.Size(325, 43);
@@ -102,7 +102,7 @@ namespace SlimTuneUI
 			// 
 			// WindowList
 			// 
-			this.WindowList.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+			this.WindowList.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
 						| System.Windows.Forms.AnchorStyles.Right)));
 			this.WindowList.DisplayMember = "Text";
 			this.WindowList.FormattingEnabled = true;
@@ -116,7 +116,7 @@ namespace SlimTuneUI
 			// 
 			// ShowHideButton
 			// 
-			this.ShowHideButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+			this.ShowHideButton.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.ShowHideButton.Enabled = false;
 			this.ShowHideButton.Location = new System.Drawing.Point(504, 266);
 			this.ShowHideButton.Name = "ShowHideButton";
@@ -199,6 +199,7 @@ namespace SlimTuneUI
 			// 
 			// SlimTune
 			// 
+			this.AllowDrop = true;
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(656, 295);
@@ -207,10 +208,12 @@ namespace SlimTuneUI
 			this.Controls.Add(this.OpenFilePanel);
 			this.Controls.Add(this.ShowHideButton);
 			this.Controls.Add(this.WindowList);
-			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+			this.Icon = ((System.Drawing.Icon) (resources.GetObject("$this.Icon")));
 			this.Name = "SlimTune";
 			this.Text = "SlimTune Profiler";
+			this.DragDrop += new System.Windows.Forms.DragEventHandler(this.SlimTune_DragDrop);
 			this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.SlimTune_FormClosed);
+			this.DragEnter += new System.Windows.Forms.DragEventHandler(this.SlimTune_DragEnter);
 			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.SlimTune_FormClosing);
 			this.OpenFilePanel.ResumeLayout(false);
 			this.panel1.ResumeLayout(false);
