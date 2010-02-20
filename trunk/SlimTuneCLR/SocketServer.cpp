@@ -320,7 +320,7 @@ void SocketServer::Start()
 	m_acceptor.async_accept(conn->GetSocket(),
 		boost::bind(&SocketServer::Accept, this, conn, boost::asio::placeholders::error));
 
-	CreateTimerQueueTimer(&m_keepAliveTimer, NULL, OnTimerGlobal, this, 5000, 5000, WT_EXECUTEDEFAULT);
+	CreateTimerQueueTimer(&m_keepAliveTimer, NULL, OnTimerGlobal, this, 10000, 10000, WT_EXECUTEDEFAULT);
 }
 
 void SocketServer::Run()
