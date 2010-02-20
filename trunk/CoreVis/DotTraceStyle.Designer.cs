@@ -80,7 +80,6 @@ namespace SlimTuneUI.CoreVis
 			this.m_treeView.DrawNode += new System.Windows.Forms.DrawTreeNodeEventHandler(this.m_treeView_DrawNode);
 			this.m_treeView.BeforeExpand += new System.Windows.Forms.TreeViewCancelEventHandler(this.m_treeView_BeforeExpand);
 			this.m_treeView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.m_treeView_AfterSelect);
-			this.m_treeView.MouseMove += new System.Windows.Forms.MouseEventHandler(this.m_treeView_MouseMove);
 			this.m_treeView.BeforeSelect += new System.Windows.Forms.TreeViewCancelEventHandler(this.m_treeView_BeforeSelect);
 			// 
 			// m_toolStrip

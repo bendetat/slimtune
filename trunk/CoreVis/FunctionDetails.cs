@@ -60,7 +60,7 @@ ORDER BY HitCount DESC
 			InitializeComponent();		
 		}
 
-		public void Initialize(ProfilerWindowBase mainWindow, Connection connection)
+		public bool Initialize(ProfilerWindowBase mainWindow, Connection connection)
 		{
 			if(mainWindow == null)
 				throw new ArgumentNullException("mainWindow");
@@ -71,13 +71,18 @@ ORDER BY HitCount DESC
 			m_connection = connection;
 
 			UpdateFunctionList();
-			mainWindow.Visualizers.Add(this);
+			return true;
 		}
 
 		public void Show(Control.ControlCollection parent)
 		{
 			this.Dock = DockStyle.Fill;
 			parent.Add(this);
+		}
+
+		public void OnClose()
+		{
+			m_refreshTimer.Enabled = false;
 		}
 
 		private void UpdateFunctionList()
@@ -118,18 +123,66 @@ ORDER BY HitCount DESC
 				//SQLite can't do RIGHT OUTER JOIN and I can't figure out how to get this with a LEFT OUTER JOIN.
 				//so I'm just sending two queries instead
 				var inFunc = Convert.ToInt32(m_connection.StorageEngine.QueryScalar(string.Format(kInFunctionQuery, entry.Id)));
-				if(inFunc > 0)
-					pane.AddPieSlice((double) inFunc, m_colors.ColorForIndex(0), 0.0, "(self)");
-
 				var data = m_connection.StorageEngine.Query(string.Format(kCalleesQuery, entry.Id));
+
+				int totalHits = inFunc;
+				foreach(DataRow row in data.Tables[0].Rows)
+				{
+					int hitCount = Convert.ToInt32(row["HitCount"]);
+					totalHits += hitCount;
+				}
+
 				int index = 1;
+				double otherTotal = 0;
+				int otherCount = 0;
+				string otherName = null;
+				
+				const double Significant = 0.01;
+				double inFuncFraction = (double) inFunc / totalHits;
+				if(inFunc > 0 && inFuncFraction >= Significant)
+				{
+					//add a slice for self if it is significant
+					pane.AddPieSlice((double) inFunc, m_colors.ColorForIndex(0), 0.0, "(self)");
+				}
+				else
+				{
+					//otherwise just add it to the other pile
+					++otherCount;
+					otherName = "(self)";
+					otherTotal += inFunc;
+				}
+
 				foreach(DataRow row in data.Tables[0].Rows)
 				{
 					int id = Convert.ToInt32(row["CalleeId"]);
 					string name = Convert.ToString(row["Name"]);
 					double hitCount = Convert.ToDouble(row["HitCount"]);
 
-					pane.AddPieSlice(hitCount, m_colors.ColorForIndex(index++), 0.0, name);
+					//only take the first 8 significant results, and compile the rest into "(other)"
+					double fraction = hitCount / totalHits;
+					if(index < 8 && fraction > 0.02)
+					{
+						var slice = pane.AddPieSlice(hitCount, m_colors.ColorForIndex(1 + index++), 0.0, name);
+						if(fraction < 0.03)
+							slice.LabelType = PieLabelType.None;
+					}
+					else
+					{
+						++otherCount;
+						otherName = name;
+						otherTotal += hitCount;
+					}
+				}
+
+				//If we only found one "other" function, no sense marking it as other
+				if(otherCount == 1)
+				{
+					var slice = pane.AddPieSlice(otherTotal, m_colors.ColorForIndex(index + 1), 0.0, otherName);
+					slice.LabelType = PieLabelType.None;
+				}
+				else if(otherCount > 1)
+				{
+					pane.AddPieSlice(otherTotal, m_colors.ColorForIndex(1), 0.0, string.Format("Other: {0} functions", otherCount));
 				}
 			}
 

@@ -64,6 +64,7 @@ namespace SlimTuneUI
 			this.EngineLabel = new System.Windows.Forms.Label();
 			this.PortLabel = new System.Windows.Forms.Label();
 			this.HostLabel = new System.Windows.Forms.Label();
+			this.m_closeVisualizerButton = new System.Windows.Forms.Button();
 			this.VisualizerHost = new System.Windows.Forms.TabControl();
 			VisualizersGroupBox = new System.Windows.Forms.GroupBox();
 			VisualizersGroupBox.SuspendLayout();
@@ -136,6 +137,7 @@ namespace SlimTuneUI
 			// 
 			// MainSplitter.Panel2
 			// 
+			this.MainSplitter.Panel2.Controls.Add(this.m_closeVisualizerButton);
 			this.MainSplitter.Panel2.Controls.Add(this.VisualizerHost);
 			this.MainSplitter.Size = new System.Drawing.Size(968, 501);
 			this.MainSplitter.SplitterDistance = 200;
@@ -250,6 +252,20 @@ namespace SlimTuneUI
 			this.HostLabel.TabIndex = 4;
 			this.HostLabel.Text = "Host:";
 			// 
+			// m_closeVisualizerButton
+			// 
+			this.m_closeVisualizerButton.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.m_closeVisualizerButton.Enabled = false;
+			this.m_closeVisualizerButton.Font = new System.Drawing.Font("Verdana", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
+			this.m_closeVisualizerButton.Location = new System.Drawing.Point(744, 0);
+			this.m_closeVisualizerButton.Name = "m_closeVisualizerButton";
+			this.m_closeVisualizerButton.Size = new System.Drawing.Size(20, 20);
+			this.m_closeVisualizerButton.TabIndex = 2;
+			this.m_closeVisualizerButton.Text = "X";
+			this.m_closeVisualizerButton.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+			this.m_closeVisualizerButton.UseVisualStyleBackColor = true;
+			this.m_closeVisualizerButton.Click += new System.EventHandler(this.m_closeVisualizerButton_Click);
+			// 
 			// VisualizerHost
 			// 
 			this.VisualizerHost.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -299,6 +315,7 @@ namespace SlimTuneUI
 		private System.Windows.Forms.Label TasksLabel;
 		private System.Windows.Forms.Button ClearDataButton;
 		private System.Windows.Forms.Button SnapshotButton;
+		private System.Windows.Forms.Button m_closeVisualizerButton;
 
 	}
 }

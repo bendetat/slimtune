@@ -20,6 +20,7 @@
 * THE SOFTWARE.
 */
 using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -83,6 +84,11 @@ namespace SlimTuneUI
 
 		private void ProfilerWindow_FormClosed(object sender, FormClosedEventArgs e)
 		{
+			foreach(var vis in Visualizers)
+			{
+				vis.OnClose();
+			}
+
 			Connection.Dispose();
 			Connection = null;
 		}
@@ -95,7 +101,7 @@ namespace SlimTuneUI
 					return;
 
 				DialogResult result = MessageBox.Show("Save before exiting?", "Save?",
-					MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
+					MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button3);
 				if(result == DialogResult.Yes)
 				{
 					SaveFileDialog dlg = new SaveFileDialog();
@@ -105,6 +111,11 @@ namespace SlimTuneUI
 						Connection.StorageEngine.Save(dlg.FileName);
 					}
 				}
+				else if(result == DialogResult.Cancel)
+				{
+					e.Cancel = true;
+				}
+
 			}
 			else
 			{
@@ -122,13 +133,23 @@ namespace SlimTuneUI
 			TypeEntry visEntry = m_visualizerCombo.SelectedItem as TypeEntry;
 			if(visEntry != null && visEntry.Type != null)
 			{
-				IVisualizer visualizer = Activator.CreateInstance(visEntry.Type) as IVisualizer;
-				visualizer.Initialize(this, Connection);
-				TabPage page = new TabPage(visualizer.DisplayName);
-				visualizer.Show(page.Controls);
-				VisualizerHost.TabPages.Add(page);
-				VisualizerHost.SelectedTab = page;
+				AddVisualizer(visEntry.Type);
 			}
+		}
+
+		public void AddVisualizer(Type visType)
+		{
+			IVisualizer visualizer = (IVisualizer) Activator.CreateInstance(visType);
+			if(!visualizer.Initialize(this, Connection))
+				return;
+
+			Visualizers.Add(visualizer);
+			TabPage page = new TabPage(visualizer.DisplayName);
+			page.Tag = visualizer;
+			visualizer.Show(page.Controls);
+			VisualizerHost.TabPages.Add(page);
+			VisualizerHost.SelectedTab = page;
+			m_closeVisualizerButton.Enabled = true;
 		}
 
 		private void ClearDataButton_Click(object sender, EventArgs e)
@@ -149,6 +170,32 @@ namespace SlimTuneUI
 
 			Connection.StorageEngine.Snapshot("User snapshot");
 			MessageBox.Show("Snapshot saved", "Take Snapshot");
+		}
+
+		private void m_closeVisualizerButton_Click(object sender, EventArgs e)
+		{
+			var tab = VisualizerHost.SelectedTab;
+			int index = VisualizerHost.SelectedIndex;
+			if(tab != null)
+			{
+				var vis = (IVisualizer) tab.Tag;
+				vis.OnClose();
+				Visualizers.Remove(vis);
+				VisualizerHost.TabPages.Remove(tab);
+
+				//Select the next tab to the right, or the rightmost tab
+				if(VisualizerHost.TabPages.Count > index)
+					VisualizerHost.SelectedIndex = index;
+				else if(VisualizerHost.TabPages.Count > 0)
+					VisualizerHost.SelectedIndex = VisualizerHost.TabPages.Count - 1;
+			}
+
+			Debug.Assert(Visualizers.Count == VisualizerHost.TabPages.Count);
+
+			if(VisualizerHost.TabPages.Count == 0)
+			{
+				m_closeVisualizerButton.Enabled = false;
+			}				
 		}
 
 		/*private void SuspendButton_Click(object sender, EventArgs e)

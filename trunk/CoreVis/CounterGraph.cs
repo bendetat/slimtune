@@ -45,7 +45,7 @@ ORDER BY Time DESC
 			InitializeComponent();
 		}
 
-		public void Initialize(ProfilerWindowBase mainWindow, Connection connection)
+		public bool Initialize(ProfilerWindowBase mainWindow, Connection connection)
 		{
 			if(mainWindow == null)
 				throw new ArgumentNullException("mainWindow");
@@ -55,19 +55,33 @@ ORDER BY Time DESC
 			m_mainWindow = mainWindow;
 			m_connection = connection;
 
-			mainWindow.Visualizers.Add(this);
-
 			Graph.GraphPane.Title.Text = "Performance Counters";
 			Graph.GraphPane.XAxis.Title.Text = "Time";
 			Graph.GraphPane.YAxis.Title.Text = "Value";
 
-			UpdateCounters();
+			try
+			{
+				UpdateCounters();
+				m_refreshTimer.Enabled = true;
+				return true;
+			}
+			catch
+			{
+				MessageBox.Show("This connection does not have any performance counter data.", "Performance Counter Visualizer",
+					MessageBoxButtons.OK, MessageBoxIcon.Error);
+				return false;
+			}
 		}
 
 		public void Show(Control.ControlCollection parent)
 		{
 			this.Dock = DockStyle.Fill;
 			parent.Add(this);
+		}
+
+		public void OnClose()
+		{
+			m_refreshTimer.Enabled = false;
 		}
 
 		private void UpdateCounters()

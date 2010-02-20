@@ -243,6 +243,7 @@ namespace SlimTuneUI
 			this.MinimizeBox = false;
 			this.Name = "RunDialog";
 			this.Text = "RunDialog";
+			this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.RunDialog_FormClosed);
 			this.m_frontendOptionsGroupBox.ResumeLayout(false);
 			this.m_frontendOptionsGroupBox.PerformLayout();
 			this.ResumeLayout(false);

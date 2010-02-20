@@ -208,7 +208,9 @@ namespace SlimTuneUI
 			this.Controls.Add(this.OpenFilePanel);
 			this.Controls.Add(this.ShowHideButton);
 			this.Controls.Add(this.WindowList);
+			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
 			this.Icon = ((System.Drawing.Icon) (resources.GetObject("$this.Icon")));
+			this.MinimizeBox = false;
 			this.Name = "SlimTune";
 			this.Text = "SlimTune Profiler";
 			this.DragDrop += new System.Windows.Forms.DragEventHandler(this.SlimTune_DragDrop);

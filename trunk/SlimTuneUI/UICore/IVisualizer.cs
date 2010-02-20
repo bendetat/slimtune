@@ -30,7 +30,8 @@ namespace UICore
 	{
 		string DisplayName { get; }
 
-		void Initialize(ProfilerWindowBase mainWindow, Connection connection);
+		bool Initialize(ProfilerWindowBase mainWindow, Connection connection);
 		void Show(System.Windows.Forms.Control.ControlCollection parent);
+		void OnClose();
 	}
 }

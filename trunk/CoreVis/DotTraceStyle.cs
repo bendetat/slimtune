@@ -156,7 +156,7 @@ WHERE C1.CallerId = {0} AND C1.CalleeId = 0 AND C1.ThreadId = {1}
 			m_filteredFonts.Add(new Font(fontName, fontSize, FontStyle.Bold), Brushes.DimGray);
 		}
 
-		public void Initialize(ProfilerWindowBase mainWindow, Connection connection)
+		public bool Initialize(ProfilerWindowBase mainWindow, Connection connection)
 		{
 			if(mainWindow == null)
 				throw new ArgumentNullException("mainWindow");
@@ -166,14 +166,18 @@ WHERE C1.CallerId = {0} AND C1.CalleeId = 0 AND C1.ThreadId = {1}
 			m_mainWindow = mainWindow;
 			m_connection = connection;
 
-			mainWindow.Visualizers.Add(this);
 			UpdateTopLevel();
+			return true;
 		}
 
 		public void Show(Control.ControlCollection parent)
 		{
 			this.Dock = DockStyle.Fill;
 			parent.Add(this);
+		}
+
+		public void OnClose()
+		{
 		}
 
 		private static void BreakName(string name, out string signature, out string funcName, out string classAndFunc, out string baseName)
@@ -218,6 +222,8 @@ WHERE C1.CallerId = {0} AND C1.CalleeId = 0 AND C1.ThreadId = {1}
 
 		private void UpdateTopLevel()
 		{
+			m_extraInfoTextBox.Text = string.Empty;
+
 			using(var transact = new TransactionHandle(m_connection.StorageEngine))
 			{
 				var data = m_connection.StorageEngine.Query(kTopLevelQuery);
@@ -375,6 +381,18 @@ WHERE C1.CallerId = {0} AND C1.CalleeId = 0 AND C1.ThreadId = {1}
 				Rectangle rect = new Rectangle(rectX, child.Bounds.Y, m_treeView.Width, child.Bounds.Height);
 				m_treeView.Invalidate(rect);
 			}
+
+			//Update the extra info text
+			var node = e.Node;
+			if(node != null && node.Tag != null)
+			{
+				NodeData data = node.Tag as NodeData;
+				m_extraInfoTextBox.Text = data.TipText;
+			}
+			else
+			{
+				m_extraInfoTextBox.Text = string.Empty;
+			}
 		}
 
 		private void m_treeView_BeforeSelect(object sender, TreeViewCancelEventArgs e)
@@ -406,21 +424,6 @@ WHERE C1.CallerId = {0} AND C1.CalleeId = 0 AND C1.ThreadId = {1}
 		private void FilterMenu_Click(object sender, EventArgs e)
 		{
 			m_treeView.Invalidate();
-		}
-
-		private void m_treeView_MouseMove(object sender, MouseEventArgs e)
-		{
-			TreeNode node = m_treeView.GetNodeAt(e.X, e.Y);
-
-			if(node != null && node.Tag != null)
-			{
-				NodeData data = node.Tag as NodeData;
-				m_extraInfoTextBox.Text = data.TipText;
-			}
-			else
-			{
-				m_extraInfoTextBox.Text = string.Empty;
-			}
 		}
 
 		private void SnapshotCombo_Click(object sender, EventArgs e)

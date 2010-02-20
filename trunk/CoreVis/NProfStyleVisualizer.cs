@@ -51,7 +51,7 @@ namespace SlimTuneUI.CoreVis
 			InitializeComponent();
 		}
 
-		public void Initialize(ProfilerWindowBase mainWindow, Connection connection)
+		public bool Initialize(ProfilerWindowBase mainWindow, Connection connection)
 		{
 			if(mainWindow == null)
 				throw new ArgumentNullException("mainWindow");
@@ -71,12 +71,18 @@ namespace SlimTuneUI.CoreVis
 			ColumnClicked(m_callees, new TreeColumnEventArgs(m_calleesPercentParentColumn));
 			ColumnClicked(m_callers, new TreeColumnEventArgs(m_callersPercentTimeColumn));
 			ColumnClicked(m_callers, new TreeColumnEventArgs(m_callersPercentTimeColumn));
+
+			return true;
 		}
 
 		public void Show(Control.ControlCollection parent)
 		{
 			this.Dock = DockStyle.Fill;
 			parent.Add(this);
+		}
+
+		public void OnClose()
+		{
 		}
 
 		private void m_refreshButton_Click(object sender, EventArgs e)

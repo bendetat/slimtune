@@ -75,7 +75,7 @@ namespace SlimTuneUI
 			InitializeComponent();
 		}
 
-		public void Initialize(ProfilerWindowBase mainWindow, Connection connection)
+		public bool Initialize(ProfilerWindowBase mainWindow, Connection connection)
 		{
 			if(connection == null)
 				throw new ArgumentNullException("connection");
@@ -84,12 +84,17 @@ namespace SlimTuneUI
 			m_connection.Closing += new EventHandler(m_connection_Closing);
 
 			this.Text = Utilities.GetStandardCaption(connection);
+			return true;
 		}
 
 		public void Show(Control.ControlCollection parent)
 		{
 			this.Dock = DockStyle.Fill;
 			parent.Add(this);
+		}
+
+		public void OnClose()
+		{
 		}
 
 		void m_connection_Closing(object sender, EventArgs e)

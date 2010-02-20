@@ -20,6 +20,9 @@
 * THE SOFTWARE.
 */
 using System;
+using System.IO;
+using System.IO.IsolatedStorage;
+using System.Xml.Serialization;
 using System.Windows.Forms;
 
 using UICore;
@@ -28,11 +31,13 @@ namespace SlimTuneUI
 {
 	public partial class RunDialog : Form
 	{
+		const string ConfigFile = "launcherConfig";
+
 		SlimTune m_mainWindow;
 
 		//saved configuration
 		static ILauncher m_launcher;
-		static int m_launcherIndex;
+		static int m_launcherIndex = 0;
 		static bool m_connect = true;
 		static string m_resultsFile;
 		static int m_visIndex;
@@ -47,15 +52,53 @@ namespace SlimTuneUI
 			{
 				m_appTypeCombo.Items.Add(launcher);
 			}
+
+			//select an initial launcher
 			m_appTypeCombo.SelectedIndex = m_launcherIndex;
+			if(m_launcher == null)
+			{
+				try
+				{
+					//try and load a launcher configuration from isolated storage
+					var isoStore = IsolatedStorageFile.GetUserStoreForAssembly();
+					using(var configFile = new IsolatedStorageFileStream(ConfigFile, FileMode.Open, FileAccess.Read, isoStore))
+					{
+						//read the concrete type to deserialize
+						var sr = new StreamReader(configFile);
+						var launcherTypeName = sr.ReadLine();
+						var launcherType = Type.GetType(launcherTypeName, true);
+
+						//read the actual object
+						XmlSerializer serializer = new XmlSerializer(launcherType);
+						m_launcher = (ILauncher) serializer.Deserialize(sr);
+
+						//select the correct item in the combo box
+						foreach(TypeEntry item in m_appTypeCombo.Items)
+						{
+							if(item.Type == launcherType)
+							{
+								m_appTypeCombo.SelectedItem = item;
+								break;
+							}
+						}
+					}
+				}
+				catch
+				{
+					//couldn't load the launcher, for whatever reason
+				}
+			}
+
 			//add the handler AFTER setting the correct selected index
 			m_appTypeCombo.SelectedIndexChanged += new EventHandler(m_appTypeCombo_SelectedIndexChanged);
-			//run the handler if necessary
+
+			//run the index changed handler if we didn't get a launcher from file
 			if(m_launcher == null)
 			{
 				m_launcherIndex = -1;
 				m_appTypeCombo_SelectedIndexChanged(m_appTypeCombo, EventArgs.Empty);
 			}
+
 			m_launchPropGrid.SelectedObject = m_launcher;
 
 			//enumerate all the visualizers
@@ -114,7 +157,7 @@ namespace SlimTuneUI
 					Connection conn = new Connection(storage);
 					conn.Executable = m_launcher.Name;
 					conn.RunClient(progress.Client);
-					//TODO: set options
+					//TODO: set options like auto snapshot frequency
 					conn.SetAutoSnapshots(10000, false);
 
 					var profilerWindow = new ProfilerWindow(m_mainWindow, conn);
@@ -122,14 +165,8 @@ namespace SlimTuneUI
 
 					TypeEntry visEntry = m_visualizerCombo.SelectedItem as TypeEntry;
 					if(visEntry != null && visEntry.Type != null)
-					{
-						IVisualizer visualizer = Activator.CreateInstance(visEntry.Type) as IVisualizer;
-						visualizer.Initialize(profilerWindow, conn);
-						TabPage page = new TabPage(visualizer.DisplayName);
-						visualizer.Show(page.Controls);
-						profilerWindow.VisualizerHost.TabPages.Add(page);
-						profilerWindow.VisualizerHost.SelectedTab = page;
-					}
+						profilerWindow.AddVisualizer(visEntry.Type);
+
 					profilerWindow.BringToFront();
 				}
 				else
@@ -223,6 +260,24 @@ namespace SlimTuneUI
 			else if(m_sqliteMemoryRadio.Checked)
 			{
 				m_resultsFileTextBox.Enabled = false;
+			}
+		}
+
+		private void RunDialog_FormClosed(object sender, FormClosedEventArgs e)
+		{
+			//save the launcher configuration to isolated storage
+			var isoStore = IsolatedStorageFile.GetUserStoreForAssembly();
+			using(var configFile = new IsolatedStorageFileStream(ConfigFile, FileMode.Create, FileAccess.Write, isoStore))
+			{
+				var launcherType = m_launcher.GetType();
+				//write the concrete type so we know what to deserialize
+				string launcherTypeName = launcherType.AssemblyQualifiedName;
+				var sw = new StreamWriter(configFile);
+				sw.WriteLine(launcherTypeName);
+
+				//write the object itself
+				var serializer = new XmlSerializer(launcherType);
+				serializer.Serialize(sw, m_launcher);
 			}
 		}
 	}
