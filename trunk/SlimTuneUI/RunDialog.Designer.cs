@@ -53,6 +53,8 @@ namespace SlimTuneUI
 			this.m_runButton = new System.Windows.Forms.Button();
 			this.m_saveResultsDialog = new System.Windows.Forms.SaveFileDialog();
 			this.m_frontendOptionsGroupBox = new System.Windows.Forms.GroupBox();
+			this.m_sqliteMemoryRadio = new System.Windows.Forms.RadioButton();
+			this.m_sqliteRadio = new System.Windows.Forms.RadioButton();
 			this.m_visualizerLabel = new System.Windows.Forms.Label();
 			this.m_visualizerCombo = new System.Windows.Forms.ComboBox();
 			this.m_connectCheckBox = new System.Windows.Forms.CheckBox();
@@ -63,8 +65,6 @@ namespace SlimTuneUI
 			this.m_launchPropGrid = new System.Windows.Forms.PropertyGrid();
 			this.m_appTypeLabel = new System.Windows.Forms.Label();
 			this.m_appTypeCombo = new System.Windows.Forms.ComboBox();
-			this.m_sqliteMemoryRadio = new System.Windows.Forms.RadioButton();
-			this.m_sqliteRadio = new System.Windows.Forms.RadioButton();
 			this.m_frontendOptionsGroupBox.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -87,7 +87,8 @@ namespace SlimTuneUI
 			// 
 			// m_frontendOptionsGroupBox
 			// 
-			this.m_frontendOptionsGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.m_frontendOptionsGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
+						| System.Windows.Forms.AnchorStyles.Right)));
 			this.m_frontendOptionsGroupBox.Controls.Add(this.m_sqliteMemoryRadio);
 			this.m_frontendOptionsGroupBox.Controls.Add(this.m_sqliteRadio);
 			this.m_frontendOptionsGroupBox.Controls.Add(this.m_visualizerLabel);
@@ -102,6 +103,30 @@ namespace SlimTuneUI
 			this.m_frontendOptionsGroupBox.TabIndex = 16;
 			this.m_frontendOptionsGroupBox.TabStop = false;
 			this.m_frontendOptionsGroupBox.Text = "Front-end Options";
+			// 
+			// m_sqliteMemoryRadio
+			// 
+			this.m_sqliteMemoryRadio.AutoSize = true;
+			this.m_sqliteMemoryRadio.Location = new System.Drawing.Point(73, 42);
+			this.m_sqliteMemoryRadio.Name = "m_sqliteMemoryRadio";
+			this.m_sqliteMemoryRadio.Size = new System.Drawing.Size(109, 17);
+			this.m_sqliteMemoryRadio.TabIndex = 24;
+			this.m_sqliteMemoryRadio.Text = "SQLite In-Memory";
+			this.m_sqliteMemoryRadio.UseVisualStyleBackColor = true;
+			this.m_sqliteMemoryRadio.CheckedChanged += new System.EventHandler(this.EngineChanged);
+			// 
+			// m_sqliteRadio
+			// 
+			this.m_sqliteRadio.AutoSize = true;
+			this.m_sqliteRadio.Checked = true;
+			this.m_sqliteRadio.Location = new System.Drawing.Point(9, 42);
+			this.m_sqliteRadio.Name = "m_sqliteRadio";
+			this.m_sqliteRadio.Size = new System.Drawing.Size(57, 17);
+			this.m_sqliteRadio.TabIndex = 23;
+			this.m_sqliteRadio.TabStop = true;
+			this.m_sqliteRadio.Text = "SQLite";
+			this.m_sqliteRadio.UseVisualStyleBackColor = true;
+			this.m_sqliteRadio.CheckedChanged += new System.EventHandler(this.EngineChanged);
 			// 
 			// m_visualizerLabel
 			// 
@@ -203,30 +228,6 @@ namespace SlimTuneUI
 			this.m_appTypeCombo.Size = new System.Drawing.Size(433, 21);
 			this.m_appTypeCombo.TabIndex = 19;
 			this.m_appTypeCombo.ValueMember = "Type";
-			// 
-			// m_sqliteMemoryRadio
-			// 
-			this.m_sqliteMemoryRadio.AutoSize = true;
-			this.m_sqliteMemoryRadio.Location = new System.Drawing.Point(73, 42);
-			this.m_sqliteMemoryRadio.Name = "m_sqliteMemoryRadio";
-			this.m_sqliteMemoryRadio.Size = new System.Drawing.Size(109, 17);
-			this.m_sqliteMemoryRadio.TabIndex = 24;
-			this.m_sqliteMemoryRadio.Text = "SQLite In-Memory";
-			this.m_sqliteMemoryRadio.UseVisualStyleBackColor = true;
-			this.m_sqliteMemoryRadio.CheckedChanged += new System.EventHandler(this.EngineChanged);
-			// 
-			// m_sqliteRadio
-			// 
-			this.m_sqliteRadio.AutoSize = true;
-			this.m_sqliteRadio.Checked = true;
-			this.m_sqliteRadio.Location = new System.Drawing.Point(9, 42);
-			this.m_sqliteRadio.Name = "m_sqliteRadio";
-			this.m_sqliteRadio.Size = new System.Drawing.Size(57, 17);
-			this.m_sqliteRadio.TabIndex = 23;
-			this.m_sqliteRadio.TabStop = true;
-			this.m_sqliteRadio.Text = "SQLite";
-			this.m_sqliteRadio.UseVisualStyleBackColor = true;
-			this.m_sqliteRadio.CheckedChanged += new System.EventHandler(this.EngineChanged);
 			// 
 			// RunDialog
 			// 

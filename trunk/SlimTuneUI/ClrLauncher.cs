@@ -67,9 +67,6 @@ namespace SlimTuneUI
 		{
 			ListenPort = 3000;
 			SamplingInterval = 5;
-			PerformanceCounters.Add(@"Process\% Processor Time");
-			PerformanceCounters.Add(@"Process\Private Bytes");
-			PerformanceCounters.Add(@".NET CLR Memory\# GC Handles");
 		}
 
 		public override bool CheckParams()

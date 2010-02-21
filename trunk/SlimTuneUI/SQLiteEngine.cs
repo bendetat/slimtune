@@ -189,7 +189,11 @@ namespace SlimTuneUI
 
 		public override void Save(string file)
 		{
-			throw new NotImplementedException();
+			lock(m_lock)
+			{
+				Flush();
+				m_database.Backup(file);
+			}
 		}
 
 		public override void Snapshot(string name)
@@ -311,6 +315,9 @@ namespace SlimTuneUI
 			m_database.Execute("PRAGMA synchronous=OFF");
 			m_database.Execute("PRAGMA journal_mode=MEMORY");
 
+			m_database.Execute("CREATE TABLE Properties (Name TEXT (256), Value TEXT (256))");
+			WriteProperties();
+
 			m_database.Execute("CREATE TABLE Snapshots (Id INT PRIMARY KEY, Name TEXT (256), DateTime INTEGER)");
 			m_database.Execute("CREATE TABLE Functions (Id INT PRIMARY KEY, ClassId INT, IsNative INT NOT NULL, Name TEXT (1024), Signature TEXT (2048))");
 			m_database.Execute("CREATE TABLE Classes (Id INT PRIMARY KEY, Name TEXT (1024))");
@@ -334,6 +341,18 @@ namespace SlimTuneUI
 			m_database.Execute("CREATE TABLE Counters (Id INT PRIMARY KEY, Name TEXT(256))");
 			m_database.Execute("CREATE TABLE CounterValues (CounterId INT, Time INT, Value INT)");
 			m_database.Execute("CREATE INDEX CounterValues_IdIndex ON Counters(Id);");
+		}
+
+		private void WriteProperty(string name, string value)
+		{
+			m_database.Execute(string.Format("INSERT INTO Properties (Name, Value) VALUES ('{0}', '{1}')", name, value));
+		}
+
+		private void WriteProperties()
+		{
+			WriteProperty("Application", "SlimTune Profiler");
+			WriteProperty("Version", System.Windows.Forms.Application.ProductVersion);
+			WriteProperty("FileVersion", "2");
 		}
 
 		private void PrepareCommands()

@@ -127,6 +127,39 @@ namespace SlimTuneUI
 			SQLiteFunctions.CheckError(result, error);
 		}
 
+		public void Backup(string file)
+		{
+			IntPtr dest;
+			var result = SQLiteFunctions.Open(file, out dest);
+			SQLiteFunctions.CheckError(result);
+
+			IntPtr error;
+			SQLiteFunctions.Exec(dest, "PRAGMA count_changes=TRUE", null, IntPtr.Zero, out error);
+			SQLiteFunctions.Exec(dest, "PRAGMA journal_mode=MEMORY", null, IntPtr.Zero, out error);
+			SQLiteFunctions.Exec(dest, "PRAGMA synchronous=OFF", null, IntPtr.Zero, out error);
+
+			try
+			{
+				var backup = SQLiteFunctions.BackupInit(dest, "main", m_database, "main");
+				if(backup == IntPtr.Zero)
+					throw new InvalidOperationException();
+
+				do
+				{
+					result = SQLiteFunctions.BackupStep(backup, 5);
+					if(result == (int) SQLiteError.BUSY)
+						System.Threading.Thread.Sleep(250);
+				} while(result == (int) SQLiteError.OK || result == (int) SQLiteError.BUSY || result == (int) SQLiteError.LOCKED);
+
+				result = SQLiteFunctions.BackupFinish(backup);
+				SQLiteFunctions.CheckError(result);
+			}
+			finally
+			{
+				SQLiteFunctions.Close(dest);
+			}
+		}
+
 		#region IDisposable Members
 
 		public void Dispose()
@@ -327,5 +360,15 @@ namespace SlimTuneUI
 
 		[DllImport(Dll, EntryPoint = "sqlite3_bind_text16")]
 		public static extern int BindText(IntPtr statement, int param, [MarshalAs(UnmanagedType.LPWStr)] string value, int bytes, IntPtr dtor);
+
+		[DllImport(Dll, EntryPoint = "sqlite3_backup_init")]
+		public static extern IntPtr BackupInit(IntPtr destDb, [MarshalAs(UnmanagedType.LPStr)] string destName,
+			IntPtr sourceDb, [MarshalAs(UnmanagedType.LPStr)] string sourceName);
+
+		[DllImport(Dll, EntryPoint = "sqlite3_backup_step")]
+		public static extern int BackupStep(IntPtr backup, int page);
+
+		[DllImport(Dll, EntryPoint = "sqlite3_backup_finish")]
+		public static extern int BackupFinish(IntPtr backup);
 	}
 }

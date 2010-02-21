@@ -57,36 +57,7 @@ namespace SlimTuneUI
 			m_appTypeCombo.SelectedIndex = m_launcherIndex;
 			if(m_launcher == null)
 			{
-				try
-				{
-					//try and load a launcher configuration from isolated storage
-					var isoStore = IsolatedStorageFile.GetUserStoreForAssembly();
-					using(var configFile = new IsolatedStorageFileStream(ConfigFile, FileMode.Open, FileAccess.Read, isoStore))
-					{
-						//read the concrete type to deserialize
-						var sr = new StreamReader(configFile);
-						var launcherTypeName = sr.ReadLine();
-						var launcherType = Type.GetType(launcherTypeName, true);
-
-						//read the actual object
-						XmlSerializer serializer = new XmlSerializer(launcherType);
-						m_launcher = (ILauncher) serializer.Deserialize(sr);
-
-						//select the correct item in the combo box
-						foreach(TypeEntry item in m_appTypeCombo.Items)
-						{
-							if(item.Type == launcherType)
-							{
-								m_appTypeCombo.SelectedItem = item;
-								break;
-							}
-						}
-					}
-				}
-				catch
-				{
-					//couldn't load the launcher, for whatever reason
-				}
+				LoadLauncherConfig();
 			}
 
 			//add the handler AFTER setting the correct selected index
@@ -179,6 +150,43 @@ namespace SlimTuneUI
 			return true;
 		}
 
+		private void LoadLauncherConfig()
+		{
+			try
+			{
+				//try and load a launcher configuration from isolated storage
+				using(var isoStore = IsolatedStorageFile.GetUserStoreForAssembly())
+				{
+					var configFile = new IsolatedStorageFileStream(ConfigFile, FileMode.Open, FileAccess.Read, isoStore);
+					using(var sr = new StreamReader(configFile))
+					{
+						//read the concrete type to deserialize
+						var launcherTypeName = sr.ReadLine();
+						var launcherType = Type.GetType(launcherTypeName, true);
+
+						//read the actual object
+						XmlSerializer serializer = new XmlSerializer(launcherType);
+						m_launcher = (ILauncher) serializer.Deserialize(sr);
+
+						//select the correct item in the combo box
+						foreach(TypeEntry item in m_appTypeCombo.Items)
+						{
+							if(item.Type == launcherType)
+							{
+								m_appTypeCombo.SelectedItem = item;
+								break;
+							}
+						}
+					}
+					isoStore.Close();
+				}
+			}
+			catch
+			{
+				//couldn't load the launcher, for whatever reason
+			}
+		}
+
 		private void m_runButton_Click(object sender, EventArgs e)
 		{
 			if(m_connectCheckBox.Checked && m_resultsFileTextBox.Enabled && m_resultsFileTextBox.Text == string.Empty)
@@ -265,19 +273,30 @@ namespace SlimTuneUI
 
 		private void RunDialog_FormClosed(object sender, FormClosedEventArgs e)
 		{
-			//save the launcher configuration to isolated storage
-			var isoStore = IsolatedStorageFile.GetUserStoreForAssembly();
-			using(var configFile = new IsolatedStorageFileStream(ConfigFile, FileMode.Create, FileAccess.Write, isoStore))
+			try
 			{
-				var launcherType = m_launcher.GetType();
-				//write the concrete type so we know what to deserialize
-				string launcherTypeName = launcherType.AssemblyQualifiedName;
-				var sw = new StreamWriter(configFile);
-				sw.WriteLine(launcherTypeName);
+				//save the launcher configuration to isolated storage
+				using(var isoStore = IsolatedStorageFile.GetUserStoreForAssembly())
+				{
+					var configFile = new IsolatedStorageFileStream(ConfigFile, FileMode.Create, FileAccess.Write, isoStore);
+					using(var sw = new StreamWriter(configFile))
+					{
+						var launcherType = m_launcher.GetType();
+						//write the concrete type so we know what to deserialize
+						string launcherTypeName = launcherType.AssemblyQualifiedName;
+						sw.WriteLine(launcherTypeName);
 
-				//write the object itself
-				var serializer = new XmlSerializer(launcherType);
-				serializer.Serialize(sw, m_launcher);
+						//write the object itself
+						var serializer = new XmlSerializer(launcherType);
+						serializer.Serialize(sw, m_launcher);
+					}
+					isoStore.Close();
+				}
+			}
+			catch(Exception ex)
+			{
+				//not catching a problem here will cause the window not to close, which sucks
+				MessageBox.Show("Please report a bug: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
 		}
 	}

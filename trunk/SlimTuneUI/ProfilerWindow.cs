@@ -93,31 +93,54 @@ namespace SlimTuneUI
 			Connection = null;
 		}
 
+		private void PromptSave()
+		{
+			SaveFileDialog dlg = new SaveFileDialog();
+			dlg.Filter = string.Format("Results file (*.{0})|*.{0}", Connection.StorageEngine.Extension);
+			dlg.AddExtension = true;
+
+			while(true)
+			{
+				DialogResult saveResult = dlg.ShowDialog(this);
+				if(saveResult == DialogResult.OK)
+				{
+					try
+					{
+						Connection.StorageEngine.Save(dlg.FileName);
+						return;
+					}
+					catch
+					{
+						MessageBox.Show("Unable to save results file.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+					}
+				}
+				else
+				{
+					return;
+				}
+			}
+		}
+
 		private void ProfilerWindow_FormClosing(object sender, FormClosingEventArgs e)
 		{
-			if(m_mainWindow.IsClosing)
-			{
-				if(!Connection.StorageEngine.InMemory)
-					return;
+			if(m_mainWindow.IsClosing && !Connection.StorageEngine.InMemory)
+				return;
 
+			//TODO: Saving of SQLite in-memory databases does not currently work for some reason
+			/*if(Connection.StorageEngine.InMemory)
+			{
 				DialogResult result = MessageBox.Show("Save before exiting?", "Save?",
 					MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button3);
 				if(result == DialogResult.Yes)
 				{
-					SaveFileDialog dlg = new SaveFileDialog();
-					DialogResult saveResult = dlg.ShowDialog(this);
-					if(saveResult == DialogResult.OK)
-					{
-						Connection.StorageEngine.Save(dlg.FileName);
-					}
+					PromptSave();
 				}
 				else if(result == DialogResult.Cancel)
 				{
 					e.Cancel = true;
 				}
-
 			}
-			else
+			else*/
 			{
 				DialogResult result = MessageBox.Show("Close this connection?", "Close Connection",
 					MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
