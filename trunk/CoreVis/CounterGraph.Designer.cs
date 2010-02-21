@@ -53,7 +53,6 @@
 			// 
 			// m_refreshTimer
 			// 
-			this.m_refreshTimer.Enabled = true;
 			this.m_refreshTimer.Interval = 1000;
 			this.m_refreshTimer.Tick += new System.EventHandler(this.m_refreshTimer_Tick);
 			// 

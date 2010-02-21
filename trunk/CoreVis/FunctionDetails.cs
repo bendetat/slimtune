@@ -25,7 +25,7 @@ JOIN (
 ) C
 ON F.Id = C.CallerId
 WHERE Name LIKE '%{0}%'
-ORDER BY HitCount DESC
+ORDER BY Name
 ";
 
 		const string kInFunctionQuery = @"
@@ -186,6 +186,7 @@ ORDER BY HitCount DESC
 				}
 			}
 
+			pane.Title.Text = entry.Name;
 			pane.AxisChange();
 			DetailsGraph.Refresh();
 		}
