@@ -172,30 +172,57 @@ namespace SlimTuneUI
 			MessageBox.Show("Snapshot saved", "Take Snapshot");
 		}
 
-		private void m_closeVisualizerButton_Click(object sender, EventArgs e)
+		private void CloseTab(int index)
 		{
-			var tab = VisualizerHost.SelectedTab;
-			int index = VisualizerHost.SelectedIndex;
-			if(tab != null)
-			{
-				var vis = (IVisualizer) tab.Tag;
-				vis.OnClose();
-				Visualizers.Remove(vis);
-				VisualizerHost.TabPages.Remove(tab);
+			var tab = VisualizerHost.TabPages[index];
 
+			if(tab == VisualizerHost.SelectedTab)
+			{
 				//Select the next tab to the right, or the rightmost tab
-				if(VisualizerHost.TabPages.Count > index)
-					VisualizerHost.SelectedIndex = index;
-				else if(VisualizerHost.TabPages.Count > 0)
-					VisualizerHost.SelectedIndex = VisualizerHost.TabPages.Count - 1;
+				if(VisualizerHost.TabPages.Count > index + 1)
+					VisualizerHost.SelectedIndex = index + 1;
+				else if(VisualizerHost.TabPages.Count > 1)
+					VisualizerHost.SelectedIndex = VisualizerHost.TabPages.Count - 2;
 			}
+
+			//close down the visualizer and its associated tab
+			var vis = (IVisualizer) tab.Tag;
+			vis.OnClose();
+			Visualizers.Remove(vis);
+			VisualizerHost.TabPages.Remove(tab);
 
 			Debug.Assert(Visualizers.Count == VisualizerHost.TabPages.Count);
 
 			if(VisualizerHost.TabPages.Count == 0)
 			{
 				m_closeVisualizerButton.Enabled = false;
-			}				
+			}
+		}
+
+		private void m_closeVisualizerButton_Click(object sender, EventArgs e)
+		{
+			var tab = VisualizerHost.SelectedTab;
+			int index = VisualizerHost.SelectedIndex;
+			if(tab != null)
+			{
+				CloseTab(index);
+			}
+		}
+
+		private void VisualizerHost_MouseClick(object sender, MouseEventArgs e)
+		{
+			if(e.Button == MouseButtons.Middle)
+			{
+				Point pos = e.Location;
+				for(int i = 0; i < VisualizerHost.TabPages.Count; ++i)
+				{
+					if(VisualizerHost.GetTabRect(i).Contains(e.Location))
+					{
+						CloseTab(i);
+						break;
+					}
+				}
+			}
 		}
 
 		/*private void SuspendButton_Click(object sender, EventArgs e)

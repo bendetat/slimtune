@@ -274,6 +274,7 @@ namespace SlimTuneUI
 			this.VisualizerHost.SelectedIndex = 0;
 			this.VisualizerHost.Size = new System.Drawing.Size(764, 501);
 			this.VisualizerHost.TabIndex = 1;
+			this.VisualizerHost.MouseClick += new System.Windows.Forms.MouseEventHandler(this.VisualizerHost_MouseClick);
 			// 
 			// ProfilerWindow
 			// 
