@@ -22,7 +22,7 @@
 ; NOTE: The value of AppId uniquely identifies this application.
 ; Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-AppId={72513408-FD69-404F-9FDB-2DB6A7DCDE84}
+AppId={{72513408-FD69-404F-9FDB-2DB6A7DCDE84}
 AppName=SlimTune Profiler
 AppVerName=SlimTune Profiler v0.2.1
 AppPublisher=SlimDX Group
@@ -68,6 +68,7 @@ Root: HKLM; Subkey: "Software\SlimDX Group\SlimTune"; ValueType: string; ValueNa
 
 [Icons]
 Name: "{group}\SlimTune Profiler"; Filename: "{app}\SlimTuneUI.exe"
+Name: "{group}\SlimTune Help"; Filename: "{app}\SlimTune.chm"
 Name: "{group}\{cm:UninstallProgram,SlimTune Profiler}"; Filename: "{uninstallexe}"
 
 [Tasks]
