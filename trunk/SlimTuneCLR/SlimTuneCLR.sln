@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SlimTuneCLR", "SlimTuneCLR.vcproj", "{5827871E-4FFC-4EBE-81C2-069BD99E18AB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlimTuneApi", "SlimTuneApi\SlimTuneApi.csproj", "{03AB76C5-F116-4A55-9BA6-3F9B60F98F90}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -19,6 +21,14 @@ Global
 		{5827871E-4FFC-4EBE-81C2-069BD99E18AB}.Release|x64.Build.0 = Release|x64
 		{5827871E-4FFC-4EBE-81C2-069BD99E18AB}.Release|x86.ActiveCfg = Release|Win32
 		{5827871E-4FFC-4EBE-81C2-069BD99E18AB}.Release|x86.Build.0 = Release|Win32
+		{03AB76C5-F116-4A55-9BA6-3F9B60F98F90}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{03AB76C5-F116-4A55-9BA6-3F9B60F98F90}.Debug|x64.Build.0 = Debug|Any CPU
+		{03AB76C5-F116-4A55-9BA6-3F9B60F98F90}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{03AB76C5-F116-4A55-9BA6-3F9B60F98F90}.Debug|x86.Build.0 = Debug|Any CPU
+		{03AB76C5-F116-4A55-9BA6-3F9B60F98F90}.Release|x64.ActiveCfg = Release|Any CPU
+		{03AB76C5-F116-4A55-9BA6-3F9B60F98F90}.Release|x64.Build.0 = Release|Any CPU
+		{03AB76C5-F116-4A55-9BA6-3F9B60F98F90}.Release|x86.ActiveCfg = Release|Any CPU
+		{03AB76C5-F116-4A55-9BA6-3F9B60F98F90}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1346,7 +1346,7 @@ void ClrProfiler::OnCounterTimer()
 	for(size_t i = 1; i <= m_counter->GetCounterCount(); ++i)
 	{
 		double value = m_counter->GetDouble(i);
-		__int64 fixedValue = static_cast<__int64>(value * 1000);
+		__int64 fixedValue = static_cast<__int64>(value * 100000);
 		WritePerfCounter(i, fixedValue);
 	}
 }

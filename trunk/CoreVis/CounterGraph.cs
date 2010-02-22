@@ -164,7 +164,7 @@ ORDER BY Time DESC
 					{
 						long time = Convert.ToInt64(row["Time"]);
 						long value = Convert.ToInt64(row["Value"]);
-						points.Add(time / 1000.0, value / 1000.0);
+						points.Add(time / 1000.0, value);
 					}
 				}
 

@@ -52,7 +52,7 @@ namespace SlimTuneUI
 		{
 		}
 
-		public void PerfCounter(int counterId, long time, long value)
+		public void PerfCounter(int counterId, long time, double value)
 		{
 		}
 

@@ -322,6 +322,9 @@ namespace UICore
 
 		public static string GetCounterString(List<string> counters)
 		{
+			if(counters.Count == 0)
+				return string.Empty;
+
 			return string.Join(";", counters.ToArray()) + ";";
 		}
 	}

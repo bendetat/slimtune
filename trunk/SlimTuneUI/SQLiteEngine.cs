@@ -157,12 +157,12 @@ namespace SlimTuneUI
 			m_counterNameCmd.Step();
 		}
 
-		public override void PerfCounter(int counterId, long time, long value)
+		public override void PerfCounter(int counterId, long time, double value)
 		{
 			m_insertCounterCmd.Reset();
 			m_insertCounterCmd.BindInt(1, counterId);
 			m_insertCounterCmd.BindLong(2, time);
-			m_insertCounterCmd.BindLong(3, value);
+			m_insertCounterCmd.BindDouble(3, value);
 			m_insertCounterCmd.Step();
 		}
 
@@ -339,7 +339,7 @@ namespace SlimTuneUI
 			m_database.Execute("CREATE INDEX Timings_Compound ON Timings(FunctionId, RangeMin);");
 
 			m_database.Execute("CREATE TABLE Counters (Id INT PRIMARY KEY, Name TEXT(256))");
-			m_database.Execute("CREATE TABLE CounterValues (CounterId INT, Time INT, Value INT)");
+			m_database.Execute("CREATE TABLE CounterValues (CounterId INT, Time INT, Value REAL)");
 			m_database.Execute("CREATE INDEX CounterValues_IdIndex ON Counters(Id);");
 		}
 
