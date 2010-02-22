@@ -1,0 +1,88 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<topic id="259ad24d-6331-4129-89e2-f996cbe6c9b4" revisionNumber="0">
+  <developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <introduction>
+      <para>
+        Using SlimTune can be confusing without an overall understanding of how it's designed.
+        This document provides a description of the underlying model at work.
+      </para>
+    </introduction>
+
+    <section>
+      <title>The Backend</title>
+
+      <content>
+        <para>
+          The backend is responsible for raw data collection from your application.
+          In the case of .NET code, it is a DLL that is injected into the runtime and tracks what code is being run.
+          The backend intrudes directly into your code, and tries to do it as quickly as possible.
+          The collected data is sent out to the frontend, without any significant processing.
+          Unlike most other profiling tools, the SlimTune backend does not write to a file, but instead lets the frontend decide what to do with the raw data.
+          This critical design difference means that you can observe the behavior of your code as it runs, and not just from the machine running it!
+        </para>
+        <para>
+          The data is transmitted using a network socket (default port 3000), and the destination can be on a local or remote machine.
+          The SlimTune installation process can grant permission to any computer on your subnet to connect, but the details of your network configuration will affect what is allowed.
+          Because the backend does not currently implement any kind of security, it is important to make sure that only trusted clients can establish a network connection to the machine running your code.
+          (This limitation will be remedied in a later release.)
+          A connected user has substantial control over the running application.
+          When dealing with production servers or similar security sensitive situations, ensure that your firewall configuration is correct.
+        </para>
+      </content>
+    </section>
+
+    <section>
+      <title>The Frontend</title>
+
+      <content>
+        <para>
+          The frontend is the GUI portion of SlimTune that you will interact with on a regular basis.
+          It handles launching applications for profiling, and visualization of both running applications and saved results files.
+          Plugins are also supported, permitting you or anyone else to write functionality which is missing or specific to you.
+        </para>
+        <para>
+          The first thing you will do from the frontend is to launch an application, service, or website.
+          Profiling cannot be engaged on already running processes in .NET; you must launch through SlimTune in order to configure things correctly.
+          However, profiling support costs you essentially nothing unless the process is actively being monitored.
+          (With the caveat that JIT times can increase dramatically.)
+          By running a program through SlimTune without establishing a connection, you make sure it's ready to be analyzed, without actually doing so.
+        </para>
+        <para>
+          The next step in the frontend is to initiate a connection.
+          Once you connect to a running application, the backend will begin its data collection process, and that information will flow into the frontend.
+          Multiple frontends can connect to a profiled application at the same time, connecting and disconnecting independently.
+          Once the frontend is connected, it begins collating the data into a database living in memory or on disk in a file.
+          It also gives you the opportunity to open visualizers, each giving you a different slice of information about the collected data.
+        </para>
+        <para>
+          If you decided to save the database to a file, you can open it up again at any time.
+          The open button allows you to select a database, or you can simply drag it onto the main SlimTune window.
+          Once open, SlimTune opens a connection window.
+          Even though the connection is not a live application, it can be visualized exactly as if it were.
+        </para>
+      </content>
+    </section>
+
+	<section>
+		<title>Connections</title>
+		
+		<content>
+			<para>
+				SlimTune is based around the idea of connections.
+				Fundamentally, a connection simply represents profiling data (typically in a database) with its associated visualizers.
+				If a connection is actively collecting data from a profiled application, it is considered active.
+				An inactive connection can be a file opened from a disk, or a connection that was previously active but lost its connection to the profiled application.
+				(The application may have closed, or there may have been a network error.)
+			</para>
+			
+			<para>
+				The backend keeps track of how many active connections it's associated with. 
+				When there are no active connections -- in other words, when nobody is watching -- it is not actively collecting data.
+				By launching an application through SlimTune but not opening a connection, a program can be run for long periods of time with little or no performance degradation.
+				(This is ideal for servers, services, or other long running applications.)
+				A frontend can initiate a connection at any time, allowing you to keep applications ready for performance analysis when you need it.
+			</para>
+		</content>
+	</section>
+  </developerConceptualDocument>
+</topic>

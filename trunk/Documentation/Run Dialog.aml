@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<topic id="f03ac7d0-69f8-43db-af80-b5d0fd3a0bc1" revisionNumber="0">
+  <developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <introduction>
+    	<para>
+        The Run dialog allows you to launch an application, service, or website for profiling.
+      </para>
+     	<para>
+        <mediaLink>
+          <caption placement="after">The Run Dialog in v0.2.1, showing the CLR Application launcher.</caption>
+          <image xlink:href="rundialog" />
+        </mediaLink>
+    	</para>
+    </introduction>
+
+    <section>
+      <title>Selecting an Application Type</title>
+
+      <content>
+        <para>
+          <image xlink:href="rundialog" />
+          At the top of the run dialog, there's a drop down list that allows you to select the type of application to run.
+          Each of these is called a <phrase>launcher</phrase>, and has its own set of options that will show up in the grid below.
+          (Note that some launchers require administrative privileges to operate.)
+        </para>
+      </content>
+    </section>
+    
+    <section>
+    	<title>Configuring the Launcher</title>
+    	
+    	<content>
+        <para>
+          The property grid under the drop down list shows the properties that can be set on the selected launcher.
+          Some properties control how the application is launched, while others control the configuration of the profiler itself.
+        </para>
+      </content>
+    </section>
+    
+    <section>
+      <title>Connection Options</title>
+      
+      <content>
+        <para>
+        The run dialog gives you the option to establish a connection to the profiling target as well.
+        This is generally the desired behavior, but sometimes you may not want to try and connect immediately.
+        (For example, you want to avoid profiling your game's menu screen, and just record the actual gameplay.)
+        The connection gives you a choice of database engines to choose from.
+        The only options available currently are SQLite (a file) and SQLite In-Memory (no file).
+        If you select SQLite, you will be asked to select a file to save to.
+        </para>
+        
+        <para>
+        You may also select an initial visualizer to open.
+        This option is intended merely as a convenience and can be left blank.
+        </para>
+      </content>
+    </section>
+  </developerConceptualDocument>
+</topic>

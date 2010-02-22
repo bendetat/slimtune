@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<topic id="035d9483-ee62-421d-8afb-f08a95065afd" revisionNumber="0">
+  <developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <introduction>
+      <para>
+        Profiling can be a confusing experience, especially when working with a new tool.
+        This guide is intended to introduce you to profiling applications with SlimTune.
+      </para>
+    </introduction>
+
+    <section>
+      <title>What is SlimTune Profiler?</title>
+
+      <content>
+        <para>
+          SlimTune is a performance analysis tool for .NET based applications, services, and websites.
+          It monitors your code as it runs, collecting and collating critical data about how it spends time.
+          This information can be displayed by the GUI portion of the tool in several different views, called <phrase>visualizers</phrase>.
+          The visualizers help you learn about the various performance aspects of your code, allowing you to address bottlenecks and code mistakes.
+        </para>
+        <para>
+          Remember, SlimTune works by observing your application live.
+          It is not a source code analysis tool, and it does not track specific behaviors such as database traffic. 
+          Think of it as a surveying tool, giving you a high level view of what your application is doing and for how long.
+          There are limitations to what data can be collected and how accurately.
+          The intrusive design also means that the overall performance of your code will be impacted to some degree.
+        </para>
+      </content>
+    </section>
+  </developerConceptualDocument>
+</topic>

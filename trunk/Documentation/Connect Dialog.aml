@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<topic id="ccab01c9-2c0b-4da7-826c-41bda6c737cb" revisionNumber="1">
+  <developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <introduction>
+      <para>
+        The Connect dialog allows you to establish a connection to a profiling-enabled application.
+      </para>
+      <para>
+        <mediaLink>
+            <caption placement="after">The Connect Dialog in v0.2.1.</caption>
+            <image xlink:href="connectdialog" />
+        </mediaLink>
+      </para>
+    </introduction>
+    
+    <section>
+      <title>Connection Options</title>
+      
+      <content>
+        <para>
+          	This section lets you specify the basic connection parameters to use.          
+			<list class="bullet">
+			  <listItem>
+			  	<legacyBold>Host name:</legacyBold> The network host name of the machine to connect to.
+			  	The default value of "localhost" is most common, but can be changed for remote profiling scenarios.
+			  </listItem>
+			  <listItem>
+			  	<legacyBold>Port:</legacyBold> The port to connect on.
+			  	This must be the same port that the backend was configured to listen on.
+			  	The default value is 3000, and there is no need to change this in most cases.
+			  </listItem>
+			</list>
+		</para>
+	  </content>
+	</section>
+	
+	<section>
+		<title>Frontend Options</title>
+		
+		<content>
+			<para>
+				This section lets you configure the frontend options for the connection.
+				<list class="bullet">
+					<listItem>
+						The database engine to use for storing the data.
+						The options are SQLite (a file) or SQLite In-Memory (no file).
+					</listItem>
+					<listItem>
+						<legacyBold>Results File:</legacyBold> The file to save results to, if SQLite is selected.
+					</listItem>
+					<listItem>
+						<legacyBold>Visualizer:</legacyBold> The visualizer to open once the connection starts.
+						This option is provided as a convenience, and can be left blank.
+					</listItem>
+				</list>
+			</para>
+		</content>
+	</section>
+  </developerConceptualDocument>
+</topic>

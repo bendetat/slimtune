@@ -1,0 +1,73 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<topic id="db911f3b-706f-4074-bcee-268b1ace21ad" revisionNumber="1">
+  <developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <introduction>
+      <para>
+      	Starting with the 0.2 release series, SlimTune provides an API for profiled .NET applications to interact with the underlying profiler.
+      	The API is still experimental, but provides some useful features.
+      </para>
+    </introduction>
+
+    <section>
+      	<title>Getting Started</title>
+    
+    	<content>
+    		<para>
+    			Using the API is simple.
+    			Add a reference to the SlimTuneApi.dll assembly, in the Api\CLR folder where SlimTune was installed.
+    			The API consists of a single static class, SlimTune, in the SlimTuneApi namespace.
+    			All of the available profiler functionality is within this class.
+    		</para>
+    		
+    		<para>
+    			Make sure to check the SlimTune.Available property before calling any other functions.
+    			If this property is true, the profiler backend is loaded and able to respond to API calls.
+    			If it is false, the profiler is not loaded and calls to other functions may crash your program.
+    		</para>
+    	</content>
+    </section>
+    
+    <section>
+    	<title>Controlling the Sampler</title>
+    	
+    	<content>
+	    	<para>
+	    		The SamplerActive property allows you to get and set whether or not sampling is currently active.
+	    		By setting this value to false, you prevent the sampler from analyzing your code.
+	    		This can be useful for preventing the profiler from tracking uninteresting segments of code.
+	    	</para>
+	    	
+	    	<para>
+	    		Note that the property only indicates whether sampling is allowed, but not whether samples are actually being taken.
+	    		If no frontend is connected, for example, the sampling engine will not be active.
+	    	</para>
+    	</content>
+    </section>
+    
+    <section>
+    	<title>Custom Performance Counters</title>
+    	
+    	<content>
+    		<para>
+    			SlimTune's 0.2 release series can track system performance counters over time.
+    			However, the application can also use the API to write custom performance counter values.
+    			These values can be anything you care to write.
+    			They represent an excellent way to track low frequency data, such as polys rendered per second or bytes transferred for second.
+    			It's not recommended to use performance counters for high frequency data, such as render time per frame.
+    			They are not meant for high amounts of data, although it will work.
+    			Later versions of SlimTune will introduce an event system for high frequency information that can be aggregated.
+    		</para>
+    		
+    		<para>
+    			Each performance counter has a unique 32 bit id that is application defined.
+    			(Values higher than int.MaxValue - 32 are not allowed.)
+    			To use a performance counter, start by setting its name with the SlimTune.SetCounterName function.
+    			This is not necessary, but the counter will be difficult to identify without it.
+    			After setting a name, you can write integer or floating point data to the counter.
+    			The value is always stored as a fixed point 64 bit integer, with five decimal places.
+    			Values that don't fit into this format will be truncated.
+    		</para>
+    	</content>
+    </section>
+  </developerConceptualDocument>
+</topic>
