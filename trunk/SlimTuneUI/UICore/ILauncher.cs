@@ -122,7 +122,7 @@ namespace UICore
 			return result;
 		}
 
-		public static bool TestConnection(string host, ushort port, IStorageEngine tempEngine)
+		public static bool TestConnection(string host, ushort port, IDataEngine tempEngine)
 		{
 			try
 			{

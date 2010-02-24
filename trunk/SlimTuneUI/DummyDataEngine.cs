@@ -2,7 +2,7 @@
 
 namespace SlimTuneUI
 {
-	public class DummyStorageEngine : UICore.IStorageEngine
+	public class DummyDataEngine : UICore.IDataEngine
 	{
 		public string Name
 		{

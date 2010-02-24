@@ -58,8 +58,8 @@ namespace SlimTuneUI
 		{
 			string dbFile = m_resultsFileTextBox.Text;
 
-			//connect to storage before launching the process -- we don't want to launch if this fails
-			IStorageEngine storage = null;
+			//connect to data engine before launching the process -- we don't want to launch if this fails
+			IDataEngine storage = null;
 			try
 			{
 				//storage = new SqlServerCompactEngine(dbFile, true);
@@ -149,7 +149,7 @@ namespace SlimTuneUI
 			}
 
 			bool result = true;
-			using(IStorageEngine engine = new DummyStorageEngine())
+			using(IDataEngine engine = new DummyDataEngine())
 			{
 				ConnectProgress progress = new ConnectProgress(m_hostNameTextBox.Text, port, engine, 1);
 				progress.ShowDialog();

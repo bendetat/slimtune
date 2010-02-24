@@ -45,18 +45,18 @@ namespace SlimTuneUI
 
 		string m_host;
 		int m_port;
-		IStorageEngine m_storage;
+		IDataEngine m_data;
 		int m_attempts;
 
 		delegate void ConnectDelegate();
 
-		public ConnectProgress(string host, int port, IStorageEngine storage, int attempts)
+		public ConnectProgress(string host, int port, IDataEngine data, int attempts)
 		{
 			InitializeComponent();
 
 			m_host = host;
 			m_port = port;
-			m_storage = storage;
+			m_data = data;
 			m_attempts = attempts;
 
 			m_connectingToLabel.Text = string.Format("Connecting to: {0}:{1}...", m_host, m_port);
@@ -96,7 +96,7 @@ namespace SlimTuneUI
 				this.Invoke(new Action<int>(UpdateAttempts), i + 1);
 				try
 				{
-					Client = new ProfilerClient(m_host, m_port, m_storage);
+					Client = new ProfilerClient(m_host, m_port, m_data);
 				}
 				catch(System.Net.Sockets.SocketException ex)
 				{

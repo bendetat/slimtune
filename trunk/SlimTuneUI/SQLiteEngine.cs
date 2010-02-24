@@ -32,7 +32,7 @@ namespace SlimTuneUI
 {
 	[DisplayName("SQLite"),
 	HandlesExtension("sqlite")]
-	public class SQLiteEngine : StorageEngineBase
+	public class SQLiteEngine : DataEngineBase
 	{
 		SQLiteDatabase m_database;
 

@@ -26,8 +26,8 @@ using System.ComponentModel;
 namespace UICore
 {
 	/// <summary>
-	/// A Connection combines two objects: a ProfilerClient and an IStorageEngine.
-	/// The storage engine is valid for the lifetime of the Connection.
+	/// A Connection combines two objects: a ProfilerClient and an IDataEngine.
+	/// The data engine is valid for the lifetime of the Connection.
 	/// The ProfilerClient may not be, or may not exist to begin with.
 	/// </summary>
 	/// <remarks>
@@ -60,15 +60,15 @@ namespace UICore
 			get { return Client != null ? Client.Port : 0; }
 		}
 
-		public IStorageEngine StorageEngine { get; private set; }
+		public IDataEngine DataEngine { get; private set; }
 		public ProfilerClient Client { get; private set; }
 		public bool IsConnected { get; private set; }
 
-		public Connection(IStorageEngine storageEngine)
+		public Connection(IDataEngine dataEngine)
 		{
-			if(storageEngine == null)
-				throw new ArgumentNullException("storageEngine");
-			this.StorageEngine = storageEngine;
+			if(dataEngine == null)
+				throw new ArgumentNullException("dataEngine");
+			this.DataEngine = dataEngine;
 		}
 
 		/// <summary>
@@ -113,9 +113,9 @@ namespace UICore
 			if(!IsConnected)
 				return;
 
-			StorageEngine.Snapshot("Auto");
+			DataEngine.Snapshot("Auto");
 			if(m_clearAfterSnapshot)
-				StorageEngine.ClearData();
+				DataEngine.ClearData();
 		}
 
 		void ReceiveThread(object data)
@@ -189,7 +189,7 @@ namespace UICore
 			}
 
 			DisconnectClient();
-			StorageEngine.Dispose();
+			DataEngine.Dispose();
 		}
 
 		#endregion

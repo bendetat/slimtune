@@ -81,7 +81,7 @@ namespace UICore
 
 		public static IEnumerable<Type> GetEngines()
 		{
-			return GetTypeList(typeof(IStorageEngine));
+			return GetTypeList(typeof(IDataEngine));
 		}
 	}
 }

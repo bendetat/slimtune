@@ -61,8 +61,8 @@ namespace SlimTuneUI.CoreVis
 			m_mainWindow = mainWindow;
 			m_connection = connection;
 
-			m_calleesModel = new CalleesModel(connection.StorageEngine);
-			m_callersModel = new CallersModel(connection.StorageEngine);
+			m_calleesModel = new CalleesModel(connection.DataEngine);
+			m_callersModel = new CallersModel(connection.DataEngine);
 			m_callees.Model = new SortedTreeModel(m_calleesModel);
 			m_callers.Model = new SortedTreeModel(m_callersModel);
 
@@ -216,21 +216,21 @@ WHERE C1.CallerId = {0} AND ThreadId = {1}
 ORDER BY HitCount DESC
 ";
 
-		IStorageEngine m_storage;
+		IDataEngine m_data;
 
-		public CalleesModel(IStorageEngine storage)
+		public CalleesModel(IDataEngine data)
 		{
-			m_storage = storage;
+			m_data = data;
 		}
 
 		public System.Collections.IEnumerable GetChildren(TreePath treePath)
 		{
-			using(var transact = new TransactionHandle(m_storage))
+			using(var transact = new TransactionHandle(m_data))
 			{
 				if(treePath.IsEmpty())
 				{
 					//top level queries
-					var data = m_storage.Query(kTopLevelQuery);
+					var data = m_data.Query(kTopLevelQuery);
 
 					foreach(DataRow row in data.Tables[0].Rows)
 					{
@@ -246,10 +246,10 @@ ORDER BY HitCount DESC
 				else
 				{
 					var parent = treePath.LastNode as FunctionItem;
-					var data = m_storage.Query(string.Format(kChildQuery, parent.Id, parent.Thread));
+					var data = m_data.Query(string.Format(kChildQuery, parent.Id, parent.Thread));
 
 					//find out what the current number of calls by the parent is
-					var parentHits = Convert.ToInt32(m_storage.QueryScalar(string.Format(kParentHits, parent.Id, parent.Thread)));
+					var parentHits = Convert.ToInt32(m_data.QueryScalar(string.Format(kParentHits, parent.Id, parent.Thread)));
 					foreach(DataRow row in data.Tables[0].Rows)
 					{
 						var item = new FunctionItem();
@@ -322,21 +322,21 @@ WHERE Callers.ThreadId = {1}
 ORDER BY HitCount DESC
 ";
 
-		IStorageEngine m_storage;
+		IDataEngine m_data;
 
-		public CallersModel(IStorageEngine storage)
+		public CallersModel(IDataEngine data)
 		{
-			m_storage = storage;
+			m_data = data;
 		}
 
 		public System.Collections.IEnumerable GetChildren(TreePath treePath)
 		{
-			using(var transact = new TransactionHandle(m_storage))
+			using(var transact = new TransactionHandle(m_data))
 			{
 				if(treePath.IsEmpty())
 				{
 					//top level queries
-					var data = m_storage.Query(kTopLevelQuery);
+					var data = m_data.Query(kTopLevelQuery);
 
 					foreach(DataRow row in data.Tables[0].Rows)
 					{
@@ -352,7 +352,7 @@ ORDER BY HitCount DESC
 				else
 				{
 					var parent = treePath.LastNode as FunctionItem;
-					var data = m_storage.Query(string.Format(kChildQuery, parent.Id, parent.Thread));
+					var data = m_data.Query(string.Format(kChildQuery, parent.Id, parent.Thread));
 
 					foreach(DataRow row in data.Tables[0].Rows)
 					{

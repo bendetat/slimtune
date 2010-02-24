@@ -38,7 +38,7 @@ namespace UICore
 		}
 	}
 
-	public abstract class StorageEngineBase : IStorageEngine
+	public abstract class DataEngineBase : IDataEngine
 	{
 		protected const string kCallersSchema = "(ThreadId INT NOT NULL, CallerId INT NOT NULL, CalleeId INT NOT NULL, HitCount INT NOT NULL)";
 		protected const string kSamplesSchema = "(ThreadId INT NOT NULL, FunctionId INT NOT NULL, HitCount INT NOT NULL)";
@@ -95,7 +95,7 @@ namespace UICore
 		public abstract object QueryScalar(string query);
 		protected abstract void DoClearData();
 
-		public StorageEngineBase(string name)
+		public DataEngineBase(string name)
 		{
 			Name = name;
 			m_callers = CallGraph<int>.Create();

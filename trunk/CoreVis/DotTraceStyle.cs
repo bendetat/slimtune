@@ -224,9 +224,9 @@ WHERE C1.CallerId = {0} AND C1.CalleeId = 0 AND C1.ThreadId = {1}
 		{
 			m_extraInfoTextBox.Text = string.Empty;
 
-			using(var transact = new TransactionHandle(m_connection.StorageEngine))
+			using(var transact = new TransactionHandle(m_connection.DataEngine))
 			{
-				var data = m_connection.StorageEngine.Query(kTopLevelQuery);
+				var data = m_connection.DataEngine.Query(kTopLevelQuery);
 
 				int totalHits = 0;
 				foreach(DataRow row in data.Tables[0].Rows)
@@ -263,10 +263,10 @@ WHERE C1.CallerId = {0} AND C1.CalleeId = 0 AND C1.ThreadId = {1}
 
 		private void UpdateChildren(TreeNode node)
 		{
-			using(var transact = new TransactionHandle(m_connection.StorageEngine))
+			using(var transact = new TransactionHandle(m_connection.DataEngine))
 			{
 				var parent = (NodeData) node.Tag;
-				var data = m_connection.StorageEngine.Query(string.Format(kChildQuery, parent.Id, parent.ThreadId));
+				var data = m_connection.DataEngine.Query(string.Format(kChildQuery, parent.Id, parent.ThreadId));
 
 				//find out what the current number of calls by the parent is
 				//var parentHits = Convert.ToInt32(m_connection.StorageEngine.QueryScalar(string.Format(kParentHits, parent.Id, parent.ThreadId)));
@@ -285,7 +285,7 @@ WHERE C1.CallerId = {0} AND C1.CalleeId = 0 AND C1.ThreadId = {1}
 
 					//find out how much time was spent exclusive of children
 					//we don't have children at this point so we have to query separately
-					var excl = m_connection.StorageEngine.Query(string.Format(kExclusiveQuery, id, parent.ThreadId));
+					var excl = m_connection.DataEngine.Query(string.Format(kExclusiveQuery, id, parent.ThreadId));
 					var hasExcl = excl.Tables[0].Rows.Count > 0;
 					var exclRow = hasExcl ? excl.Tables[0].Rows[0] : null;
 					double exclPercent = exclRow != null ? Convert.ToDouble(exclRow["Percent"]) : 0.0;
@@ -430,10 +430,10 @@ WHERE C1.CallerId = {0} AND C1.CalleeId = 0 AND C1.ThreadId = {1}
 		{
 			SnapshotCombo.Items.Clear();
 			SnapshotCombo.Items.Add("Current");
-			//get a list of snapshots from the storage engine -- this can fail on 0.1.x files
+			//get a list of snapshots from the data engine -- this can fail on 0.1.x files
 			try
 			{
-				var snapshots = m_connection.StorageEngine.Query("SELECT * FROM Snapshots");
+				var snapshots = m_connection.DataEngine.Query("SELECT * FROM Snapshots");
 				foreach(DataRow row in snapshots.Tables[0].Rows)
 				{
 					string text = string.Format("{0} - {1}", row[1], row[2]);

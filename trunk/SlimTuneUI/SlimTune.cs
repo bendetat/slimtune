@@ -166,7 +166,7 @@ namespace SlimTuneUI
 			try
 			{
 				//arguments are filename, createNew
-				IStorageEngine engine = (IStorageEngine) Activator.CreateInstance(engineType, file, false);
+				IDataEngine engine = (IDataEngine) Activator.CreateInstance(engineType, file, false);
 
 				var conn = new Connection(engine);
 				var window = new ProfilerWindow(this, conn);

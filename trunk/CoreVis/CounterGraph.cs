@@ -92,9 +92,9 @@ ORDER BY Time DESC
 				entry.Tagged = false;
 			}
 
-			using(var transact = new TransactionHandle(m_connection.StorageEngine))
+			using(var transact = new TransactionHandle(m_connection.DataEngine))
 			{
-				var data = m_connection.StorageEngine.Query(kCountersQuery);
+				var data = m_connection.DataEngine.Query(kCountersQuery);
 				foreach(DataRow row in data.Tables[0].Rows)
 				{
 					int id = Convert.ToInt32(row["Id"]);
@@ -157,9 +157,9 @@ ORDER BY Time DESC
 			if(e.NewValue == CheckState.Checked)
 			{
 				var points = new PointPairList();
-				using(var transact = new TransactionHandle(m_connection.StorageEngine))
+				using(var transact = new TransactionHandle(m_connection.DataEngine))
 				{
-					var data = m_connection.StorageEngine.Query(string.Format(kValuesQuery, entry.Id), 3600);
+					var data = m_connection.DataEngine.Query(string.Format(kValuesQuery, entry.Id), 3600);
 					foreach(DataRow row in data.Tables[0].Rows)
 					{
 						long time = Convert.ToInt64(row["Time"]);

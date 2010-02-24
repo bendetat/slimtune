@@ -89,17 +89,17 @@ namespace SlimTuneUI
 			if(!m_launcher.CheckParams())
 				return false;
 
-			//connect to storage before launching the process -- we don't want to launch if this fails
-			IStorageEngine storage = null;
+			//connect to data engine before launching the process -- we don't want to launch if this fails
+			IDataEngine data = null;
 			if(m_connectCheckBox.Checked)
 			{
 				try
 				{
 					//storage = new SqlServerCompactEngine(dbFile, true);
 					if(m_sqliteRadio.Checked)
-						storage = new SQLiteEngine(dbFile, true);
+						data = new SQLiteEngine(dbFile, true);
 					else if(m_sqliteMemoryRadio.Checked)
-						storage = new SQLiteMemoryEngine();
+						data = new SQLiteMemoryEngine();
 					else
 						throw new NotImplementedException();
 				}
@@ -112,20 +112,20 @@ namespace SlimTuneUI
 
 			if(!m_launcher.Launch())
 			{
-				if(storage != null)
-					storage.Dispose();
+				if(data != null)
+					data.Dispose();
 				return false;
 			}
 
 			//connect, if we're asked to
 			if(m_connectCheckBox.Checked)
 			{
-				ConnectProgress progress = new ConnectProgress("localhost", m_launcher.ListenPort, storage, 10);
+				ConnectProgress progress = new ConnectProgress("localhost", m_launcher.ListenPort, data, 10);
 				progress.ShowDialog(this);
 
 				if(progress.Client != null)
 				{
-					Connection conn = new Connection(storage);
+					Connection conn = new Connection(data);
 					conn.Executable = m_launcher.Name;
 					conn.RunClient(progress.Client);
 					//TODO: set options like auto snapshot frequency
@@ -143,7 +143,7 @@ namespace SlimTuneUI
 				else
 				{
 					//connection failed, shut down the storage
-					storage.Dispose();
+					data.Dispose();
 				}
 			}
 

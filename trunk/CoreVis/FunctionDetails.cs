@@ -88,7 +88,7 @@ ORDER BY HitCount DESC
 		private void UpdateFunctionList()
 		{
 			FunctionList.Items.Clear();
-			var data = m_connection.StorageEngine.Query(string.Format(kSearchQuery, SearchBox.Text), 250);
+			var data = m_connection.DataEngine.Query(string.Format(kSearchQuery, SearchBox.Text), 250);
 			foreach(DataRow row in data.Tables[0].Rows)
 			{
 				int id = Convert.ToInt32(row["Id"]);
@@ -117,13 +117,13 @@ ORDER BY HitCount DESC
 			pane.CurveList.Clear();
 			pane.Title.Text = "Function Breakdown (samples)";
 
-			using(var transact = new TransactionHandle(m_connection.StorageEngine))
+			using(var transact = new TransactionHandle(m_connection.DataEngine))
 			{
 				//find time in function
 				//SQLite can't do RIGHT OUTER JOIN and I can't figure out how to get this with a LEFT OUTER JOIN.
 				//so I'm just sending two queries instead
-				var inFunc = Convert.ToInt32(m_connection.StorageEngine.QueryScalar(string.Format(kInFunctionQuery, entry.Id)));
-				var data = m_connection.StorageEngine.Query(string.Format(kCalleesQuery, entry.Id));
+				var inFunc = Convert.ToInt32(m_connection.DataEngine.QueryScalar(string.Format(kInFunctionQuery, entry.Id)));
+				var data = m_connection.DataEngine.Query(string.Format(kCalleesQuery, entry.Id));
 
 				int totalHits = inFunc;
 				foreach(DataRow row in data.Tables[0].Rows)

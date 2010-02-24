@@ -48,8 +48,8 @@ namespace SlimTuneUI
 			HostLabel.Text = "Host: " + host;
 			string port = conn.Port == 0 ? "(file)" : conn.Port.ToString();
 			PortLabel.Text = "Port: " + port;
-			EngineLabel.Text = "Engine: " + conn.StorageEngine.Engine;
-			NameLabel.Text = "Name: " + conn.StorageEngine.Name;
+			EngineLabel.Text = "Engine: " + conn.DataEngine.Engine;
+			NameLabel.Text = "Name: " + conn.DataEngine.Name;
 
 			string status;
 			if(conn.Port == 0)
@@ -96,7 +96,7 @@ namespace SlimTuneUI
 		private void PromptSave()
 		{
 			SaveFileDialog dlg = new SaveFileDialog();
-			dlg.Filter = string.Format("Results file (*.{0})|*.{0}", Connection.StorageEngine.Extension);
+			dlg.Filter = string.Format("Results file (*.{0})|*.{0}", Connection.DataEngine.Extension);
 			dlg.AddExtension = true;
 
 			while(true)
@@ -106,7 +106,7 @@ namespace SlimTuneUI
 				{
 					try
 					{
-						Connection.StorageEngine.Save(dlg.FileName);
+						Connection.DataEngine.Save(dlg.FileName);
 						return;
 					}
 					catch
@@ -123,7 +123,7 @@ namespace SlimTuneUI
 
 		private void ProfilerWindow_FormClosing(object sender, FormClosingEventArgs e)
 		{
-			if(m_mainWindow.IsClosing && !Connection.StorageEngine.InMemory)
+			if(m_mainWindow.IsClosing && !Connection.DataEngine.InMemory)
 				return;
 
 			//TODO: Saving of SQLite in-memory databases does not currently work for some reason
@@ -180,7 +180,7 @@ namespace SlimTuneUI
 			DialogResult result = MessageBox.Show("WARNING: This will clear all collected data, and cannot be reversed. Continue?",
 				"Clear All Data", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2);
 			if(result == DialogResult.Yes)
-				Connection.StorageEngine.ClearData();
+				Connection.DataEngine.ClearData();
 		}
 
 		private void SnapshotButton_Click(object sender, EventArgs e)
@@ -191,7 +191,7 @@ namespace SlimTuneUI
 				return;
 			}
 
-			Connection.StorageEngine.Snapshot("User snapshot");
+			Connection.DataEngine.Snapshot("User snapshot");
 			MessageBox.Show("Snapshot saved", "Take Snapshot");
 		}
 

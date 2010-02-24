@@ -66,7 +66,7 @@ namespace UICore
 		Dictionary<int, ThreadInfo> m_threads = new Dictionary<int, ThreadInfo>();
 		Dictionary<int, string> m_counters = new Dictionary<int, string>();
 
-		IStorageEngine m_storage;
+		IDataEngine m_data;
 
 		internal TcpClient Socket
 		{
@@ -76,7 +76,7 @@ namespace UICore
 		public string HostName { get; private set; }
 		public int Port { get; private set; }
 
-		public ProfilerClient(string host, int port, IStorageEngine storage)
+		public ProfilerClient(string host, int port, IDataEngine data)
 		{
 			m_client = new TcpClient();
 			m_client.Connect(host, port);
@@ -90,7 +90,7 @@ namespace UICore
 			m_bufferedStream = new BufferedStream(m_stream, 64 * 1024);
 			m_reader = new BinaryReader(m_bufferedStream, Encoding.Unicode);
 			m_writer = new BinaryWriter(m_stream, Encoding.Unicode);
-			m_storage = storage;
+			m_data = data;
 
 			m_classes.Add(0, new ClassInfo(0, "$INVALID$"));
 			m_functions.Add(0, new FunctionInfo(0, 0, false, "$INVALID$", string.Empty));
@@ -211,7 +211,7 @@ namespace UICore
 			if(!m_classes.ContainsKey(funcInfo.ClassId))
 				RequestClassMapping(funcInfo.ClassId);
 
-			m_storage.MapFunction(funcInfo);
+			m_data.MapFunction(funcInfo);
 
 			Debug.WriteLine(string.Format("Mapped {0} to {1}.", mapFunc.Name, mapFunc.FunctionId));
 		}
@@ -226,7 +226,7 @@ namespace UICore
 			classInfo.Name = mapClass.Name;
 			m_classes.Add(classInfo.ClassId, classInfo);
 
-			m_storage.MapClass(classInfo);
+			m_data.MapClass(classInfo);
 		}
 
 		private void MapThread(Messages.MapThread mapThread)
@@ -244,7 +244,7 @@ namespace UICore
 				threadInfo.Alive = mapThread.IsAlive;
 			}
 
-			m_storage.UpdateThread(threadInfo.ThreadId, threadInfo.Alive, threadInfo.Name);
+			m_data.UpdateThread(threadInfo.ThreadId, threadInfo.Alive, threadInfo.Name);
 		}
 
 		private void FunctionEvent(MessageId id, Messages.FunctionEvent funcEvent)
@@ -269,7 +269,7 @@ namespace UICore
 			{
 				Debug.Assert(info.ShadowStack.Peek().First == funcEvent.FunctionId);
 				Pair<int, long> funcStart = info.ShadowStack.Pop();
-				m_storage.FunctionTiming(funcEvent.FunctionId, funcEvent.TimeStamp - funcStart.Second);
+				m_data.FunctionTiming(funcEvent.FunctionId, funcEvent.TimeStamp - funcStart.Second);
 			}
 		}
 
@@ -290,7 +290,7 @@ namespace UICore
 				}
 			}
 
-			m_storage.ParseSample(sample);
+			m_data.ParseSample(sample);
 		}
 
 		private void UpdateThread(int threadId, bool alive, string name)
@@ -309,7 +309,7 @@ namespace UICore
 				info.Alive = alive;
 			}
 
-			m_storage.UpdateThread(threadId, alive, name);
+			m_data.UpdateThread(threadId, alive, name);
 		}
 
 		private void NameCounter(Messages.CounterName counterName)
@@ -319,7 +319,7 @@ namespace UICore
 			else
 				m_counters[counterName.CounterId] = counterName.Name;
 
-			m_storage.CounterName(counterName.CounterId, counterName.Name);
+			m_data.CounterName(counterName.CounterId, counterName.Name);
 		}
 
 		private void ParseCounter(Messages.PerfCounter counter)
@@ -330,7 +330,7 @@ namespace UICore
 				RequestCounterName(counter.CounterId);
 			}
 
-			m_storage.PerfCounter(counter.CounterId, counter.TimeStamp, counter.Value);
+			m_data.PerfCounter(counter.CounterId, counter.TimeStamp, counter.Value);
 		}
 
 		private void RequestFunctionMapping(int functionId)

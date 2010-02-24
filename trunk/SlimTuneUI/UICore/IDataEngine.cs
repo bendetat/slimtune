@@ -64,9 +64,9 @@ namespace UICore
 
 	public class TransactionHandle : IDisposable
 	{
-		IStorageEngine m_engine;
+		IDataEngine m_engine;
 
-		public TransactionHandle(IStorageEngine engine)
+		public TransactionHandle(IDataEngine engine)
 		{
 			if(engine == null)
 				throw new ArgumentNullException("engine");
@@ -92,7 +92,7 @@ namespace UICore
 		}
 	}
 
-	public interface IStorageEngine : IDisposable
+	public interface IDataEngine : IDisposable
 	{
 		string Name { get; }
 		string Extension { get; }

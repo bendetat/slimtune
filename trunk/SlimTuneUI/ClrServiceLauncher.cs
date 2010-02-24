@@ -135,7 +135,7 @@ namespace SlimTuneUI
 			StartService(ServiceName, StartCommand);
 
 			Thread.Sleep(1000);
-			using(var engine = new DummyStorageEngine())
+			using(var engine = new DummyDataEngine())
 			{
 				var progress = new ConnectProgress("localhost", ListenPort, engine, 10);
 				progress.ShowDialog();

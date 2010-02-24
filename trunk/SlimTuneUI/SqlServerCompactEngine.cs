@@ -34,7 +34,7 @@ namespace SlimTuneUI
 	[Obsolete,
 	DisplayName("SQL Server Compact"),
 	HandlesExtension("sdf")]
-	public class SqlServerCompactEngine : StorageEngineBase
+	public class SqlServerCompactEngine : DataEngineBase
 	{
 		private const int kTimingBuckets = 20;
 

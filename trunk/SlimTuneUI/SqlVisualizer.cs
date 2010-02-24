@@ -107,7 +107,7 @@ namespace SlimTuneUI
 		{
 			try
 			{
-				DataSet ds = m_connection.StorageEngine.Query(m_queryTextBox.Text);
+				DataSet ds = m_connection.DataEngine.Query(m_queryTextBox.Text);
 				if(ds != null)
 				{
 					m_dataGrid.DataSource = ds;
@@ -126,7 +126,7 @@ namespace SlimTuneUI
 				"Irreversible Deletion Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
 			if(result == DialogResult.Yes)
 			{
-				m_connection.StorageEngine.ClearData();
+				m_connection.DataEngine.ClearData();
 			}
 		}
 	}

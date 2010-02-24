@@ -61,7 +61,7 @@
     <Compile Include="ConnectProgress.Designer.cs">
       <DependentUpon>ConnectProgress.cs</DependentUpon>
     </Compile>
-    <Compile Include="DummyStorageEngine.cs" />
+    <Compile Include="DummyDataEngine.cs" />
     <Compile Include="ProfilerWindow.cs">
       <SubType>Form</SubType>
     </Compile>
