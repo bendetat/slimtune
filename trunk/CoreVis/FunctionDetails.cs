@@ -29,7 +29,7 @@ ORDER BY Name
 ";
 
 		const string kInFunctionQuery = @"
-SELECT HitCount
+SELECT SUM(HitCount)
 FROM Callers
 WHERE CallerId = {0} AND CalleeId = 0
 ";
