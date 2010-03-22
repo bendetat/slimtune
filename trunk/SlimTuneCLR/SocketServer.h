@@ -23,8 +23,6 @@
 #define SOCKETSERVER_H
 #pragma once
 
-#include <boost/asio.hpp>
-
 #include "IProfilerServer.h"
 #include "IProfilerData.h"
 #include "Messages.h"

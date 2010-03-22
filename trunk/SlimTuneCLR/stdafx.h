@@ -45,22 +45,28 @@
 #define _WIN32_IE 0x0600	// Change this to the appropriate value to target other versions of IE.
 #endif
 
-#define _ATL_APARTMENT_THREADED
-#define _ATL_NO_AUTOMATIC_NAMESPACE
-
-#define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS	// some CString constructors will be explicit
 #define DBGHELP_TRANSLATE_TCHAR
+
+//Probably always want this unless we are using something esoteric. In any case parts of boost will define
+//it anyway(although they are included after windows.h ...)
+#define WIN32_LEAN_AND_MEAN
 
 //Iterator debugging is great! Except it takes global locks that are a deadlock risk when mixed with SuspendThread.
 #define _HAS_ITERATOR_DEBUGGING 0
 
 #include "Memory.h"
 #include "resource.h"
-#include <atlbase.h>
-#include <atlcom.h>
 #include <windows.h>
 #include <mmsystem.h>
 #include <dbghelp.h>
+
+//Make sure we include winsock2 for asio.
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#include <mswsock.h>
+
+//For COM error codes.
+#include <olectl.h>
 
 #include <cstdlib>
 #include <cstddef>
@@ -81,6 +87,7 @@
 #include <boost/pool/pool_alloc.hpp>
 #include <boost/preprocessor/stringize.hpp>
 #include <boost/format.hpp>
+#include <boost/asio.hpp>
 #pragma warning(pop)
 
 #include <stdexcept>
@@ -88,10 +95,9 @@
 #include <vector>
 #include <unordered_map>
 
+#include "SlimComPtr.h"
 #include "SlimTuneProfiler.h"
 #include "ProfilerBase.h"
 #include "Utilities.h"
 
 typedef boost::pool_allocator<unsigned int> UIntPoolAlloc;
-
-using namespace ATL;

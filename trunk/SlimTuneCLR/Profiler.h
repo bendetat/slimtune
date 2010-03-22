@@ -59,26 +59,18 @@ inline bool operator< (const GUID& lhs, const GUID& rhs)
 }
 
 // ClrProfiler
-class ATL_NO_VTABLE ClrProfiler :
-	public CComObjectRootEx<CComSingleThreadModel>,
-	public CComCoClass<ClrProfiler, &CLSID_Profiler>,
-	public ProfilerBase,
+class ClrProfiler :
+	public ProfilerBase, //Inherits from IUnknown
 	public IProfilerData
 {
 public:
 	ClrProfiler();
 	virtual ~ClrProfiler();
 
-	DECLARE_REGISTRY_RESOURCEID(IDR_PROFILER)
-	BEGIN_COM_MAP(ClrProfiler)
-		COM_INTERFACE_ENTRY(ICorProfilerCallback)
-		COM_INTERFACE_ENTRY(ICorProfilerCallback2)
-	END_COM_MAP()
-	DECLARE_PROTECT_FINAL_CONSTRUCT()
-
-	// overridden implementations of FinalConstruct and FinalRelease
-	HRESULT FinalConstruct();
-	void FinalRelease();
+	//IUnknown Methods
+	virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppvObject);
+	virtual ULONG  STDMETHODCALLTYPE AddRef();
+	virtual ULONG STDMETHODCALLTYPE Release();
 
 	//public interface functions
 
@@ -141,9 +133,13 @@ private:
 
 	void LeaveImpl(FunctionID functionId, FunctionInfo* info, MessageId message);
 
+	//IUnknown stuff.
+	volatile ULONG refCount;
+
 	//COM Interface pointers
-	CComPtr<ICorProfilerInfo> m_ProfilerInfo;
-	CComPtr<ICorProfilerInfo2> m_ProfilerInfo2;
+	SlimComPtr<ICorProfilerInfo> m_ProfilerInfo;
+	SlimComPtr<ICorProfilerInfo2> m_ProfilerInfo2;
+
 	volatile LONG m_eventMask;
 	ProfilerConfig m_config;
 
@@ -207,8 +203,7 @@ private:
 	static HRESULT CALLBACK StackWalkGlobal(FunctionID funcId, UINT_PTR ip, COR_PRF_FRAME_INFO frameInfo, ULONG32 contextSize, BYTE context[], void *clientData);
 };
 
-OBJECT_ENTRY_AUTO(__uuidof(Profiler), ClrProfiler)
-
 extern ClrProfiler* g_Profiler;
+extern volatile ULONG ComServerLocks;
 
 #endif

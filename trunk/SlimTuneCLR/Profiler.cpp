@@ -84,6 +84,9 @@ m_instDepth(0)
 	__debugbreak();
 #endif
 
+	refCount = 1;
+	InterlockedIncrement((volatile LONG *)&ComServerLocks);
+
 	InitializeCriticalSectionAndSpinCount(&m_lock, 200);
 	m_modules.reserve(16);
 	m_classes.reserve(512);
@@ -107,15 +110,51 @@ m_instDepth(0)
 ClrProfiler::~ClrProfiler()
 {
 	DeleteCriticalSection(&m_lock);
+	InterlockedDecrement((volatile LONG *)&ComServerLocks);
 }
 
-HRESULT ClrProfiler::FinalConstruct()
+HRESULT ClrProfiler::QueryInterface(REFIID riid, void **ppvObject)
 {
+	if(riid == IID_IUnknown)
+	{
+		*ppvObject = (IUnknown *)this;
+	}
+	else if(riid == IID_ICorProfilerCallback)
+	{
+		*ppvObject = (ICorProfilerCallback *)this;
+	}
+	else if(riid == IID_ICorProfilerCallback2)
+	{
+		*ppvObject = (ICorProfilerCallback2 *)this;
+	}
+	else
+	{
+		*ppvObject = NULL;
+		return E_NOINTERFACE;
+	}
+
+	AddRef();
 	return S_OK;
 }
 
-void ClrProfiler::FinalRelease()
+ULONG ClrProfiler::AddRef()
 {
+	return InterlockedIncrement((volatile LONG *)&refCount);
+}
+
+ULONG ClrProfiler::Release()
+{
+	int newRefCount = InterlockedDecrement((volatile LONG *)&refCount);
+
+	if(newRefCount == 0)
+	{
+		delete this;
+		return 0;
+	}
+	else
+	{
+		return newRefCount;
+	}
 }
 
 STDMETHODIMP ClrProfiler::Initialize(IUnknown *pICorProfilerInfoUnk)
@@ -499,7 +538,7 @@ unsigned int ClrProfiler::MapClass(mdTypeDef classDef, IMetaDataImport* metadata
 	if(info->Name.size() == 0 && !m_suspended)
 	{
 		//get a metadata if we don't have one
-		CComPtr<IMetaDataImport> freshMetadata;
+		SlimComPtr<IMetaDataImport> freshMetadata;
 		if(metadata == NULL)
 		{
 			HRESULT hr = m_ProfilerInfo->GetModuleMetaData(moduleInfo->NativeId, ofRead, IID_IMetaDataImport, (IUnknown**) &freshMetadata);
@@ -636,8 +675,8 @@ HRESULT ClrProfiler::GetMethodInfo(FunctionID functionID, LPWSTR functionName, U
 	mdToken funcToken = 0;
 	const ULONG originalMaxFunctionLength = maxFunctionLength;
 
-	CComPtr<IMetaDataImport> metaData;
-	CComPtr<IMetaDataImport2> metaData2;
+	SlimComPtr<IMetaDataImport> metaData;
+	SlimComPtr<IMetaDataImport2> metaData2;
 
 	hr = m_ProfilerInfo->GetTokenAndMetaDataFromFunction(functionID, IID_IMetaDataImport, (IUnknown**) &metaData, &funcToken);
 	CHECK_HR(hr);
@@ -1275,7 +1314,7 @@ HRESULT ClrProfiler::ModuleLoadFinished(ModuleID moduleId, HRESULT hrStatus)
 
 	EnterLock localLock(&m_lock);
 
-	CComPtr<IMetaDataImport> metadata;
+	SlimComPtr<IMetaDataImport> metadata;
 	HRESULT hr = m_ProfilerInfo2->GetModuleMetaData(moduleId, ofRead, IID_IMetaDataImport, (IUnknown**) &metadata);
 	CHECK_HR(hr);
 	if(metadata == NULL)
