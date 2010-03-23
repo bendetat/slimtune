@@ -68,6 +68,11 @@ namespace SlimTuneUI
 		Description("Causes the target process to suspend when a profiler connects.")]
 		public bool SuspendOnConnect { get; set; }
 
+        [Category("Profiling"),
+        DisplayName("Allow Method Inlining"),
+        Description("Allowing method inlining can give more accurate results in some situations, but may make the profile data harder to interpret.")]
+        public bool AllowMethodInlining { get; set; }
+
 		private ushort m_listenPort = 3000;
 		[Category("Profiling"),
 		DisplayName("Listen port"),

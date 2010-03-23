@@ -106,7 +106,7 @@ namespace SlimTuneUI
 		{
 			StopService(ServiceName, StopCommand);
 
-			string config = LauncherCommon.CreateConfigString(ProfilingMode, ListenPort, WaitForConnection, IncludeNative, SamplingInterval, CounterInterval);
+			string config = LauncherCommon.CreateConfigString(ProfilingMode, ListenPort, WaitForConnection, IncludeNative, SamplingInterval, CounterInterval, AllowMethodInlining);
 			string[] profEnv = LauncherCommon.CreateProfilerEnvironment(config, LauncherCommon.GetCounterString(PerformanceCounters));
 
 			string serviceAccountSid = null;
