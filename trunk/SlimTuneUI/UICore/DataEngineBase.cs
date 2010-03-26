@@ -175,6 +175,7 @@ namespace UICore
 					}
 				}
 				m_lastFlush = DateTime.Now;
+				m_samples.Clear();
 				m_cachedSamples = 0;
 
 				//m_timings.Clear();

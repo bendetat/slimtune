@@ -99,12 +99,12 @@ namespace UICore
 			if(!string.IsNullOrEmpty(connection.Executable))
 			{
 				caption = string.Format("{0} - {1}", System.IO.Path.GetFileNameWithoutExtension(connection.Executable),
-					System.IO.Path.GetFileNameWithoutExtension(connection.DataEngine.Name));
+					System.IO.Path.GetFileName(connection.DataEngine.Name));
 			}
 			else if(!string.IsNullOrEmpty(connection.HostName))
 			{
 				caption = string.Format("{0}:{1} - {2}", connection.HostName, connection.Port,
-					System.IO.Path.GetFileNameWithoutExtension(connection.DataEngine.Name));
+					System.IO.Path.GetFileName(connection.DataEngine.Name));
 			}
 			else
 			{

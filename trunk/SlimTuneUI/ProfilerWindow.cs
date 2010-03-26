@@ -74,7 +74,7 @@ namespace SlimTuneUI
 		{
 			if(!this.IsDisposed)
 			{
-				this.Invoke((Action) delegate
+				this.Invoke((System.Action) delegate
 				{
 					StatusLabel.Text = "Status: Stopped";
 					SnapshotButton.Enabled = false;

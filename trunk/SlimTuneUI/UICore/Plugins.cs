@@ -57,6 +57,16 @@ namespace UICore
 				if(assembly.GlobalAssemblyCache)
 					continue;
 
+				Type[] exportedTypes = null;
+				try
+				{
+					exportedTypes = assembly.GetExportedTypes();
+				}
+				catch
+				{
+					continue;
+				}
+
 				foreach(var type in assembly.GetExportedTypes())
 				{
 					if(type == baseType)

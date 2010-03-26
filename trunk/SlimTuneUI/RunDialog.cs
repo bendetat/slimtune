@@ -97,6 +97,7 @@ namespace SlimTuneUI
 				{
 					//storage = new SqlServerCompactEngine(dbFile, true);
 					if(m_sqliteRadio.Checked)
+						//data = new SQLiteEngine(dbFile, true);
 						data = new SQLiteEngine(dbFile, true);
 					else if(m_sqliteMemoryRadio.Checked)
 						data = new SQLiteMemoryEngine();

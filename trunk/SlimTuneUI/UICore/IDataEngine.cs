@@ -92,6 +92,14 @@ namespace UICore
 		}
 	}
 
+	public interface IDataEngineCreator
+	{
+		bool CheckParams();
+		IDataEngine CreateEngine();
+
+		string Name { get; }
+	}
+
 	public interface IDataEngine : IDisposable
 	{
 		string Name { get; }

@@ -422,7 +422,7 @@ namespace SlimTuneUI
 					m_updateSampleCmd.Reset();
 					m_updateSampleCmd.BindInt(1, threadKvp.Key);
 					m_updateSampleCmd.BindInt(2, sampleKvp.Key);
-					m_updateSampleCmd.BindInt(3, threadKvp.Key);
+					m_updateSampleCmd.BindInt(3, threadKvp.Value);
 					m_updateSampleCmd.Step();
 
 					if(m_updateSampleCmd.GetInt(0) == 0)
@@ -430,7 +430,7 @@ namespace SlimTuneUI
 						m_insertSampleCmd.Reset();
 						m_insertSampleCmd.BindInt(1, threadKvp.Key);
 						m_insertSampleCmd.BindInt(2, sampleKvp.Key);
-						m_insertSampleCmd.BindInt(3, threadKvp.Key);
+						m_insertSampleCmd.BindInt(3, threadKvp.Value);
 						m_insertSampleCmd.Step();
 					}
 				}
