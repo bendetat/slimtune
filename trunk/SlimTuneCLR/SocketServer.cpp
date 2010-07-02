@@ -267,11 +267,11 @@ FinishRead:
 		//ran out of space, so don't keep reading
 		//copy the remaining buffer to the beginning and store the offset to start the next recv there
 		memmove_s(&m_recvBuffer[0], kBufferSize, bufPtr, bytesToParse);
-		m_parseOffset = bytesToParse;
+		m_parseOffset = static_cast<unsigned int>(bytesToParse);
 		return true;
 	}
 
-	m_parseOffset = bufPtr - &m_recvBuffer[0];
+	m_parseOffset = static_cast<unsigned int>(bufPtr - &m_recvBuffer[0]);
 	return false;
 }
 
@@ -437,7 +437,7 @@ void SocketServer::Write(const void* data, size_t sizeBytes, bool forceFlush)
 #else
 	//Used when locks are being used. Locks are being used because my lockless code is broken.
 	LONG oldLength = m_writeLength;
-	m_writeLength += sizeBytes;
+	m_writeLength += static_cast<LONG>(sizeBytes);
 
 	if(m_writeLength > FlushSize || bufferPos == m_sendBuffer.GetBufferRoot())
 		flush = true;

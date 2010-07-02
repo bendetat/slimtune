@@ -36,6 +36,9 @@ struct ModuleInfo
 		: Id(id)
 	{
 	}
+
+private:
+	void operator=(const ModuleInfo&) { }
 };
 
 struct ClassInfo
@@ -50,6 +53,9 @@ struct ClassInfo
 		NativeId(nativeId)
 	{
 	}
+
+private:
+	void operator=(const ClassInfo&) { }
 };
 
 struct ThreadContext
@@ -58,12 +64,14 @@ struct ThreadContext
 	LONG InstCount;
 	LONG DisableCount;
 	std::vector<unsigned int> ShadowStack;
+	bool Suspended;
 
 	ThreadContext()
-		: Id(0), InstCount(0), DisableCount(0)
+		: Id(0), InstCount(0), DisableCount(0), Suspended(false)
 	{
 		ShadowStack.reserve(32);
 	}
+
 };
 
 struct FunctionInfo
@@ -86,11 +94,14 @@ struct FunctionInfo
 		DisableInstrumentation(false)
 	{
 	}
+
+private:
+	void operator=(const FunctionInfo&) { }
 };
 
 struct ThreadInfo
 {
-	unsigned int Id;
+	const unsigned int Id;
 	std::wstring Name;
 	bool Destroyed;
 
@@ -110,6 +121,9 @@ struct ThreadInfo
 	{
 		Name[0] = 0;
 	}
+
+private:
+	void operator=(const ThreadInfo&) { }
 };
 
 struct IProfilerData

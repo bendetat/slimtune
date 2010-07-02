@@ -59,6 +59,7 @@ struct ProfilerConfig
 	//Sampling properties
 	unsigned int SampleInterval;
 	bool SampleUnmanaged;
+	bool SampleSuspended;
 
 	//Perf counter properties
 	unsigned int CounterInterval;

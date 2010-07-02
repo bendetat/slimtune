@@ -45,6 +45,7 @@
 #include "Config.h"
 #include "PerfCounter.h"
 #include "lockfree_list.h"
+#include "SlimComPtr.h"
 
 #if defined(_WIN32_WCE) && !defined(_CE_DCOM) && !defined(_CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA)
 #error "Single-threaded COM objects are not properly supported on Windows CE platform, such as the Windows Mobile platforms that do not include full DCOM support. Define _CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA to force ATL to support creating single-thread COM object's and allow use of it's single-threaded COM object implementations. The threading model in your rgs file was set to 'Free' as that is the only threading model supported in non DCOM Windows CE platforms."
@@ -118,6 +119,9 @@ public:
 	STDMETHOD(ModuleLoadFinished)(ModuleID moduleId, HRESULT hrStatus);
 
 	STDMETHOD(JITCachedFunctionSearchStarted)(FunctionID functionId, BOOL* pbUseCachedFunction);
+
+	STDMETHOD(RuntimeThreadSuspended)(ThreadID threadId);
+	STDMETHOD(RuntimeThreadResumed)(ThreadID threadId);
 
 private:
 	HRESULT GetMethodInfo(FunctionID functionID,

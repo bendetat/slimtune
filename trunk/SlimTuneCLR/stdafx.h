@@ -54,6 +54,8 @@
 //Iterator debugging is great! Except it takes global locks that are a deadlock risk when mixed with SuspendThread.
 #define _HAS_ITERATOR_DEBUGGING 0
 
+#pragma warning(disable:4100)
+
 #include "Memory.h"
 #include "resource.h"
 #include <windows.h>

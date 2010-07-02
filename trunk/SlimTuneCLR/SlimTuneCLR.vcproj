@@ -63,10 +63,10 @@
 				BasicRuntimeChecks="0"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="2"
-				WarningLevel="4"
+				WarningLevel="3"
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
-				DisableSpecificWarnings="4996"
+				DisableSpecificWarnings="4996;4127"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -94,109 +94,6 @@
 				GenerateDebugInformation="true"
 				AssemblyDebug="1"
 				SubSystem="2"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
-				TargetMachine="1"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
-			Name="Release|Win32"
-			OutputDirectory="x86\$(ConfigurationName)"
-			IntermediateDirectory="x86\$(ConfigurationName)"
-			ConfigurationType="2"
-			UseOfATL="0"
-			ATLMinimizesCRunTimeLibraryUsage="false"
-			CharacterSet="1"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				PreprocessorDefinitions="NDEBUG"
-				MkTypLibCompatible="false"
-				TargetEnvironment="1"
-				GenerateStublessProxies="true"
-				TypeLibraryName="$(IntDir)/SlimTuneProfiler.tlb"
-				HeaderFileName="SlimTuneProfiler.h"
-				DLLDataFileName=""
-				InterfaceIdentifierFileName="SlimTuneProfiler_i.c"
-				ProxyFileName="SlimTuneProfiler_p.c"
-				ValidateParameters="false"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="3"
-				InlineFunctionExpansion="2"
-				EnableIntrinsicFunctions="true"
-				FavorSizeOrSpeed="1"
-				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="..\external\boost_1_42_0"
-				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;_USRDLL;X86"
-				RuntimeLibrary="2"
-				UsePrecompiledHeader="2"
-				WarningLevel="4"
-				Detect64BitPortabilityProblems="false"
-				DebugInformationFormat="3"
-				DisableSpecificWarnings="4996"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG"
-				Culture="1033"
-				AdditionalIncludeDirectories="$(IntDir);..\external\boost_1_42_0"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				RegisterOutput="true"
-				IgnoreImportLibrary="true"
-				AdditionalDependencies="corguids.lib winmm.lib dbghelp.lib pdh.lib"
-				Version="0.2.1.0"
-				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\external\boost_1_42_0\stage_x86\lib"
-				ModuleDefinitionFile=".\SlimTune.def"
-				DelayLoadDLLs=""
-				GenerateDebugInformation="true"
-				SubSystem="2"
-				OptimizeReferences="2"
-				EnableCOMDATFolding="2"
-				LinkTimeCodeGeneration="1"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
 				TargetMachine="1"
@@ -266,10 +163,10 @@
 				BasicRuntimeChecks="0"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="2"
-				WarningLevel="4"
+				WarningLevel="3"
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
-				DisableSpecificWarnings="4996"
+				DisableSpecificWarnings="4996;4127"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -278,7 +175,7 @@
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_DEBUG"
 				Culture="1033"
-				AdditionalIncludeDirectories="$(IntDir)"
+				AdditionalIncludeDirectories="$(IntDir);..\external\boost_1_42_0"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -298,6 +195,109 @@
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
 				TargetMachine="17"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release|Win32"
+			OutputDirectory="x86\$(ConfigurationName)"
+			IntermediateDirectory="x86\$(ConfigurationName)"
+			ConfigurationType="2"
+			UseOfATL="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="NDEBUG"
+				MkTypLibCompatible="false"
+				TargetEnvironment="1"
+				GenerateStublessProxies="true"
+				TypeLibraryName="$(IntDir)/SlimTuneProfiler.tlb"
+				HeaderFileName="SlimTuneProfiler.h"
+				DLLDataFileName=""
+				InterfaceIdentifierFileName="SlimTuneProfiler_i.c"
+				ProxyFileName="SlimTuneProfiler_p.c"
+				ValidateParameters="false"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="3"
+				InlineFunctionExpansion="2"
+				EnableIntrinsicFunctions="true"
+				FavorSizeOrSpeed="1"
+				WholeProgramOptimization="true"
+				AdditionalIncludeDirectories="..\external\boost_1_42_0"
+				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;_USRDLL;X86"
+				RuntimeLibrary="2"
+				UsePrecompiledHeader="2"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="false"
+				DebugInformationFormat="3"
+				DisableSpecificWarnings="4996;4127"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="1033"
+				AdditionalIncludeDirectories="$(IntDir);..\external\boost_1_42_0"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				RegisterOutput="true"
+				IgnoreImportLibrary="true"
+				AdditionalDependencies="corguids.lib winmm.lib dbghelp.lib pdh.lib"
+				Version="0.2.1.0"
+				LinkIncremental="1"
+				AdditionalLibraryDirectories="..\external\boost_1_42_0\stage_x86\lib"
+				ModuleDefinitionFile=".\SlimTune.def"
+				DelayLoadDLLs=""
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				LinkTimeCodeGeneration="1"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+				TargetMachine="1"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -365,10 +365,10 @@
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;_USRDLL;X64"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="2"
-				WarningLevel="4"
+				WarningLevel="3"
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
-				DisableSpecificWarnings="4996"
+				DisableSpecificWarnings="4996;4127"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -377,7 +377,7 @@
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG"
 				Culture="1033"
-				AdditionalIncludeDirectories="$(IntDir)"
+				AdditionalIncludeDirectories="$(IntDir);..\external\boost_1_42_0"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -437,162 +437,6 @@
 	</References>
 	<Files>
 		<Filter
-			Name="Source Files"
-			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
-			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
-			>
-			<File
-				RelativePath=".\Config.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\dbghelp.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\IProfilerServer.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Memory.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Messages.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\NativeHooks.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\PerfCounter.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Profiler.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ProfilerClassFactory.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\PublicInterface.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\RingBuffer.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\SigParse.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\SocketServer.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Timer.cpp"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="Header Files"
-			Filter="h;hpp;hxx;hm;inl;inc;xsd"
-			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
-			>
-			<File
-				RelativePath=".\Config.h"
-				>
-			</File>
-			<File
-				RelativePath=".\dbghelp.h"
-				>
-			</File>
-			<File
-				RelativePath=".\IdRemapper.h"
-				>
-			</File>
-			<File
-				RelativePath=".\IProfilerData.h"
-				>
-			</File>
-			<File
-				RelativePath=".\IProfilerServer.h"
-				>
-			</File>
-			<File
-				RelativePath=".\lockfree_list.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Memory.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Messages.h"
-				>
-			</File>
-			<File
-				RelativePath=".\NativeHooks.h"
-				>
-			</File>
-			<File
-				RelativePath=".\PerfCounter.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Profiler.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ProfilerBase.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ProfilerClassFactory.h"
-				>
-			</File>
-			<File
-				RelativePath=".\PublicInterface.h"
-				>
-			</File>
-			<File
-				RelativePath=".\RingBuffer.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SigFormat.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SigParse.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SlimComPtr.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SocketServer.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Timer.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Utilities.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Version.h"
-				>
-			</File>
-		</Filter>
-		<Filter
 			Name="Resource Files"
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
@@ -635,20 +479,20 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Debug|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
 						UsePrecompiledHeader="0"
 						CompileAsManaged="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -700,7 +544,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release|Win32"
+					Name="Debug|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -708,7 +552,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|x64"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -745,15 +589,6 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						CommandLine="copy &quot;$(InputPath)&quot; &quot;$(TargetDir)&quot;&#x0D;&#x0A;"
-						Outputs="$(TargetDir)$(InputFileName)"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Debug|x64"
 					ExcludedFromBuild="true"
 					>
@@ -761,6 +596,15 @@
 						Name="VCCustomBuildTool"
 						CommandLine=""
 						Outputs=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="copy &quot;$(InputPath)&quot; &quot;$(TargetDir)&quot;&#x0D;&#x0A;"
+						Outputs="$(TargetDir)$(InputFileName)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -790,20 +634,20 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Debug|x64"
 					>
 					<Tool
 						Name="VCCustomBuildTool"
 						CommandLine="copy &quot;$(InputPath)&quot; &quot;$(TargetDir)&quot;&#x0D;&#x0A;"
 						Outputs="$(TargetDir)$(InputFileName)"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -815,6 +659,154 @@
 						Outputs="$(TargetDir)$(InputFileName)"
 					/>
 				</FileConfiguration>
+			</File>
+		</Filter>
+		<Filter
+			Name="Profiler"
+			>
+			<File
+				RelativePath=".\Config.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Config.h"
+				>
+			</File>
+			<File
+				RelativePath=".\dbghelp.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\dbghelp.h"
+				>
+			</File>
+			<File
+				RelativePath=".\IdRemapper.h"
+				>
+			</File>
+			<File
+				RelativePath=".\IProfilerData.h"
+				>
+			</File>
+			<File
+				RelativePath=".\IProfilerServer.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\IProfilerServer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\lockfree_list.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Memory.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Memory.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Messages.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Messages.h"
+				>
+			</File>
+			<File
+				RelativePath=".\NativeHooks.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\NativeHooks.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PerfCounter.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PerfCounter.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Profiler.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Profiler.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ProfilerBase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ProfilerClassFactory.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ProfilerClassFactory.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PublicInterface.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PublicInterface.h"
+				>
+			</File>
+			<File
+				RelativePath=".\RingBuffer.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\RingBuffer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SigFormat.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SigParse.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\SigParse.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SlimComPtr.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SocketServer.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\SocketServer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Timer.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Timer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Utilities.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Version.h"
+				>
 			</File>
 		</Filter>
 	</Files>

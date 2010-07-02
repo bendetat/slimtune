@@ -58,6 +58,8 @@ struct IoThreadFunc
 
 private:
 	IProfilerServer& m_server;
+
+	void operator=(const IoThreadFunc&) { }
 };
 
 unsigned int ClassIdFromTypeDefAndModule(mdTypeDef classDef, ModuleID module)
@@ -80,7 +82,7 @@ ClrProfiler::ClrProfiler()
 m_suspended(0),
 m_instDepth(0)
 {
-#ifdef DEBUG
+#ifdef _DEBUG
 	__debugbreak();
 #endif
 
@@ -208,7 +210,7 @@ STDMETHODIMP ClrProfiler::Initialize(IUnknown *pICorProfilerInfoUnk)
 
 	//CONFIG: Server type?
 	m_samplerActive = false;
-	m_server.reset(IProfilerServer::CreateSocketServer(*this, m_config.ListenPort, m_lock));
+	m_server.reset(IProfilerServer::CreateSocketServer(*this, static_cast<unsigned short>(m_config.ListenPort), m_lock));
 	m_server->SetCallbacks(boost::bind(&ClrProfiler::OnConnect, this), boost::bind(&ClrProfiler::OnDisconnect, this));
 	m_server->Start();
 
@@ -443,14 +445,14 @@ void ClrProfiler::SetInstrument(unsigned int id, bool enable)
 }
 
 // this function is called by the CLR when a function has been mapped to an ID
-UINT_PTR ClrProfiler::StaticFunctionMapper(FunctionID functionID, BOOL *pbHookFunction)
+UINT_PTR ClrProfiler::StaticFunctionMapper(FunctionID functionId, BOOL *pbHookFunction)
 {
-	UINT_PTR retVal = functionID;
+	UINT_PTR retVal = functionId;
 	ClrProfiler* profiler = g_Profiler;
 	if(profiler == NULL)
-		return functionID;
+		return functionId;
 
-	retVal = profiler->MapFunction(functionID, true);
+	retVal = profiler->MapFunction(functionId, true);
 
 	if(profiler->GetMode() & PM_Tracing)
 	{
@@ -462,7 +464,7 @@ UINT_PTR ClrProfiler::StaticFunctionMapper(FunctionID functionID, BOOL *pbHookFu
 			mdToken token;
 			ULONG methodSize;
 
-			HRESULT hr = profiler->m_ProfilerInfo->GetFunctionInfo(functionID, NULL, &moduleId, &token);
+			HRESULT hr = profiler->m_ProfilerInfo->GetFunctionInfo(functionId, NULL, &moduleId, &token);
 			if(FAILED(hr))
 				return retVal;
 
@@ -569,17 +571,17 @@ unsigned int ClrProfiler::MapClass(mdTypeDef classDef, IMetaDataImport* metadata
 	return newId;
 }
 
-UINT_PTR ClrProfiler::MapFunction(FunctionID functionID, bool deferNameLookup)
+UINT_PTR ClrProfiler::MapFunction(FunctionID functionId, bool deferNameLookup)
 {
 	EnterLock localLock(&m_lock);
 
 	//Look up the FunctionInfo or create a new one
 	FunctionInfo* info;
-	unsigned int& newId = m_functionRemapper[functionID];
+	unsigned int& newId = m_functionRemapper[functionId];
 	if(newId == 0)
 	{
 		newId = m_functionRemapper.Alloc();
-		info = new FunctionInfo(newId, functionID);
+		info = new FunctionInfo(newId, functionId);
 		info->IsNative = FALSE;
 		m_functions.push_back(info);
 	}
@@ -599,7 +601,7 @@ UINT_PTR ClrProfiler::MapFunction(FunctionID functionID, bool deferNameLookup)
 		//get the method name and class
 		ULONG nameLength = Messages::MapFunction::MaxNameSize;
 		ULONG signatureLength = Messages::MapFunction::MaxSignatureSize;
-		HRESULT hr = GetMethodInfo(functionID, mapFunction.Name, nameLength, mapFunction.ClassId, mapFunction.Signature, signatureLength);
+		HRESULT hr = GetMethodInfo(functionId, mapFunction.Name, nameLength, mapFunction.ClassId, mapFunction.Signature, signatureLength);
 		if(FAILED(hr))
 		{
 			//Unable to look up the name; not entirely sure why this can happen but it can.
@@ -611,8 +613,6 @@ UINT_PTR ClrProfiler::MapFunction(FunctionID functionID, bool deferNameLookup)
 			signatureLength = 0;
 			mapFunction.ClassId = 0;
 		}
-
-		//TODO: Should we send the function mapping or not?
 
 		info->Name = std::wstring(&mapFunction.Name[0], &mapFunction.Name[nameLength - 1]);
 		info->ClassId = mapFunction.ClassId;
@@ -668,7 +668,7 @@ unsigned int ClrProfiler::MapUnmanaged(UINT_PTR address)
 
 //The returned lengths INCLUDE the null terminator on the string
 //They are buffer sizes, not string lengths
-HRESULT ClrProfiler::GetMethodInfo(FunctionID functionID, LPWSTR functionName, ULONG& maxFunctionLength,
+HRESULT ClrProfiler::GetMethodInfo(FunctionID functionId, LPWSTR functionName, ULONG& maxFunctionLength,
 								   unsigned int& classId, LPWSTR signature, ULONG& maxSignatureLength)
 {
 	HRESULT hr = S_OK;
@@ -678,7 +678,7 @@ HRESULT ClrProfiler::GetMethodInfo(FunctionID functionID, LPWSTR functionName, U
 	SlimComPtr<IMetaDataImport> metaData;
 	SlimComPtr<IMetaDataImport2> metaData2;
 
-	hr = m_ProfilerInfo->GetTokenAndMetaDataFromFunction(functionID, IID_IMetaDataImport, (IUnknown**) &metaData, &funcToken);
+	hr = m_ProfilerInfo->GetTokenAndMetaDataFromFunction(functionId, IID_IMetaDataImport, (IUnknown**) &metaData, &funcToken);
 	CHECK_HR(hr);
 
 	hr = metaData->QueryInterface(IID_IMetaDataImport2, (void**) &metaData2);
@@ -706,7 +706,7 @@ HRESULT ClrProfiler::GetMethodInfo(FunctionID functionID, LPWSTR functionName, U
 			std::copy(functionName, functionName + maxFunctionLength, functionName + classInfo->Name.size() + 1);
 			std::copy(classInfo->Name.begin(), classInfo->Name.end(), functionName);
 			functionName[classInfo->Name.size()] = L'.';
-			maxFunctionLength += classInfo->Name.size() + 1;
+			maxFunctionLength += static_cast<ULONG>(classInfo->Name.size() + 1);
 
 			assert(wcslen(functionName) + 1 == maxFunctionLength);
 		}
@@ -740,7 +740,7 @@ HRESULT ClrProfiler::GetMethodInfo(FunctionID functionID, LPWSTR functionName, U
 		}
 		*end++ = L'>';
 		*end = 0;
-		maxFunctionLength = end - functionName + 1;
+		maxFunctionLength = static_cast<ULONG>(end - functionName + 1);
 		assert(wcslen(functionName) == maxFunctionLength - 1);
 	}
 
@@ -748,9 +748,36 @@ HRESULT ClrProfiler::GetMethodInfo(FunctionID functionID, LPWSTR functionName, U
 	signature[0] = 0;
 	SigFormat formatter(signature, maxSignatureLength, funcToken, metaData, metaData2);
 	formatter.Parse((sig_byte*) sigBlob, sigBlobSize);
-	maxSignatureLength = formatter.GetLength() + 1;
+	maxSignatureLength = static_cast<ULONG>(formatter.GetLength() + 1);
 	assert(wcslen(signature) + 1 == maxSignatureLength);
 
+	//TODO: Extract Method
+	//Look up the debug symbol for this thing and try to figure out where it lives
+	ULONG64 buffer[(sizeof(SYMBOL_INFO) +
+		MAX_SYM_NAME * sizeof(TCHAR) +
+		sizeof(ULONG64) - 1) /
+		sizeof(ULONG64)];
+	PSYMBOL_INFO pSymbol = (PSYMBOL_INFO) buffer;
+	pSymbol->SizeOfStruct = sizeof(SYMBOL_INFO);
+	pSymbol->MaxNameLen = MAX_SYM_NAME;
+
+	/*ModuleID moduleId = 0;
+	m_ProfilerInfo->GetFunctionInfo(functionId, NULL, &moduleId, NULL);
+	LPCBYTE moduleAddr = 0;
+	m_ProfilerInfo->GetModuleInfo(moduleId, &moduleAddr, 0, 0, 0, 0);
+	BOOL tokenResult = SymFromToken(GetCurrentProcess(), reinterpret_cast<DWORD64>(moduleAddr), funcToken, pSymbol);
+	if(tokenResult)
+	{
+		IMAGEHLP_LINE64 lineInfo;
+		lineInfo.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
+		BOOL lineResult = SymGetLineFromAddr64(GetCurrentProcess(), pSymbol->Address, NULL, &lineInfo);
+		if(!lineResult)
+		{
+			DWORD err = GetLastError();
+			err = 0;
+		}
+	}*/
+	
 	return S_OK;
 }
 
@@ -818,7 +845,7 @@ bool ClrProfiler::ResumeTarget()
 }
 
 
-void ClrProfiler::Enter(FunctionID functionID, UINT_PTR clientData, COR_PRF_FRAME_INFO frameInfo, COR_PRF_FUNCTION_ARGUMENT_INFO *argumentInfo)
+void ClrProfiler::Enter(FunctionID functionId, UINT_PTR clientData, COR_PRF_FRAME_INFO frameInfo, COR_PRF_FUNCTION_ARGUMENT_INFO *argumentInfo)
 {
 	FunctionInfo* info = reinterpret_cast<FunctionInfo*>(clientData);
 
@@ -942,14 +969,14 @@ void ClrProfiler::LeaveImpl(FunctionID functionId, FunctionInfo* info, MessageId
 	InterlockedDecrement(&m_instDepth);
 }
 
-void ClrProfiler::Leave(FunctionID functionID, UINT_PTR clientData, COR_PRF_FRAME_INFO frameInfo, COR_PRF_FUNCTION_ARGUMENT_RANGE *argumentRange)
+void ClrProfiler::Leave(FunctionID functionId, UINT_PTR clientData, COR_PRF_FRAME_INFO frameInfo, COR_PRF_FUNCTION_ARGUMENT_RANGE *argumentRange)
 {
-	LeaveImpl(functionID, reinterpret_cast<FunctionInfo*>(clientData), MID_LeaveFunction);
+	LeaveImpl(functionId, reinterpret_cast<FunctionInfo*>(clientData), MID_LeaveFunction);
 }
 
-void ClrProfiler::Tailcall(FunctionID functionID, UINT_PTR clientData, COR_PRF_FRAME_INFO frameInfo)
+void ClrProfiler::Tailcall(FunctionID functionId, UINT_PTR clientData, COR_PRF_FRAME_INFO frameInfo)
 {
-	LeaveImpl(functionID, reinterpret_cast<FunctionInfo*>(clientData), MID_TailCall);
+	LeaveImpl(functionId, reinterpret_cast<FunctionInfo*>(clientData), MID_TailCall);
 }
 
 HRESULT ClrProfiler::StackWalkGlobal(FunctionID funcId, UINT_PTR ip, COR_PRF_FRAME_INFO frameInfo, ULONG32 contextSize, BYTE contextBytes[], void *clientData)
@@ -1030,11 +1057,19 @@ void ClrProfiler::OnSampleTimer()
 		ThreadInfo* threadInfo = it->second;
 		if(threadInfo->Destroyed)
 			continue;
+		DWORD threadId = threadInfo->SystemId;
+
+		ContextList::iterator contextIt = m_threadContexts.find(threadId);
+		if(contextIt != m_threadContexts.end())
+		{
+			//if this thread is suspended and we're not supposed to sample suspended threads, move on
+			if(!m_config.SampleSuspended && contextIt->second.Suspended)
+				continue;
+		}
 
 		Messages::Sample sample;
 		sample.ThreadId = it->first;
 
-		DWORD threadId = threadInfo->SystemId;
 		HANDLE hThread = OpenThread(THREAD_SUSPEND_RESUME | THREAD_QUERY_INFORMATION | THREAD_GET_CONTEXT, false, threadId);
 		if(hThread == NULL)
 		{
@@ -1131,7 +1166,7 @@ void ClrProfiler::OnSampleTimer()
 				//still an unmanaged function
 				if(m_config.SampleUnmanaged)
 				{
-					unsigned int id = MapUnmanaged(stackFrame.AddrPC.Offset);
+					unsigned int id = MapUnmanaged(static_cast<UINT_PTR>(stackFrame.AddrPC.Offset));
 					if(id != 0)
 						functions->push_back(id);
 				}
@@ -1382,7 +1417,7 @@ void ClrProfiler::OnCounterTimerGlobal(LPVOID lpParameter, BOOLEAN TimerOrWaitFi
 void ClrProfiler::OnCounterTimer()
 {
 	m_counter->Update();
-	for(size_t i = 1; i <= m_counter->GetCounterCount(); ++i)
+	for(unsigned int i = 1; i <= m_counter->GetCounterCount(); ++i)
 	{
 		double value = m_counter->GetDouble(i);
 		__int64 fixedValue = static_cast<__int64>(value * 100000);
@@ -1428,4 +1463,28 @@ void ClrProfiler::EndEvent(unsigned int id)
 	InterlockedIncrement(&m_instDepth);
 	endEvent.Write(*m_server, MID_EndEvent);
 	InterlockedDecrement(&m_instDepth);
+}
+
+HRESULT ClrProfiler::RuntimeThreadSuspended(ThreadID threadId)
+{
+	ContextList::iterator it = m_threadContexts.find(threadId);
+	if(it != m_threadContexts.end())
+	{
+		ThreadContext& context = it->second;
+		context.Suspended = true;
+	}
+
+	return S_OK;
+}
+
+HRESULT ClrProfiler::RuntimeThreadResumed(ThreadID threadId)
+{
+	ContextList::iterator it = m_threadContexts.find(threadId);
+	if(it != m_threadContexts.end())
+	{
+		ThreadContext& context = it->second;
+		context.Suspended = false;
+	}
+
+	return S_OK;
 }

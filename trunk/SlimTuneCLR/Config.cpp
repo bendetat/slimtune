@@ -37,6 +37,7 @@ ProfilerConfig::ProfilerConfig()
 
 	SampleInterval = 3;
 	SampleUnmanaged = false;
+	SampleSuspended = true;
 
 	CounterInterval = 1000;
 
@@ -90,6 +91,8 @@ void ParseVar(ProfilerConfig& config, wchar_t* var)
 		ParseRef(valueStr, config.SampleInterval);
 	else if(_wcsicmp(var, L"sampleunmanaged") == 0)
 		ParseRef(valueStr, config.SampleUnmanaged);
+	else if(_wcsicmp(var, L"samplesuspended") == 0)
+		ParseRef(valueStr, config.SampleSuspended);
 	else if(_wcsicmp(var, L"counterinterval") == 0)
 		ParseRef(valueStr, config.CounterInterval);
 }

@@ -33,10 +33,10 @@ char* Write7BitEncodedInt(char* buffer, unsigned int value)
 {
 	while(value >= 128)
 	{
-		*buffer++ = value | 0x80;
+		*buffer++ = static_cast<char>(value | 0x80);
 		value >>= 7;
 	}
-	*buffer++ = value;
+	*buffer++ = static_cast<char>(value);
 
 	return buffer;
 }
@@ -45,10 +45,10 @@ char* Write7BitEncodedInt64(char* buffer, unsigned __int64 value)
 {
 	while(value >= 128)
 	{
-		*buffer++ = (char) (value | 0x80);
+		*buffer++ = static_cast<char>(value | 0x80);
 		value >>= 7;
 	}
-	*buffer++ = (char) value;
+	*buffer++ = static_cast<char>(value);
 
 	return buffer;
 }
