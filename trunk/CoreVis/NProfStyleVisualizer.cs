@@ -181,8 +181,8 @@ namespace SlimTuneUI.CoreVis
 	{
 		const string kParentHits = @"
 SELECT SUM(HitCount)
-FROM Callers
-WHERE CallerId = {0} AND ThreadId = {1}
+FROM Calls
+WHERE ParentId = {0} AND ThreadId = {1}
 ";
 
 		const string kTopLevelQuery = @"
@@ -199,20 +199,20 @@ ORDER BY HitCount DESC
 ";
 
 		const string kChildQuery = @"
-SELECT C1.CalleeId, HitCount, Name AS ""Function"", Signature, CASE TotalCalls
+SELECT C1.ChildId, HitCount, Name AS ""Function"", Signature, CASE TotalCalls
 	WHEN 0 THEN 0
 	ELSE (1.0 * C1.HitCount / TotalCalls)
 	END AS ""% Calls""
-FROM Callers AS ""C1""
+FROM Calls AS ""C1""
 JOIN Functions
-	ON C1.CalleeId = Id
+	ON C1.ChildId = Id
 JOIN (
-	SELECT CalleeId, SUM(HitCount) AS ""TotalCalls""
-	FROM Callers
-	GROUP BY CalleeId
+	SELECT ChildId, SUM(HitCount) AS ""TotalCalls""
+	FROM Calls
+	GROUP BY ChildId
 ) AS ""C2""
-	ON C1.CalleeId = C2.CalleeId
-WHERE C1.CallerId = {0} AND ThreadId = {1}
+	ON C1.ChildId = C2.ChildId
+WHERE C1.ParentId = {0} AND ThreadId = {1}
 ORDER BY HitCount DESC
 ";
 
@@ -230,7 +230,7 @@ ORDER BY HitCount DESC
 				if(treePath.IsEmpty())
 				{
 					//top level queries
-					var data = m_data.Query(kTopLevelQuery);
+					var data = m_data.RawQuery(kTopLevelQuery);
 
 					foreach(DataRow row in data.Tables[0].Rows)
 					{
@@ -246,15 +246,15 @@ ORDER BY HitCount DESC
 				else
 				{
 					var parent = treePath.LastNode as FunctionItem;
-					var data = m_data.Query(string.Format(kChildQuery, parent.Id, parent.Thread));
+					var data = m_data.RawQuery(string.Format(kChildQuery, parent.Id, parent.Thread));
 
 					//find out what the current number of calls by the parent is
-					var parentHits = Convert.ToInt32(m_data.QueryScalar(string.Format(kParentHits, parent.Id, parent.Thread)));
+					var parentHits = Convert.ToInt32(m_data.RawQueryScalar(string.Format(kParentHits, parent.Id, parent.Thread)));
 					foreach(DataRow row in data.Tables[0].Rows)
 					{
 						var item = new FunctionItem();
 						item.Thread = Convert.ToInt32(parent.Thread);
-						item.Id = Convert.ToInt32(row["CalleeId"]);
+						item.Id = Convert.ToInt32(row["ChildId"]);
 						item.Name = Convert.ToString(row["Function"]) + Convert.ToString(row["Signature"]);
 						item.HitCount = Convert.ToInt32(row["HitCount"]);
 						if(parentHits == 0)
@@ -291,16 +291,16 @@ ORDER BY HitCount DESC
 	class CallersModel : ITreeModel
 	{
 		const string kTopLevelQuery = @"
-SELECT Callers.ThreadId, Id, Name AS ""Function"", Signature, HitCount, CASE TotalHits
+SELECT Calls.ThreadId, Id, Name AS ""Function"", Signature, HitCount, CASE TotalHits
 	WHEN 0 THEN 0
 	ELSE (1.0 * HitCount / TotalHits)
 	END AS ""Percent""
-FROM Callers
+FROM Calls
 JOIN Functions
-	ON Id = CallerId
-JOIN (SELECT ThreadId, SUM(HitCount) AS ""TotalHits"" FROM Callers WHERE CalleeId = 0 GROUP BY ThreadId) AS ""Totals""
-	ON Callers.ThreadId = Totals.ThreadId
-WHERE CalleeId = 0
+	ON Id = ParentId
+JOIN (SELECT ThreadId, SUM(HitCount) AS ""TotalHits"" FROM Calls WHERE ChildId = 0 GROUP BY ThreadId) AS ""Totals""
+	ON Calls.ThreadId = Totals.ThreadId
+WHERE ChildId = 0
 ORDER BY HitCount DESC
 ";
 
@@ -309,16 +309,16 @@ SELECT Id, HitCount, Name AS ""Function"", Signature, CASE TotalCalls
 	WHEN 0 THEN 0
 	ELSE (1.0 * HitCount / TotalCalls)
 	END AS ""Percent""
-FROM Callers
+FROM Calls
 JOIN Functions
-	ON Id = CallerId
+	ON Id = ParentId
 JOIN (
-	SELECT CalleeId, SUM(HitCount) AS ""TotalCalls""
-	FROM Callers
-	WHERE CalleeId = {0} AND ThreadId = {1}
+	SELECT ChildId, SUM(HitCount) AS ""TotalCalls""
+	FROM Calls
+	WHERE ChildId = {0} AND ThreadId = {1}
 ) AS ""Totals""
-	ON Callers.CalleeId = Totals.CalleeId
-WHERE Callers.ThreadId = {1}
+	ON Calls.ChildId = Totals.ChildId
+WHERE Calls.ThreadId = {1}
 ORDER BY HitCount DESC
 ";
 
@@ -336,7 +336,7 @@ ORDER BY HitCount DESC
 				if(treePath.IsEmpty())
 				{
 					//top level queries
-					var data = m_data.Query(kTopLevelQuery);
+					var data = m_data.RawQuery(kTopLevelQuery);
 
 					foreach(DataRow row in data.Tables[0].Rows)
 					{
@@ -352,7 +352,7 @@ ORDER BY HitCount DESC
 				else
 				{
 					var parent = treePath.LastNode as FunctionItem;
-					var data = m_data.Query(string.Format(kChildQuery, parent.Id, parent.Thread));
+					var data = m_data.RawQuery(string.Format(kChildQuery, parent.Id, parent.Thread));
 
 					foreach(DataRow row in data.Tables[0].Rows)
 					{

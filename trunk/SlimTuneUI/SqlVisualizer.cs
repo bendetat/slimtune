@@ -36,24 +36,24 @@ using UICore;
  * Useful queries:
  * 
 
-SELECT M1.Name AS "Caller", M2.Name AS "Constructor", HitCount, CallerId, CalleeId
-FROM Callers
-JOIN Mappings M1 ON CallerId = M1.Id
-JOIN Mappings M2 ON CalleeId = M2.Id
+SELECT M1.Name AS "Caller", M2.Name AS "Constructor", HitCount, ParentId, ChildId
+FROM Calls
+JOIN Mappings M1 ON ParentId = M1.Id
+JOIN Mappings M2 ON ChildId = M2.Id
 WHERE M2.Name LIKE '%..ctor'
 ORDER BY HitCount DESC
 
 SELECT Name, HitCount
-FROM Callers
-JOIN Mappings on CallerId = Mappings.Id
-WHERE CalleeId = 0
+FROM Calls
+JOIN Mappings on ParentId = Mappings.Id
+WHERE ChildId = 0
 ORDER BY HitCount DESC
 
 SELECT Mappings.Name AS "Name", ROUND(100.0 * HitCount / @SampleCount, 2) AS "Percent", Threads.Name AS "Thread"
-FROM Callers
-JOIN Mappings ON CallerId = Mappings.Id
+FROM Calls
+JOIN Mappings ON ParentId = Mappings.Id
 JOIN Threads ON ThreadId = Threads.Id
-WHERE CalleeId = 0
+WHERE ChildId = 0
 ORDER BY HitCount DESC
 
 */

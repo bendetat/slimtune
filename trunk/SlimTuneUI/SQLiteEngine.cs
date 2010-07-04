@@ -203,7 +203,7 @@ namespace SlimTuneUI
 
 				using(SQLiteTransaction transact = m_database.BeginTransaction())
 				{
-					queryCount += FlushCallers();
+					queryCount += FlushCalls();
 					queryCount += FlushSamples();
 					transact.Commit();
 				}
@@ -235,8 +235,8 @@ namespace SlimTuneUI
 				Command(cmd);
 
 				int id = (int) RawQueryScalar("SELECT MAX(Id) FROM Snapshots");
-				Command(string.Format("CREATE TABLE Callers_{0} {1}", id, kCallersSchema));
-				Command(string.Format("INSERT INTO Callers_{0} SELECT * FROM Callers", id));
+				Command(string.Format("CREATE TABLE Calls_{0} {1}", id, kCallsSchema));
+				Command(string.Format("INSERT INTO Calls_{0} SELECT * FROM Callers", id));
 				Command(string.Format("CREATE TABLE Samples_{0} {1}", id, kSamplesSchema));
 				Command(string.Format("INSERT INTO Samples_{0} SELECT * FROM Samples", id));
 			}
@@ -317,7 +317,7 @@ namespace SlimTuneUI
 
 		protected override void DoClearData()
 		{
-			RawQueryScalar("UPDATE Callers SET HitCount = 0");
+			RawQueryScalar("UPDATE Calls SET HitCount = 0");
 			RawQueryScalar("UPDATE Samples SET HitCount = 0");
 			RawQueryScalar("DELETE FROM CounterValues");
 			RawQueryScalar("DELETE FROM Counters");
@@ -346,11 +346,11 @@ namespace SlimTuneUI
 
 			Command("CREATE TABLE Threads (Id INT PRIMARY KEY, IsAlive INT, Name TEXT(256))");
 
-			//We will look up results in CallerId order when updating this table
-			Command("CREATE TABLE Callers " + kCallersSchema);
-			Command("CREATE INDEX Callers_CallerIndex ON Callers(CallerId);");
-			Command("CREATE INDEX Callers_CalleeIndex ON Callers(CalleeId);");
-			Command("CREATE INDEX Callers_Compound ON Callers(ThreadId, CallerId, CalleeId);");
+			//We will look up results in ParentId order when updating this table
+			Command("CREATE TABLE Calls " + kCallsSchema);
+			Command("CREATE INDEX Calls_ParentIndex ON Calls(ParentId);");
+			Command("CREATE INDEX Calls_ChildIndex ON Calls(ChildId);");
+			Command("CREATE INDEX Calls_Compound ON Calls(ThreadId, ParentId, ChildId);");
 
 			Command("CREATE TABLE Samples " + kSamplesSchema);
 			Command("CREATE INDEX Samples_FunctionIndex ON Samples(FunctionId);");
@@ -361,7 +361,7 @@ namespace SlimTuneUI
 			Command("CREATE INDEX Timings_Compound ON Timings(FunctionId, RangeMin);");
 
 			Command("CREATE TABLE Counters (Id INT PRIMARY KEY, Name TEXT(256))");
-			Command("CREATE TABLE CounterValues (CounterId INT, Time INT, Value REAL)");
+			Command("CREATE TABLE CounterValues (CounterId INT, Time INT, Value NUMERIC)");
 			Command("CREATE INDEX CounterValues_IdIndex ON Counters(Id);");
 		}
 
@@ -394,8 +394,8 @@ namespace SlimTuneUI
 			m_updateThreadAliveCmd = CreateCommand("UPDATE Threads SET IsAlive = ? WHERE Id=?", 2);
 			m_updateThreadNameCmd = CreateCommand("UPDATE Threads SET Name = ? WHERE Id=?", 2);
 
-			m_insertCallerCmd = CreateCommand("INSERT INTO Callers (ThreadId, CallerId, CalleeId, HitCount) VALUES (?, ?, ?, ?)", 4);
-			m_updateCallerCmd = CreateCommand("UPDATE Callers SET HitCount = HitCount + ? WHERE ThreadId=? AND CallerId=? AND CalleeId=?", 4);
+			m_insertCallerCmd = CreateCommand("INSERT INTO Calls (ThreadId, ParentId, ChildId, HitCount) VALUES (?, ?, ?, ?)", 4);
+			m_updateCallerCmd = CreateCommand("UPDATE Calls SET HitCount = HitCount + ? WHERE ThreadId=? AND ParentId=? AND ChildId=?", 4);
 
 			m_insertSampleCmd = CreateCommand("INSERT INTO Samples (ThreadId, FunctionId, HitCount) VALUES (?, ?, ?)", 3);
 			m_updateSampleCmd = CreateCommand("UPDATE Samples SET HitCount = HitCount + ? WHERE ThreadId=? AND FunctionId=?", 3);
@@ -404,32 +404,32 @@ namespace SlimTuneUI
 			m_counterNameCmd = CreateCommand("REPLACE INTO Counters (Id, Name) VALUES (?, ?)", 2);
 		}
 
-		private int FlushCallers()
+		private int FlushCalls()
 		{
 			int queryCount = 0;
-			foreach(KeyValuePair<int, SortedDictionary<int, SortedList<int, int>>> threadKvp in m_callers.Graph)
+			foreach(KeyValuePair<int, SortedDictionary<int, SortedList<int, int>>> threadKvp in m_calls.Graph)
 			{
 				int threadId = threadKvp.Key;
 				foreach(KeyValuePair<int, SortedList<int, int>> callerKvp in threadKvp.Value)
 				{
-					int callerId = callerKvp.Key;
+					int parentId = callerKvp.Key;
 					foreach(KeyValuePair<int, int> hitsKvp in callerKvp.Value)
 					{
-						int calleeId = hitsKvp.Key;
+						int childId = hitsKvp.Key;
 						int hits = hitsKvp.Value;
 
 						m_updateCallerCmd.Parameters[0].Value = hits;
 						m_updateCallerCmd.Parameters[1].Value = threadId;
-						m_updateCallerCmd.Parameters[2].Value = callerId;
-						m_updateCallerCmd.Parameters[3].Value = calleeId;
+						m_updateCallerCmd.Parameters[2].Value = parentId;
+						m_updateCallerCmd.Parameters[3].Value = childId;
 						int count = Convert.ToInt32(m_updateCallerCmd.ExecuteScalar());
 						++queryCount;
 
 						if(count == 0)
 						{
 							m_insertCallerCmd.Parameters[0].Value = threadId;
-							m_insertCallerCmd.Parameters[1].Value = callerId;
-							m_insertCallerCmd.Parameters[2].Value = calleeId;
+							m_insertCallerCmd.Parameters[1].Value = parentId;
+							m_insertCallerCmd.Parameters[2].Value = childId;
 							m_insertCallerCmd.Parameters[3].Value = hits;
 							m_insertCallerCmd.ExecuteNonQuery();
 							++queryCount;

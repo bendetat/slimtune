@@ -91,7 +91,7 @@ public:
 	bool ResumeTarget();
 
 	void SetCounterName(unsigned int counterId, const std::wstring& name);
-	void WritePerfCounter(unsigned int counterId, __int64 value);
+	void WritePerfCounter(unsigned int counterId, double value);
 
 	void SetEventName(unsigned int eventId, const std::wstring& name);
 	void BeginEvent(unsigned int eventId);

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 using FluentNHibernate.Mapping;
 
-namespace UICore
+namespace UICore.Mappings
 {
 	public class ThreadInfoMap : ClassMap<ThreadInfo>
 	{
@@ -12,12 +12,8 @@ namespace UICore
 			Id(x => x.Id);
 			Map(x => x.IsAlive);
 			Map(x => x.Name);
-			HasMany(x => x.Samples)
-				.Inverse()
-				.Cascade.All();
-			HasMany(x => x.Calls)
-				.Inverse()
-				.Cascade.All();
+			HasMany(x => x.Samples);
+			HasMany(x => x.Calls);
 			Table("Threads");
 		}
 	}
@@ -32,6 +28,8 @@ namespace UICore
 			Map(x => x.IsNative);
 			Map(x => x.ClassId);
 			References(x => x.Class, "ClassId");
+			HasMany(x => x.CallsAsParent);
+			HasMany(x => x.CallsAsChild);
 			Table("Functions");
 		}
 	}
@@ -42,8 +40,7 @@ namespace UICore
 		{
 			Id(x => x.Id);
 			Map(x => x.Name);
-			HasMany(x => x.Functions)
-				.Cascade.All();
+			HasMany(x => x.Functions);
 			Table("Classes");
 		}
 	}
@@ -52,15 +49,19 @@ namespace UICore
 	{
 		public CallMap()
 		{
-			Id();
+			CompositeId()
+				.KeyProperty(x => x.ThreadId)
+				.KeyProperty(x => x.ParentId)
+				.KeyProperty(x => x.ChildId)
+				.Mapped();
 			Map(x => x.ThreadId);
-			Map(x => x.CallerId);
-			Map(x => x.CalleeId);
+			Map(x => x.ParentId);
+			Map(x => x.ChildId);
 			Map(x => x.HitCount);
 			References(x => x.Thread, "ThreadId");
-			References(x => x.Caller, "CallerId");
-			References(x => x.Callee, "CalleeId");
-			Table("Callers");
+			References(x => x.Parent, "ParentId");
+			References(x => x.Child, "ChildId");
+			Table("Calls");
 		}
 	}
 
@@ -78,6 +79,34 @@ namespace UICore
 			References(x => x.Thread, "ThreadId");
 			References(x => x.Function, "FunctionId");
 			Table("Samples");
+		}
+	}
+
+	public class CounterMap : ClassMap<Counter>
+	{
+		public CounterMap()
+		{
+			Id(x => x.Id);
+			Map(x => x.Id);
+			Map(x => x.Name);
+			HasMany(x => x.Values);
+			Table("Counters");
+		}
+	}
+
+	public class CounterValueMap : ClassMap<CounterValue>
+	{
+		public CounterValueMap()
+		{
+			CompositeId()
+				.KeyProperty(x => x.CounterId)
+				.KeyProperty(x => x.Time)
+				.Mapped();
+			Map(x => x.CounterId);
+			Map(x => x.Time);
+			Map(x => x.Value);
+			References(x => x.Counter, "CounterId");
+			Table("CounterValues");
 		}
 	}
 }

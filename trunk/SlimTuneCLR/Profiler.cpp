@@ -1395,7 +1395,7 @@ const std::wstring& ClrProfiler::GetCounterName(unsigned int id)
 	return m_counters[id];
 }
 
-void ClrProfiler::WritePerfCounter(unsigned int counterId, __int64 value)
+void ClrProfiler::WritePerfCounter(unsigned int counterId, double value)
 {
 	Messages::PerfCounter counter;
 	counter.CounterId = counterId;
@@ -1420,8 +1420,7 @@ void ClrProfiler::OnCounterTimer()
 	for(unsigned int i = 1; i <= m_counter->GetCounterCount(); ++i)
 	{
 		double value = m_counter->GetDouble(i);
-		__int64 fixedValue = static_cast<__int64>(value * 100000);
-		WritePerfCounter(i, fixedValue);
+		WritePerfCounter(i, value);
 	}
 }
 

@@ -94,7 +94,7 @@ ORDER BY Time DESC
 
 			using(var transact = new TransactionHandle(m_connection.DataEngine))
 			{
-				var data = m_connection.DataEngine.Query(kCountersQuery);
+				var data = m_connection.DataEngine.RawQuery(kCountersQuery);
 				foreach(DataRow row in data.Tables[0].Rows)
 				{
 					int id = Convert.ToInt32(row["Id"]);
@@ -159,7 +159,7 @@ ORDER BY Time DESC
 				var points = new PointPairList();
 				using(var transact = new TransactionHandle(m_connection.DataEngine))
 				{
-					var data = m_connection.DataEngine.Query(string.Format(kValuesQuery, entry.Id), 3600);
+					var data = m_connection.DataEngine.RawQuery(string.Format(kValuesQuery, entry.Id), 3600);
 					foreach(DataRow row in data.Tables[0].Rows)
 					{
 						long time = Convert.ToInt64(row["Time"]);

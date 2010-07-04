@@ -220,8 +220,7 @@ namespace UICore
 				PerfCounter result = new PerfCounter();
 				result.CounterId = Utilities.Read7BitEncodedInt(reader);
 				result.TimeStamp = Utilities.Read7BitEncodedInt64(reader);
-				long value = Utilities.Read7BitEncodedInt64(reader);
-				result.Value = value / 100000.0;
+				result.Value = reader.ReadDouble();
 
 				return result;
 			}

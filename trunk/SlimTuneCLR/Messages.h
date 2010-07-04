@@ -162,7 +162,7 @@ namespace Messages
 	{
 		unsigned int CounterId;
 		unsigned __int64 TimeStamp;
-		__int64 Value;
+		double Value;
 
 		void Write(IProfilerServer& server);
 	};

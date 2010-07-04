@@ -61,14 +61,9 @@ void STDCALL SetCounterName(unsigned int counterId, const wchar_t* name)
 	g_Profiler->SetCounterName(counterId + USER_COUNTER_OFFSET, name);
 }
 
-void STDCALL WritePerfCounterInt(unsigned int counterId, __int64 value)
+void STDCALL WritePerfCounter(unsigned int counterId, double value)
 {
-	g_Profiler->WritePerfCounter(counterId + USER_COUNTER_OFFSET, value * 100000);
-}
-
-void STDCALL WritePerfCounterFloat(unsigned int counterId, double value)
-{
-	g_Profiler->WritePerfCounter(counterId + USER_COUNTER_OFFSET, static_cast<__int64>(value * 100000));
+	g_Profiler->WritePerfCounter(counterId + USER_COUNTER_OFFSET, value);
 }
 
 }

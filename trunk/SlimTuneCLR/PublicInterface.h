@@ -18,8 +18,7 @@ DLLEXPORT int STDCALL IsSamplerActive();
 DLLEXPORT void STDCALL SetSamplerActive(int active);
 DLLEXPORT void STDCALL SetInstrument(unsigned int id, int enable);
 DLLEXPORT void STDCALL SetCounterName(unsigned int counterId, const wchar_t* name);
-DLLEXPORT void STDCALL WritePerfCounterInt(unsigned int counterId, __int64 value);
-DLLEXPORT void STDCALL WritePerfCounterFloat(unsigned int counterId, double value);
+DLLEXPORT void STDCALL WritePerfCounter(unsigned int counterId, double value);
 
 }
 

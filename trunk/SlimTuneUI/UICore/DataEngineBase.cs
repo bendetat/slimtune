@@ -27,7 +27,7 @@ namespace UICore
 {
 	public struct CallGraph<T>
 	{
-		//this is: ThreadId, CallerId, CalleeId, HitCount
+		//this is: ThreadId, ParentId, ChildId, HitCount
 		public SortedList<int, SortedDictionary<int, SortedList<int, T>>> Graph;
 
 		public static CallGraph<T> Create()
@@ -40,11 +40,11 @@ namespace UICore
 
 	public abstract class DataEngineBase : IDataEngine
 	{
-		protected const string kCallersSchema = "(ThreadId INT NOT NULL, CallerId INT NOT NULL, CalleeId INT NOT NULL, HitCount INT NOT NULL)";
+		protected const string kCallsSchema = "(ThreadId INT NOT NULL, ParentId INT NOT NULL, ChildId INT NOT NULL, HitCount INT NOT NULL)";
 		protected const string kSamplesSchema = "(ThreadId INT NOT NULL, FunctionId INT NOT NULL, HitCount INT NOT NULL)";
 
 		//Everything is stored sorted so that we can sprint through the database quickly
-		protected CallGraph<int> m_callers;
+		protected CallGraph<int> m_calls;
 		//this is: FunctionId, ThreadId, HitCount
 		protected SortedDictionary<int, SortedList<int, int>> m_samples;
 
@@ -101,12 +101,13 @@ namespace UICore
 		public abstract System.Data.DataSet RawQuery(string query);
 		public abstract System.Data.DataSet RawQuery(string query, int limit);
 		public abstract object RawQueryScalar(string query);
+		public abstract NHibernate.ISession OpenSession();
 		protected abstract void DoClearData();
 
 		public DataEngineBase(string name)
 		{
 			Name = name;
-			m_callers = CallGraph<int>.Create();
+			m_calls = CallGraph<int>.Create();
 			m_samples = new SortedDictionary<int, SortedList<int, int>>();
 			m_lastFlush = DateTime.Now;
 		}
@@ -115,13 +116,13 @@ namespace UICore
 		{
 			lock(m_lock)
 			{
-				//Update callers
+				//Update calls
 				SortedDictionary<int, SortedList<int, int>> perThread;
-				bool foundThread = m_callers.Graph.TryGetValue(sample.ThreadId, out perThread);
+				bool foundThread = m_calls.Graph.TryGetValue(sample.ThreadId, out perThread);
 				if(!foundThread)
 				{
 					perThread = new SortedDictionary<int, SortedList<int, int>>();
-					m_callers.Graph.Add(sample.ThreadId, perThread);
+					m_calls.Graph.Add(sample.ThreadId, perThread);
 				}
 
 				Increment(sample.Functions[0], 0, perThread);
@@ -174,7 +175,7 @@ namespace UICore
 		{
 			lock(m_lock)
 			{
-				foreach(KeyValuePair<int, SortedDictionary<int, SortedList<int, int>>> threadKvp in m_callers.Graph)
+				foreach(KeyValuePair<int, SortedDictionary<int, SortedList<int, int>>> threadKvp in m_calls.Graph)
 				{
 					int threadId = threadKvp.Key;
 					foreach(KeyValuePair<int, SortedList<int, int>> callerKvp in threadKvp.Value)
@@ -197,14 +198,6 @@ namespace UICore
 		{
 			config.Mappings(m => m.FluentMappings.AddFromAssemblyOf<DataEngineBase>());
 			m_sessionFactory = config.BuildSessionFactory();
-		}
-
-		public virtual NHibernate.ISession OpenSession()
-		{
-			if(m_sessionFactory != null)
-				return m_sessionFactory.OpenSession();
-
-			return null;
 		}
 
 		public virtual void FunctionTiming(int functionId, long time)

@@ -129,7 +129,9 @@ namespace Messages
 		*bufTmp = MID_PerfCounter;
 		bufPtr = Write7BitEncodedInt(bufPtr, CounterId);
 		bufPtr = Write7BitEncodedInt64(bufPtr, TimeStamp);
-		bufPtr = Write7BitEncodedInt64(bufPtr, *(unsigned __int64*) &Value);
+		*(double*)bufPtr = Value;
+		assert(sizeof(double) == 8);
+		bufPtr += 8;
 
 		server.Write(buffer, bufPtr - buffer);
 	}

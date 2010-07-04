@@ -18,31 +18,31 @@ namespace SlimTuneUI.CoreVis
 SELECT Id, Name
 FROM Functions F
 JOIN (
-	SELECT CallerId, SUM(HitCount) ""HitCount""
-	FROM Callers
-	WHERE CalleeId = 0
-	GROUP BY CallerId
+	SELECT ParentId, SUM(HitCount) ""HitCount""
+	FROM Calls
+	WHERE ChildId = 0
+	GROUP BY ParentId
 ) C
-ON F.Id = C.CallerId
+ON F.Id = C.ParentId
 WHERE Name LIKE '%{0}%'
 ORDER BY Name
 ";
 
 		const string kInFunctionQuery = @"
 SELECT SUM(HitCount)
-FROM Callers
-WHERE CallerId = {0} AND CalleeId = 0
+FROM Calls
+WHERE ParentId = {0} AND ChildId = 0
 ";
 		const string kCalleesQuery = @"
-SELECT C.CalleeId, Name, HitCount
+SELECT C.ChildId, Name, HitCount
 FROM Functions
 JOIN (
-	SELECT CalleeId, SUM(HitCount) HitCount
-	FROM Callers
-	WHERE CallerId = {0}
-	GROUP BY CalleeId
+	SELECT ChildId, SUM(HitCount) HitCount
+	FROM Calls
+	WHERE ParentId = {0}
+	GROUP BY ChildId
 ) C
-ON Id = CalleeId
+ON Id = ChildId
 ORDER BY HitCount DESC
 ";
 
@@ -88,7 +88,7 @@ ORDER BY HitCount DESC
 		private void UpdateFunctionList()
 		{
 			FunctionList.Items.Clear();
-			var data = m_connection.DataEngine.Query(string.Format(kSearchQuery, SearchBox.Text), 250);
+			var data = m_connection.DataEngine.RawQuery(string.Format(kSearchQuery, SearchBox.Text), 250);
 			foreach(DataRow row in data.Tables[0].Rows)
 			{
 				int id = Convert.ToInt32(row["Id"]);
@@ -122,8 +122,8 @@ ORDER BY HitCount DESC
 				//find time in function
 				//SQLite can't do RIGHT OUTER JOIN and I can't figure out how to get this with a LEFT OUTER JOIN.
 				//so I'm just sending two queries instead
-				var inFunc = Convert.ToInt32(m_connection.DataEngine.QueryScalar(string.Format(kInFunctionQuery, entry.Id)));
-				var data = m_connection.DataEngine.Query(string.Format(kCalleesQuery, entry.Id));
+				var inFunc = Convert.ToInt32(m_connection.DataEngine.RawQueryScalar(string.Format(kInFunctionQuery, entry.Id)));
+				var data = m_connection.DataEngine.RawQuery(string.Format(kCalleesQuery, entry.Id));
 
 				int totalHits = inFunc;
 				foreach(DataRow row in data.Tables[0].Rows)
@@ -154,7 +154,7 @@ ORDER BY HitCount DESC
 
 				foreach(DataRow row in data.Tables[0].Rows)
 				{
-					int id = Convert.ToInt32(row["CalleeId"]);
+					int id = Convert.ToInt32(row["ChildId"]);
 					string name = Convert.ToString(row["Name"]);
 					double hitCount = Convert.ToDouble(row["HitCount"]);
 

@@ -21,6 +21,9 @@ namespace UICore
 		public virtual bool IsNative { get; set; }
 		public virtual string Name { get; set; }
 		public virtual string Signature { get; set; }
+
+		public virtual IList<Call> CallsAsParent { get; set; }
+		public virtual IList<Call> CallsAsChild { get; set; }
 	}
 
 	public class ClassInfo
@@ -33,13 +36,13 @@ namespace UICore
 	public class Call
 	{
 		public virtual int ThreadId { get; set; }
-		public virtual int CallerId { get; set; }
-		public virtual int CalleeId { get; set; }
+		public virtual int ParentId { get; set; }
+		public virtual int ChildId { get; set; }
 		public virtual int HitCount { get; set; }
 
 		public virtual ThreadInfo Thread { get; set; }
-		public virtual FunctionInfo Caller { get; set; }
-		public virtual FunctionInfo Callee { get; set; }
+		public virtual FunctionInfo Parent { get; set; }
+		public virtual FunctionInfo Child { get; set; }
 
 		public override bool Equals(object obj)
 		{
@@ -48,15 +51,15 @@ namespace UICore
 
 			var other = obj as Call;
 			if(ThreadId == other.ThreadId &&
-				CallerId == other.CallerId &&
-				CalleeId == other.CalleeId)
+				ParentId == other.ParentId &&
+				ChildId == other.ChildId)
 				return true;
 			return false;
 		}
 
 		public override int GetHashCode()
 		{
-			int hash = 13 + ThreadId << 16 + CallerId << 8 + CalleeId;
+			int hash = 13 + ThreadId << 16 + ParentId << 8 + ChildId;
 			return hash;
 		}
 	}
@@ -85,6 +88,37 @@ namespace UICore
 		{
 			int hash = 17 + ThreadId << 16 + FunctionId;
 			return hash;
+		}
+	}
+
+	public class Counter
+	{
+		public virtual int Id { get; set; }
+		public virtual string Name { get; set; }
+		public virtual IList<CounterValue> Values { get; set; }
+	}
+
+	public class CounterValue
+	{
+		public virtual int CounterId { get; set; }
+		public virtual Counter Counter { get; set; }
+		public virtual long Time { get; set; }
+		public virtual double Value { get; set; }
+
+		public override bool Equals(object obj)
+		{
+			if(obj == null)
+				return false;
+
+			var other = obj as CounterValue;
+			if(CounterId == other.CounterId && Time == other.Time)
+				return true;
+			return false;
+		}
+
+		public override int GetHashCode()
+		{
+			return 23 + CounterId + (int) Time;
 		}
 	}
 }
