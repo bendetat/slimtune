@@ -53,6 +53,8 @@ namespace UICore
 		//we use this so we don't have to check DateTime.Now on every single sample
 		protected int m_cachedSamples;
 
+		protected NHibernate.ISessionFactory m_sessionFactory;
+
 		protected object m_lock = new object();
 
 		public string Name
@@ -79,7 +81,13 @@ namespace UICore
 		public bool AllowFlush
 		{
 			get { return m_allowFlush; }
-			set { m_allowFlush = value; }
+			set
+			{
+				lock(m_lock)
+				{
+					m_allowFlush = value;
+				}
+			}
 		}
 
 		public abstract void MapFunction(FunctionInfo funcInfo);
@@ -90,9 +98,9 @@ namespace UICore
 		public abstract void Flush();
 		public abstract void Save(string file);
 		public abstract void Snapshot(string name);
-		public abstract System.Data.DataSet Query(string query);
-		public abstract System.Data.DataSet Query(string query, int limit);
-		public abstract object QueryScalar(string query);
+		public abstract System.Data.DataSet RawQuery(string query);
+		public abstract System.Data.DataSet RawQuery(string query, int limit);
+		public abstract object RawQueryScalar(string query);
 		protected abstract void DoClearData();
 
 		public DataEngineBase(string name)
@@ -183,6 +191,20 @@ namespace UICore
 
 				DoClearData();
 			}
+		}
+
+		public void CreateSessionFactory(FluentNHibernate.Cfg.FluentConfiguration config)
+		{
+			config.Mappings(m => m.FluentMappings.AddFromAssemblyOf<DataEngineBase>());
+			m_sessionFactory = config.BuildSessionFactory();
+		}
+
+		public virtual NHibernate.ISession OpenSession()
+		{
+			if(m_sessionFactory != null)
+				return m_sessionFactory.OpenSession();
+
+			return null;
 		}
 
 		public virtual void FunctionTiming(int functionId, long time)

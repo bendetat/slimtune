@@ -26,16 +26,67 @@ using System.Collections.Generic;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 
+using UICore;
+using NHibernate;
+using NHibernate.Cfg;
+using FluentNHibernate.Cfg;
+using FluentNHibernate.Cfg.Db;
+using FluentNHibernate.Mapping;
+using NHibernate.Tool.hbm2ddl;
+
 namespace SlimTuneUI
 {
 	static class Program
 	{
-        /// <summary>
-        /// The main entry point for the application.
-        /// </summary>
-        [STAThread]
+		const string DbFile = @"D:\Promit\Documents\Projects\SlimTune\trunk\SlimTuneUI\test.sqlite";
+		private static ISessionFactory CreateSessionFactory()
+		{
+			return Fluently.Configure()
+				.Database(SQLiteConfiguration.Standard.UsingFile(DbFile))
+				.Mappings(m => m.FluentMappings.AddFromAssemblyOf<FunctionInfo>())
+				//.ExposeConfiguration(BuildSchema)
+				.BuildSessionFactory();				
+		}
+
+		private static void BuildSchema(Configuration config)
+		{
+			if(File.Exists(DbFile))
+				File.Delete(DbFile);
+
+			new SchemaExport(config).Create(false, true);
+		}
+
+		/// <summary>
+		/// The main entry point for the application.
+		/// </summary>
+		[STAThread]
 		static void Main()
 		{
+#if FALSE
+			var factory = CreateSessionFactory();
+			using(var session = factory.OpenSession())
+			{
+				//using(var transact = session.BeginTransaction())
+				{
+					var functions = session.CreateCriteria<FunctionInfo>().List<FunctionInfo>();
+					/*var classes = session.CreateCriteria(typeof(ClassInfo)).List<ClassInfo>();
+					foreach(var c in classes)
+					{
+						Console.WriteLine(c.Name);
+						foreach(var f in c.Functions)
+						{
+							Console.WriteLine("\t" + f.Name);
+						}
+					}
+					var threads = session.CreateCriteria<ThreadInfo>().List<ThreadInfo>();
+					foreach(var t in threads)
+					{
+						Console.WriteLine("Thread #{0} has {1} samples.", t.Id, t.Samples.Count);
+					}*/
+				}
+			}
+#endif
+
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
 			Application.Run(new SlimTune());

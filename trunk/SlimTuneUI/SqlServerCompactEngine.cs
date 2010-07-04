@@ -29,6 +29,7 @@ using System.Data.SqlServerCe;
 
 using UICore;
 
+#if FALSE
 namespace SlimTuneUI
 {
 	[Obsolete,
@@ -96,7 +97,7 @@ namespace SlimTuneUI
 		{
 			var resultSet = m_addFunctionCmd.ExecuteResultSet(ResultSetOptions.Updatable);
 			var row = resultSet.CreateRecord();
-			row["Id"] = funcInfo.FunctionId;
+			row["Id"] = funcInfo.Id;
 			row["ClassId"] = funcInfo.ClassId != 0 ? (object) funcInfo.ClassId : null;
 			row["IsNative"] = funcInfo.IsNative ? 1 : 0;
 			row["Name"] = funcInfo.Name;
@@ -108,7 +109,7 @@ namespace SlimTuneUI
 		{
 			var resultSet = m_addClassCmd.ExecuteResultSet(ResultSetOptions.Updatable);
 			var row = resultSet.CreateRecord();
-			row["Id"] = classInfo.ClassId;
+			row["Id"] = classInfo.Id;
 			row["Name"] = classInfo.Name;
 			resultSet.Insert(row);
 		}
@@ -221,7 +222,7 @@ namespace SlimTuneUI
 				cmd.Parameters.Add(new SqlCeParameter("@DateTime", DateTime.Now));
 				cmd.ExecuteNonQuery();
 
-				int id = (int) QueryScalar("SELECT MAX(Id) FROM Snapshots");
+				int id = (int) RawQueryScalar("SELECT MAX(Id) FROM Snapshots");
 				ExecuteNonQuery(string.Format("CREATE TABLE Callers_{0} {1}", id, kCallersSchema));
 				ExecuteNonQuery(string.Format("INSERT INTO Callers_{0} SELECT * FROM Callers", id));
 				ExecuteNonQuery(string.Format("CREATE TABLE Samples_{0} {1}", id, kSamplesSchema));
@@ -229,14 +230,14 @@ namespace SlimTuneUI
 			}
 		}
 
-		public override DataSet Query(string query, int limit)
+		public override DataSet RawQuery(string query, int limit)
 		{
 			query = query.Substring(query.IndexOf("SELECT") + 6);
 			query = string.Format("SELECT TOP ({0}) {1}", limit.ToString(), query);
-			return Query(query);
+			return RawQuery(query);
 		}
 
-		public override DataSet Query(string query)
+		public override DataSet RawQuery(string query)
 		{
 			var command = new SqlCeCommand(query, m_sqlConn);
 			var adapter = new SqlCeDataAdapter(command);
@@ -245,7 +246,7 @@ namespace SlimTuneUI
 			return ds;
 		}
 
-		public override object QueryScalar(string query)
+		public override object RawQueryScalar(string query)
 		{
 			var command = new SqlCeCommand(query, m_sqlConn);
 			return command.ExecuteScalar();
@@ -515,7 +516,7 @@ namespace SlimTuneUI
 					}
 				}
 
-				/*#if DEBUG
+				#if FALSE
 								//DEBUG ONLY HACK: display buckets
 								if(!resultSet.Seek(DbSeekOptions.BeforeEqual, timingKvp.Key, 0.0f))
 									resultSet.ReadFirst();
@@ -535,7 +536,7 @@ namespace SlimTuneUI
 									Console.WriteLine("[{0}, {1}]: {2}", min, max, hits);
 									resultSet.Read();
 								}
-				#endif*/
+				#endif
 			}
 		}
 
@@ -551,3 +552,4 @@ namespace SlimTuneUI
 		}
 	}
 }
+#endif

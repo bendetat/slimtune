@@ -33,7 +33,7 @@ using UICore;
 namespace SlimTuneUI
 {
 	[Serializable,
-	DisplayName("ASP.NET 2.0 Server")]
+	DisplayName("ASP.NET 2.0 Server (IIS)")]
 	public class AspNetLauncher : ClrLauncherBase
 	{
 		[Browsable(false)]

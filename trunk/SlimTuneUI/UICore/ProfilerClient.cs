@@ -38,7 +38,7 @@ namespace UICore
 		Hybrid = Sampling | Tracing,
 	}
 
-	public class ThreadInfo
+	public class ThreadContext
 	{
 		public int ThreadId;
 		public string Name;
@@ -46,7 +46,7 @@ namespace UICore
 
 		public Stack<Pair<int, long>> ShadowStack = new Stack<Pair<int, long>>();
 
-		public ThreadInfo(int threadId, string name, bool alive)
+		public ThreadContext(int threadId, string name, bool alive)
 		{
 			ThreadId = threadId;
 			Name = name;
@@ -63,7 +63,7 @@ namespace UICore
 		BinaryWriter m_writer;
 		Dictionary<int, FunctionInfo> m_functions = new Dictionary<int, FunctionInfo>();
 		Dictionary<int, ClassInfo> m_classes = new Dictionary<int, ClassInfo>();
-		Dictionary<int, ThreadInfo> m_threads = new Dictionary<int, ThreadInfo>();
+		Dictionary<int, ThreadContext> m_threads = new Dictionary<int, ThreadContext>();
 		Dictionary<int, string> m_counters = new Dictionary<int, string>();
 
 		IDataEngine m_data;
@@ -92,8 +92,8 @@ namespace UICore
 			m_writer = new BinaryWriter(m_stream, Encoding.Unicode);
 			m_data = data;
 
-			m_classes.Add(0, new ClassInfo(0, "$INVALID$"));
-			m_functions.Add(0, new FunctionInfo(0, 0, false, "$INVALID$", string.Empty));
+			m_classes.Add(0, new ClassInfo { Id = 0, Name = "$INVALID$" });
+			m_functions.Add(0, new FunctionInfo { Id = 0, ClassId = 0, IsNative = false, Name = "$INVALID$", Signature = string.Empty });
 
 			HostName = host;
 			Port = port;
@@ -200,13 +200,12 @@ namespace UICore
 			if(m_functions.ContainsKey(mapFunc.FunctionId))
 				return;
 
-			FunctionInfo funcInfo = new FunctionInfo();
-			funcInfo.FunctionId = mapFunc.FunctionId;
+			FunctionInfo funcInfo = new FunctionInfo { Id = mapFunc.FunctionId };
 			funcInfo.ClassId = mapFunc.ClassId;
 			funcInfo.Name = mapFunc.Name;
 			funcInfo.Signature = mapFunc.Signature;
 			funcInfo.IsNative = mapFunc.IsNative;
-			m_functions.Add(funcInfo.FunctionId, funcInfo);
+			m_functions.Add(funcInfo.Id, funcInfo);
 
 			if(!m_classes.ContainsKey(funcInfo.ClassId))
 				RequestClassMapping(funcInfo.ClassId);
@@ -221,20 +220,19 @@ namespace UICore
 			if(m_classes.ContainsKey(mapClass.ClassId))
 				return;
 
-			ClassInfo classInfo = new ClassInfo();
-			classInfo.ClassId = mapClass.ClassId;
+			ClassInfo classInfo = new ClassInfo { Id = mapClass.ClassId };
 			classInfo.Name = mapClass.Name;
-			m_classes.Add(classInfo.ClassId, classInfo);
+			m_classes.Add(classInfo.Id, classInfo);
 
 			m_data.MapClass(classInfo);
 		}
 
 		private void MapThread(Messages.MapThread mapThread)
 		{
-			ThreadInfo threadInfo = null;
+			ThreadContext threadInfo = null;
 			if(!m_threads.ContainsKey(mapThread.ThreadId))
 			{
-				threadInfo = new ThreadInfo(mapThread.ThreadId, mapThread.Name, mapThread.IsAlive);
+				threadInfo = new ThreadContext(mapThread.ThreadId, mapThread.Name, mapThread.IsAlive);
 				m_threads.Add(threadInfo.ThreadId, threadInfo);
 			}
 			else
@@ -249,10 +247,10 @@ namespace UICore
 
 		private void FunctionEvent(MessageId id, Messages.FunctionEvent funcEvent)
 		{
-			ThreadInfo info;
+			ThreadContext info;
 			if(!m_threads.ContainsKey(funcEvent.ThreadId))
 			{
-				info = new ThreadInfo(funcEvent.ThreadId, "", true);
+				info = new ThreadContext(funcEvent.ThreadId, "", true);
 				m_threads.Add(funcEvent.ThreadId, info);
 				RequestThreadMapping(funcEvent.ThreadId);
 			}
@@ -277,7 +275,7 @@ namespace UICore
 		{
 			if(!m_threads.ContainsKey(sample.ThreadId))
 			{
-				ThreadInfo info = new ThreadInfo(sample.ThreadId, "", true);
+				ThreadContext info = new ThreadContext(sample.ThreadId, "", true);
 				m_threads.Add(sample.ThreadId, info);
 				RequestThreadMapping(sample.ThreadId);
 			}
@@ -295,10 +293,10 @@ namespace UICore
 
 		private void UpdateThread(int threadId, bool alive, string name)
 		{
-			ThreadInfo info;
+			ThreadContext info;
 			if(!m_threads.ContainsKey(threadId))
 			{
-				info = new ThreadInfo(threadId, name != null ? name : string.Empty, alive);
+				info = new ThreadContext(threadId, name != null ? name : string.Empty, alive);
 				m_threads.Add(threadId, info);
 			}
 			else

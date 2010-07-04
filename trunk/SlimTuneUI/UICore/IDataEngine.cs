@@ -21,47 +21,12 @@
 */
 using System;
 using System.Data;
+using System.Collections.Generic;
+
+using NHibernate;
 
 namespace UICore
 {
-	public class FunctionInfo
-	{
-		public int FunctionId;
-		public int ClassId;
-		public bool IsNative;
-		public string Name;
-		public string Signature;
-
-		public FunctionInfo()
-		{
-		}
-
-		public FunctionInfo(int funcId, int classId, bool isNative, string name, string signature)
-		{
-			FunctionId = funcId;
-			ClassId = classId;
-			IsNative = isNative;
-			Name = name;
-			Signature = signature;
-		}
-	}
-
-	public class ClassInfo
-	{
-		public int ClassId;
-		public string Name;
-
-		public ClassInfo()
-		{
-		}
-
-		public ClassInfo(int classId, string name)
-		{
-			ClassId = classId;
-			Name = name;
-		}
-	}
-
 	public class TransactionHandle : IDisposable
 	{
 		IDataEngine m_engine;
@@ -125,8 +90,10 @@ namespace UICore
 
 		void Save(string file);
 
-		DataSet Query(string query);
-		DataSet Query(string query, int limit);
-		object QueryScalar(string query);
+		ISession OpenSession();
+
+		DataSet RawQuery(string query);
+		DataSet RawQuery(string query, int limit);
+		object RawQueryScalar(string query);
 	}
 }

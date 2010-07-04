@@ -28,26 +28,30 @@ using System.IO;
 
 using UICore;
 
+using System.Data.SQLite;
+using FluentNHibernate.Cfg;
+using FluentNHibernate.Cfg.Db;
+
 namespace SlimTuneUI
 {
 	[DisplayName("SQLite"),
 	HandlesExtension("sqlite")]
 	public class SQLiteEngine : DataEngineBase
 	{
-		SQLiteDatabase m_database;
+		SQLiteConnection m_database;
 
-		SQLiteStatement m_mapFunctionCmd;
-		SQLiteStatement m_mapClassCmd;
-		SQLiteStatement m_insertThreadCmd;
-		SQLiteStatement m_updateThreadAliveCmd;
-		SQLiteStatement m_updateThreadNameCmd;
-		SQLiteStatement m_insertCallerCmd;
-		SQLiteStatement m_updateCallerCmd;
-		SQLiteStatement m_insertSampleCmd;
-		SQLiteStatement m_updateSampleCmd;
+		SQLiteCommand m_mapFunctionCmd;
+		SQLiteCommand m_mapClassCmd;
+		SQLiteCommand m_insertThreadCmd;
+		SQLiteCommand m_updateThreadAliveCmd;
+		SQLiteCommand m_updateThreadNameCmd;
+		SQLiteCommand m_insertCallerCmd;
+		SQLiteCommand m_updateCallerCmd;
+		SQLiteCommand m_insertSampleCmd;
+		SQLiteCommand m_updateSampleCmd;
 
-		SQLiteStatement m_insertCounterCmd;
-		SQLiteStatement m_counterNameCmd;
+		SQLiteCommand m_insertCounterCmd;
+		SQLiteCommand m_counterNameCmd;
 
 		public override string Extension
 		{
@@ -60,23 +64,30 @@ namespace SlimTuneUI
 		}
 
 		public SQLiteEngine()
-			: base("memory")
+			: base(Path.GetTempFileName())
 		{
-			//create the database in-memory
-			m_database = new SQLiteDatabase(":memory:");
+			string connStr = string.Format("Data Source={0}; Synchronous=Off;", Name);
+			m_database = new SQLiteConnection(connStr);
+			m_database.Open();
 			CreateSchema();
+
+			var config = Fluently.Configure().Database(SQLiteConfiguration.Standard.ConnectionString(connStr));
+			CreateSessionFactory(config);
+
 			PrepareCommands();
 		}
 
 		public SQLiteEngine(string name, bool createNew)
 			: base(name)
 		{
+			string connStr = string.Format("Data Source={0}; Synchronous=Off;", Name);
 			if(createNew)
 			{
 				if(File.Exists(name))
 					File.Delete(name);
 
-				m_database = new SQLiteDatabase(name);
+				m_database = new SQLiteConnection(connStr);
+				m_database.Open();
 				CreateSchema();
 			}
 			else
@@ -84,8 +95,13 @@ namespace SlimTuneUI
 				if(!File.Exists(name))
 					throw new InvalidOperationException();
 
-				m_database = new SQLiteDatabase(name);
+				m_database = new SQLiteConnection(connStr);
+				m_database.Open();
 			}
+
+
+			var config = Fluently.Configure().Database(SQLiteConfiguration.Standard.ConnectionString(connStr));
+			CreateSessionFactory(config);
 
 			PrepareCommands();
 		}
@@ -97,73 +113,81 @@ namespace SlimTuneUI
 
 		public override void MapFunction(FunctionInfo funcInfo)
 		{
-			m_mapFunctionCmd.Reset();
-			m_mapFunctionCmd.BindInt(1, funcInfo.FunctionId);
-			m_mapFunctionCmd.BindInt(2, funcInfo.ClassId);
-			m_mapFunctionCmd.BindInt(3, funcInfo.IsNative ? 1 : 0);
-			m_mapFunctionCmd.BindText(4, funcInfo.Name);
-			m_mapFunctionCmd.BindText(5, funcInfo.Signature);
-			m_mapFunctionCmd.Step();
+			lock(m_lock)
+			{
+				m_mapFunctionCmd.Parameters[0].Value = funcInfo.Id;
+				m_mapFunctionCmd.Parameters[1].Value = funcInfo.ClassId;
+				m_mapFunctionCmd.Parameters[2].Value = funcInfo.IsNative ? 1 : 0;
+				m_mapFunctionCmd.Parameters[3].Value = funcInfo.Name;
+				m_mapFunctionCmd.Parameters[4].Value = funcInfo.Signature;
+				m_mapFunctionCmd.ExecuteNonQuery();
+			}
 		}
 
 		public override void MapClass(ClassInfo classInfo)
 		{
-			m_mapClassCmd.Reset();
-			m_mapClassCmd.BindInt(1, classInfo.ClassId);
-			m_mapClassCmd.BindText(2, classInfo.Name);
-			m_mapClassCmd.Step();
+			lock(m_lock)
+			{
+				m_mapClassCmd.Parameters[0].Value = classInfo.Id;
+				m_mapClassCmd.Parameters[1].Value = classInfo.Name;
+				m_mapClassCmd.ExecuteNonQuery();
+			}
 		}
 
 		public override void UpdateThread(int threadId, bool? alive, string name)
 		{
-			bool insert = false;
-			if(alive.HasValue)
+			lock(m_lock)
 			{
-				m_updateThreadAliveCmd.Reset();
-				m_updateThreadAliveCmd.BindInt(1, threadId);
-				m_updateThreadAliveCmd.BindInt(2, alive.Value ? 1 : 0);
-				m_updateThreadAliveCmd.Step();
-				if(m_updateThreadAliveCmd.GetInt(0) == 0)
-					insert = true;
-			}
+				bool insert = false;
+				if(alive.HasValue)
+				{
+					m_updateThreadAliveCmd.Parameters[0].Value = alive.Value ? 1 : 0;
+					m_updateThreadAliveCmd.Parameters[1].Value = threadId;
+					int count = m_updateThreadAliveCmd.ExecuteNonQuery();
+					if(count == 0)
+						insert = true;
+				}
 
-			if(!insert && name != null)
-			{
-				m_updateThreadNameCmd.Reset();
-				m_updateThreadNameCmd.BindInt(1, threadId);
-				m_updateThreadNameCmd.BindText(2, name);
-				m_updateThreadNameCmd.Step();
-				if(m_updateThreadNameCmd.GetInt(0) == 0)
-					insert = true;
-			}
+				if(!insert && name != null)
+				{
+					m_updateThreadNameCmd.Parameters[0].Value = name;
+					m_updateThreadNameCmd.Parameters[1].Value = threadId;
+					int count = m_updateThreadNameCmd.ExecuteNonQuery();
+					if(count == 0)
+						insert = true;
+				}
 
-			if(insert)
-			{
-				bool aliveValue = alive.HasValue ? alive.Value : true;
-				string nameValue = name ?? string.Empty;
-				m_insertThreadCmd.Reset();
-				m_insertThreadCmd.BindInt(1, threadId);
-				m_insertThreadCmd.BindInt(2, aliveValue ? 1 : 0);
-				m_insertThreadCmd.BindText(3, nameValue);
-				m_insertThreadCmd.Step();
+				if(insert)
+				{
+					bool aliveValue = alive.HasValue ? alive.Value : true;
+					string nameValue = name ?? string.Empty;
+					m_insertThreadCmd.Parameters[0].Value = threadId;
+					m_insertThreadCmd.Parameters[1].Value = aliveValue ? 1 : 0;
+					m_insertThreadCmd.Parameters[2].Value = nameValue;
+					m_insertThreadCmd.ExecuteNonQuery();
+				}
 			}
 		}
 
 		public override void CounterName(int counterId, string name)
 		{
-			m_counterNameCmd.Reset();
-			m_counterNameCmd.BindInt(1, counterId);
-			m_counterNameCmd.BindText(2, name);
-			m_counterNameCmd.Step();
+			lock(m_lock)
+			{
+				m_counterNameCmd.Parameters[0].Value = counterId;
+				m_counterNameCmd.Parameters[1].Value = name;
+				m_counterNameCmd.ExecuteNonQuery();
+			}
 		}
 
 		public override void PerfCounter(int counterId, long time, double value)
 		{
-			m_insertCounterCmd.Reset();
-			m_insertCounterCmd.BindInt(1, counterId);
-			m_insertCounterCmd.BindLong(2, time);
-			m_insertCounterCmd.BindDouble(3, value);
-			m_insertCounterCmd.Step();
+			lock(m_lock)
+			{
+				m_insertCounterCmd.Parameters[0].Value = counterId;
+				m_insertCounterCmd.Parameters[1].Value = time;
+				m_insertCounterCmd.Parameters[2].Value = value;
+				m_insertCounterCmd.ExecuteNonQuery();
+			}
 		}
 
 		public override void Flush()
@@ -175,25 +199,30 @@ namespace SlimTuneUI
 			{
 				Stopwatch timer = new Stopwatch();
 				timer.Start();
+				int queryCount = 0;
 
-				FlushCallers();
-				FlushSamples();
+				using(SQLiteTransaction transact = m_database.BeginTransaction())
+				{
+					queryCount += FlushCallers();
+					queryCount += FlushSamples();
+					transact.Commit();
+				}
 
 				m_lastFlush = DateTime.Now;
 				m_cachedSamples = 0;
 				//m_cachedTimings = 0;
 				timer.Stop();
-				Debug.WriteLine(string.Format("Database update took {0} milliseconds.", timer.ElapsedMilliseconds));
+				Debug.WriteLine(string.Format("Database update took {0} milliseconds for {1} queries.", timer.ElapsedMilliseconds, queryCount));
 			}
 		}
 
 		public override void Save(string file)
 		{
-			lock(m_lock)
+			/*lock(m_lock)
 			{
 				Flush();
 				m_database.Backup(file);
-			}
+			}*/
 		}
 
 		public override void Snapshot(string name)
@@ -203,149 +232,142 @@ namespace SlimTuneUI
 				Flush();
 
 				var cmd = string.Format("INSERT INTO Snapshots (Name, DateTime) VALUES ({0}, {1})", name, DateTime.Now.ToFileTime());
-				m_database.Execute(cmd);
+				Command(cmd);
 
-				int id = (int) QueryScalar("SELECT MAX(Id) FROM Snapshots");
-				m_database.Execute(string.Format("CREATE TABLE Callers_{0} {1}", id, kCallersSchema));
-				m_database.Execute(string.Format("INSERT INTO Callers_{0} SELECT * FROM Callers", id));
-				m_database.Execute(string.Format("CREATE TABLE Samples_{0} {1}", id, kSamplesSchema));
-				m_database.Execute(string.Format("INSERT INTO Samples_{0} SELECT * FROM Samples", id));
+				int id = (int) RawQueryScalar("SELECT MAX(Id) FROM Snapshots");
+				Command(string.Format("CREATE TABLE Callers_{0} {1}", id, kCallersSchema));
+				Command(string.Format("INSERT INTO Callers_{0} SELECT * FROM Callers", id));
+				Command(string.Format("CREATE TABLE Samples_{0} {1}", id, kSamplesSchema));
+				Command(string.Format("INSERT INTO Samples_{0} SELECT * FROM Samples", id));
 			}
 		}
 
-		public override DataSet Query(string query, int limit)
+		public override NHibernate.ISession OpenSession()
+		{
+			return m_sessionFactory.OpenSession(m_database);
+		}
+
+		public override DataSet RawQuery(string query, int limit)
 		{
 			query += "\nLIMIT " + limit.ToString();
-			return Query(query);
+			return RawQuery(query);
 		}
 
-		public override DataSet Query(string query)
+		public static DataSet ConvertDataReaderToDataSet(SQLiteDataReader reader)
 		{
-			using(SQLiteStatement cmd = new SQLiteStatement(m_database, query))
+			DataSet dataSet = new DataSet();
+			do
 			{
-				var ds = new DataSet();
-				var table = new DataTable("Query");
-
-				int columnCount = cmd.Columns;
-				while(cmd.Step())
+				// Create new data table
+				DataTable schemaTable = reader.GetSchemaTable();
+				DataTable dataTable = new DataTable("Query");
+				if(schemaTable != null)
 				{
-					//populate columns if necessary
-					if(table.Columns.Count == 0)
+					// A query returning records was executed
+					for(int i = 0; i < schemaTable.Rows.Count; i++)
 					{
-						for(int i = 0; i < columnCount; ++i)
-						{
-							Type type = typeof(string);
-							SQLiteType columnType = cmd.GetColumnType(i);
-							switch(columnType)
-							{
-								case SQLiteType.Integer:
-									type = typeof(long);
-									break;
-								case SQLiteType.Float:
-									type = typeof(double);
-									break;
-								case SQLiteType.Text:
-								default:
-									type = typeof(string);
-									break;
-							}
-
-							table.Columns.Add(cmd.GetColumnName(i), type);
-						}
+						DataRow dataRow = schemaTable.Rows[i];
+						// Create a column name that is unique in the data table
+						string columnName = (string) dataRow["ColumnName"];
+						// Add the column definition to the data table
+						DataColumn column = new DataColumn(columnName, (Type) dataRow["DataType"]);
+						dataTable.Columns.Add(column);
 					}
-
-					//get row data
-					var row = table.NewRow();
-					for(int i = 0; i < columnCount; ++i)
+					dataSet.Tables.Add(dataTable);
+					// Fill the data table we just created
+					while(reader.Read())
 					{
-						switch(cmd.GetColumnType(i))
-						{
-							case SQLiteType.Integer:
-								row[i] = cmd.GetLong(i);
-								break;
-							case SQLiteType.Float:
-								row[i] = cmd.GetDouble(i);
-								break;
-							case SQLiteType.Text:
-							default:
-								row[i] = cmd.GetText(i);
-								break;
-						}
+						DataRow dataRow = dataTable.NewRow();
+						for(int i = 0; i < reader.FieldCount; i++)
+							dataRow[i] = reader.GetValue(i);
+						dataTable.Rows.Add(dataRow);
 					}
-					table.Rows.Add(row);
 				}
-
-				ds.Tables.Add(table);
-				return ds;
+				else
+				{
+					// No records were returned
+					DataColumn column = new DataColumn("RowsAffected");
+					dataTable.Columns.Add(column);
+					dataSet.Tables.Add(dataTable);
+					DataRow dataRow = dataTable.NewRow();
+					dataRow[0] = reader.RecordsAffected;
+					dataTable.Rows.Add(dataRow);
+				}
+			}
+			while(reader.NextResult());
+			return dataSet;
+		}
+		
+		public override DataSet RawQuery(string query)
+		{
+			using(SQLiteCommand cmd = new SQLiteCommand(query, m_database))
+			{
+				var reader = cmd.ExecuteReader();
+				return ConvertDataReaderToDataSet(reader);
 			}
 		}
 
-		public override object QueryScalar(string query)
+		public override object RawQueryScalar(string query)
 		{
-			using(SQLiteStatement cmd = new SQLiteStatement(m_database, query))
+			using(SQLiteCommand cmd = new SQLiteCommand(query, m_database))
 			{
-				if(!cmd.Step())
-					return null;
-
-				switch(cmd.GetColumnType(0))
-				{
-					case SQLiteType.Integer:
-						return cmd.GetLong(0);
-					case SQLiteType.Float:
-						return cmd.GetDouble(0);
-					case SQLiteType.Text:
-						return cmd.GetText(0);
-				}
-
-				return null;
+				return cmd.ExecuteScalar();
 			}
 		}
 
 		protected override void DoClearData()
 		{
-			QueryScalar("UPDATE Callers SET HitCount = 0");
-			QueryScalar("UPDATE Samples SET HitCount = 0");
-			QueryScalar("DELETE FROM CounterValues");
-			QueryScalar("DELETE FROM Counters");
+			RawQueryScalar("UPDATE Callers SET HitCount = 0");
+			RawQueryScalar("UPDATE Samples SET HitCount = 0");
+			RawQueryScalar("DELETE FROM CounterValues");
+			RawQueryScalar("DELETE FROM Counters");
+		}
+
+		private void Command(string command)
+		{
+			using(SQLiteCommand cmd = new SQLiteCommand(command, m_database))
+			{
+				cmd.ExecuteNonQuery();
+			}
 		}
 
 		private void CreateSchema()
 		{
-			m_database.Execute("PRAGMA count_changes=TRUE");
-			m_database.Execute("PRAGMA synchronous=OFF");
-			m_database.Execute("PRAGMA journal_mode=MEMORY");
+			Command("PRAGMA count_changes=TRUE");
+			Command("PRAGMA synchronous=OFF");
+			Command("PRAGMA journal_mode=MEMORY");
 
-			m_database.Execute("CREATE TABLE Properties (Name TEXT (256), Value TEXT (256))");
+			Command("CREATE TABLE Properties (Name TEXT (256), Value TEXT (256))");
 			WriteProperties();
 
-			m_database.Execute("CREATE TABLE Snapshots (Id INT PRIMARY KEY, Name TEXT (256), DateTime INTEGER)");
-			m_database.Execute("CREATE TABLE Functions (Id INT PRIMARY KEY, ClassId INT, IsNative INT NOT NULL, Name TEXT (1024), Signature TEXT (2048))");
-			m_database.Execute("CREATE TABLE Classes (Id INT PRIMARY KEY, Name TEXT (1024))");
+			Command("CREATE TABLE Snapshots (Id INT PRIMARY KEY, Name TEXT (256), DateTime INTEGER)");
+			Command("CREATE TABLE Functions (Id INT PRIMARY KEY, ClassId INT, IsNative INT NOT NULL, Name TEXT (1024), Signature TEXT (2048))");
+			Command("CREATE TABLE Classes (Id INT PRIMARY KEY, Name TEXT (1024))");
 
-			m_database.Execute("CREATE TABLE Threads (Id INT PRIMARY KEY, IsAlive INT, Name TEXT(256))");
+			Command("CREATE TABLE Threads (Id INT PRIMARY KEY, IsAlive INT, Name TEXT(256))");
 
 			//We will look up results in CallerId order when updating this table
-			m_database.Execute("CREATE TABLE Callers " + kCallersSchema);
-			m_database.Execute("CREATE INDEX Callers_CallerIndex ON Callers(CallerId);");
-			m_database.Execute("CREATE INDEX Callers_CalleeIndex ON Callers(CalleeId);");
-			m_database.Execute("CREATE INDEX Callers_Compound ON Callers(ThreadId, CallerId, CalleeId);");
+			Command("CREATE TABLE Callers " + kCallersSchema);
+			Command("CREATE INDEX Callers_CallerIndex ON Callers(CallerId);");
+			Command("CREATE INDEX Callers_CalleeIndex ON Callers(CalleeId);");
+			Command("CREATE INDEX Callers_Compound ON Callers(ThreadId, CallerId, CalleeId);");
 
-			m_database.Execute("CREATE TABLE Samples " + kSamplesSchema);
-			m_database.Execute("CREATE INDEX Samples_FunctionIndex ON Samples(FunctionId);");
-			m_database.Execute("CREATE INDEX Samples_Compound ON Samples(ThreadId, FunctionId);");
+			Command("CREATE TABLE Samples " + kSamplesSchema);
+			Command("CREATE INDEX Samples_FunctionIndex ON Samples(FunctionId);");
+			Command("CREATE INDEX Samples_Compound ON Samples(ThreadId, FunctionId);");
 
-			m_database.Execute("CREATE TABLE Timings (FunctionId INT, RangeMin INT, RangeMax INT, HitCount INT)");
-			m_database.Execute("CREATE INDEX Timings_FunctionIndex ON Timings(FunctionId);");
-			m_database.Execute("CREATE INDEX Timings_Compound ON Timings(FunctionId, RangeMin);");
+			Command("CREATE TABLE Timings (FunctionId INT, RangeMin INT, RangeMax INT, HitCount INT)");
+			Command("CREATE INDEX Timings_FunctionIndex ON Timings(FunctionId);");
+			Command("CREATE INDEX Timings_Compound ON Timings(FunctionId, RangeMin);");
 
-			m_database.Execute("CREATE TABLE Counters (Id INT PRIMARY KEY, Name TEXT(256))");
-			m_database.Execute("CREATE TABLE CounterValues (CounterId INT, Time INT, Value REAL)");
-			m_database.Execute("CREATE INDEX CounterValues_IdIndex ON Counters(Id);");
+			Command("CREATE TABLE Counters (Id INT PRIMARY KEY, Name TEXT(256))");
+			Command("CREATE TABLE CounterValues (CounterId INT, Time INT, Value REAL)");
+			Command("CREATE INDEX CounterValues_IdIndex ON Counters(Id);");
 		}
 
 		private void WriteProperty(string name, string value)
 		{
-			m_database.Execute(string.Format("INSERT INTO Properties (Name, Value) VALUES ('{0}', '{1}')", name, value));
+			Command(string.Format("INSERT INTO Properties (Name, Value) VALUES ('{0}', '{1}')", name, value));
 		}
 
 		private void WriteProperties()
@@ -355,27 +377,36 @@ namespace SlimTuneUI
 			WriteProperty("FileVersion", "2");
 		}
 
-		private void PrepareCommands()
+		private SQLiteCommand CreateCommand(string commandText, int paramCount)
 		{
-			m_mapFunctionCmd = new SQLiteStatement(m_database, "INSERT INTO Functions (Id, ClassId, IsNative, Name, Signature) VALUES (?1, ?2, ?3, ?4, ?5)");
-			m_mapClassCmd = new SQLiteStatement(m_database, "INSERT INTO Classes (Id, Name) VALUES (?1, ?2)");
-
-			m_insertThreadCmd = new SQLiteStatement(m_database, "INSERT INTO Threads (Id, IsAlive, Name) VALUES (?1, ?2, ?3)");
-			m_updateThreadAliveCmd = new SQLiteStatement(m_database, "UPDATE Threads SET IsAlive = ?2 WHERE Id=?1");
-			m_updateThreadNameCmd = new SQLiteStatement(m_database, "UPDATE Threads SET Name = ?2 WHERE Id=?1");
-
-			m_insertCallerCmd = new SQLiteStatement(m_database, "INSERT INTO Callers (ThreadId, CallerId, CalleeId, HitCount) VALUES (?1, ?2, ?3, ?4)");
-			m_updateCallerCmd = new SQLiteStatement(m_database, "UPDATE Callers SET HitCount = HitCount + ?4 WHERE ThreadId=?1 AND CallerId=?2 AND CalleeId=?3");
-
-			m_insertSampleCmd = new SQLiteStatement(m_database, "INSERT INTO Samples (ThreadId, FunctionId, HitCount) VALUES (?1, ?2, ?3)");
-			m_updateSampleCmd = new SQLiteStatement(m_database, "UPDATE Samples SET HitCount = HitCount + ?3 WHERE ThreadId=?1 AND FunctionId=?2");
-
-			m_insertCounterCmd = new SQLiteStatement(m_database, "INSERT INTO CounterValues (CounterId, Time, Value) VALUES (?1, ?2, ?3)");
-			m_counterNameCmd = new SQLiteStatement(m_database, "REPLACE INTO Counters (Id, Name) VALUES (?1, ?2)");
+			SQLiteCommand command = new SQLiteCommand(commandText, m_database);
+			for(int i = 0; i < paramCount; ++i)
+				command.Parameters.Add(new SQLiteParameter());
+			return command;
 		}
 
-		private void FlushCallers()
+		private void PrepareCommands()
 		{
+			m_mapFunctionCmd = CreateCommand("INSERT INTO Functions (Id, ClassId, IsNative, Name, Signature) VALUES (?, ?, ?, ?, ?)", 5);
+			m_mapClassCmd = CreateCommand("INSERT INTO Classes (Id, Name) VALUES (?, ?)", 2);
+
+			m_insertThreadCmd = CreateCommand("INSERT INTO Threads (Id, IsAlive, Name) VALUES (?, ?, ?)", 3);
+			m_updateThreadAliveCmd = CreateCommand("UPDATE Threads SET IsAlive = ? WHERE Id=?", 2);
+			m_updateThreadNameCmd = CreateCommand("UPDATE Threads SET Name = ? WHERE Id=?", 2);
+
+			m_insertCallerCmd = CreateCommand("INSERT INTO Callers (ThreadId, CallerId, CalleeId, HitCount) VALUES (?, ?, ?, ?)", 4);
+			m_updateCallerCmd = CreateCommand("UPDATE Callers SET HitCount = HitCount + ? WHERE ThreadId=? AND CallerId=? AND CalleeId=?", 4);
+
+			m_insertSampleCmd = CreateCommand("INSERT INTO Samples (ThreadId, FunctionId, HitCount) VALUES (?, ?, ?)", 3);
+			m_updateSampleCmd = CreateCommand("UPDATE Samples SET HitCount = HitCount + ? WHERE ThreadId=? AND FunctionId=?", 3);
+
+			m_insertCounterCmd = CreateCommand("INSERT INTO CounterValues (CounterId, Time, Value) VALUES (?, ?, ?)", 3);
+			m_counterNameCmd = CreateCommand("REPLACE INTO Counters (Id, Name) VALUES (?, ?)", 2);
+		}
+
+		private int FlushCallers()
+		{
+			int queryCount = 0;
 			foreach(KeyValuePair<int, SortedDictionary<int, SortedList<int, int>>> threadKvp in m_callers.Graph)
 			{
 				int threadId = threadKvp.Key;
@@ -387,30 +418,32 @@ namespace SlimTuneUI
 						int calleeId = hitsKvp.Key;
 						int hits = hitsKvp.Value;
 
-						m_updateCallerCmd.Reset();
-						m_updateCallerCmd.BindInt(1, threadId);
-						m_updateCallerCmd.BindInt(2, callerId);
-						m_updateCallerCmd.BindInt(3, calleeId);
-						m_updateCallerCmd.BindInt(4, hits);
-						m_updateCallerCmd.Step();
+						m_updateCallerCmd.Parameters[0].Value = hits;
+						m_updateCallerCmd.Parameters[1].Value = threadId;
+						m_updateCallerCmd.Parameters[2].Value = callerId;
+						m_updateCallerCmd.Parameters[3].Value = calleeId;
+						int count = Convert.ToInt32(m_updateCallerCmd.ExecuteScalar());
+						++queryCount;
 
-						if(m_updateCallerCmd.GetInt(0) == 0)
+						if(count == 0)
 						{
-							m_insertCallerCmd.Reset();
-							m_insertCallerCmd.BindInt(1, threadId);
-							m_insertCallerCmd.BindInt(2, callerId);
-							m_insertCallerCmd.BindInt(3, calleeId);
-							m_insertCallerCmd.BindInt(4, hits);
-							m_insertCallerCmd.Step();
+							m_insertCallerCmd.Parameters[0].Value = threadId;
+							m_insertCallerCmd.Parameters[1].Value = callerId;
+							m_insertCallerCmd.Parameters[2].Value = calleeId;
+							m_insertCallerCmd.Parameters[3].Value = hits;
+							m_insertCallerCmd.ExecuteNonQuery();
+							++queryCount;
 						}
 					}
 					callerKvp.Value.Clear();
 				}
 			}
+			return queryCount;
 		}
 
-		private void FlushSamples()
+		private int FlushSamples()
 		{
+			int queryCount = 0;
 			//now to update the samples table
 			foreach(KeyValuePair<int, SortedList<int, int>> sampleKvp in m_samples)
 			{
@@ -419,24 +452,25 @@ namespace SlimTuneUI
 
 				foreach(KeyValuePair<int, int> threadKvp in sampleKvp.Value)
 				{
-					m_updateSampleCmd.Reset();
-					m_updateSampleCmd.BindInt(1, threadKvp.Key);
-					m_updateSampleCmd.BindInt(2, sampleKvp.Key);
-					m_updateSampleCmd.BindInt(3, threadKvp.Value);
-					m_updateSampleCmd.Step();
+					m_updateSampleCmd.Parameters[0].Value = threadKvp.Value;
+					m_updateSampleCmd.Parameters[1].Value = threadKvp.Key;
+					m_updateSampleCmd.Parameters[2].Value = sampleKvp.Key;
+					int count = Convert.ToInt32(m_updateSampleCmd.ExecuteScalar());
+					++queryCount;
 
-					if(m_updateSampleCmd.GetInt(0) == 0)
+					if(count == 0)
 					{
-						m_insertSampleCmd.Reset();
-						m_insertSampleCmd.BindInt(1, threadKvp.Key);
-						m_insertSampleCmd.BindInt(2, sampleKvp.Key);
-						m_insertSampleCmd.BindInt(3, threadKvp.Value);
-						m_insertSampleCmd.Step();
+						m_insertSampleCmd.Parameters[0].Value = threadKvp.Key;
+						m_insertSampleCmd.Parameters[1].Value = sampleKvp.Key;
+						m_insertSampleCmd.Parameters[2].Value = threadKvp.Value;
+						m_insertSampleCmd.ExecuteNonQuery();
+						++queryCount;
 					}
 				}
 
 				sampleKvp.Value.Clear();
 			}
+			return queryCount;
 		}
 
 		public override void Dispose()

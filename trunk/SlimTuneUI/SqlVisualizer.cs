@@ -107,7 +107,7 @@ namespace SlimTuneUI
 		{
 			try
 			{
-				DataSet ds = m_connection.DataEngine.Query(m_queryTextBox.Text);
+				DataSet ds = m_connection.DataEngine.RawQuery(m_queryTextBox.Text);
 				if(ds != null)
 				{
 					m_dataGrid.DataSource = ds;

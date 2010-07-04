@@ -79,17 +79,22 @@ namespace SlimTuneUI
 		{
 		}
 
-		public System.Data.DataSet Query(string query)
+		public NHibernate.ISession OpenSession()
 		{
 			throw new NotImplementedException();
 		}
 
-		public System.Data.DataSet Query(string query, int limit)
+		public System.Data.DataSet RawQuery(string query)
 		{
 			throw new NotImplementedException();
 		}
 
-		public object QueryScalar(string query)
+		public System.Data.DataSet RawQuery(string query, int limit)
+		{
+			throw new NotImplementedException();
+		}
+
+		public object RawQueryScalar(string query)
 		{
 			throw new NotImplementedException();
 		}
