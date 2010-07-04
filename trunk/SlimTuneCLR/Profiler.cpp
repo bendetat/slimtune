@@ -559,7 +559,7 @@ unsigned int ClrProfiler::MapClass(mdTypeDef classDef, IMetaDataImport* metadata
 		if(hr == S_FALSE)
 		{
 			//This happens with a few types, like <Module> and <CrtImplementationDetails>
-			info->Name = L"Unknown";
+			info->Name = L"[none]";
 		}
 		else
 		{
@@ -1467,6 +1467,7 @@ void ClrProfiler::EndEvent(unsigned int id)
 
 HRESULT ClrProfiler::RuntimeThreadSuspended(ThreadID threadId)
 {
+	__debugbreak();
 	ContextList::iterator it = m_threadContexts.find(threadId);
 	if(it != m_threadContexts.end())
 	{
