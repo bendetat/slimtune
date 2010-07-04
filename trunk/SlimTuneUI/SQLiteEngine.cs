@@ -64,9 +64,9 @@ namespace SlimTuneUI
 		}
 
 		public SQLiteEngine()
-			: base(Path.GetTempFileName())
+			: base("memory")
 		{
-			string connStr = string.Format("Data Source={0}; Synchronous=Off;", Name);
+			string connStr = "Data Source=:memory:;";
 			m_database = new SQLiteConnection(connStr);
 			m_database.Open();
 			CreateSchema();
