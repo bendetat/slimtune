@@ -24,7 +24,7 @@
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
 AppId={{72513408-FD69-404F-9FDB-2DB6A7DCDE84}
 AppName=SlimTune Profiler
-AppVerName=SlimTune Profiler v0.2.1
+AppVerName=SlimTune Profiler v0.3.0
 AppPublisher=SlimDX Group
 AppPublisherURL=http://www.slimtune.com/
 AppSupportURL=http://www.slimtune.com/
@@ -41,7 +41,7 @@ MinVersion=0,5.01
 VersionInfoVersion=0.2.1.0
 VersionInfoCompany=SlimDX Group
 VersionInfoCopyright=Copyright © SlimDX Group 2010
-VersionInfoProductName=SlimTune Profiler v0.2.1
+VersionInfoProductName=SlimTune Profiler v0.3.0
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
