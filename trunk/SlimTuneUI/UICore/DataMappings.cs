@@ -5,6 +5,17 @@ using FluentNHibernate.Mapping;
 
 namespace UICore.Mappings
 {
+	public class PropertyMap : ClassMap<Property>
+	{
+		public PropertyMap()
+		{
+			Id(x => x.Name);
+			Map(x => x.Name);
+			Map(x => x.Value);
+			Table("Properties");
+		}
+	}
+
 	public class ThreadInfoMap : ClassMap<ThreadInfo>
 	{
 		public ThreadInfoMap()
@@ -12,8 +23,8 @@ namespace UICore.Mappings
 			Id(x => x.Id);
 			Map(x => x.IsAlive);
 			Map(x => x.Name);
-			HasMany(x => x.Samples);
-			HasMany(x => x.Calls);
+			HasMany(x => x.Samples).Inverse();
+			HasMany(x => x.Calls).Inverse();
 			Table("Threads");
 		}
 	}
@@ -28,8 +39,8 @@ namespace UICore.Mappings
 			Map(x => x.IsNative);
 			Map(x => x.ClassId);
 			References(x => x.Class, "ClassId");
-			HasMany(x => x.CallsAsParent);
-			HasMany(x => x.CallsAsChild);
+			HasMany(x => x.CallsAsParent).Inverse();
+			HasMany(x => x.CallsAsChild).Inverse();
 			Table("Functions");
 		}
 	}
@@ -40,7 +51,7 @@ namespace UICore.Mappings
 		{
 			Id(x => x.Id);
 			Map(x => x.Name);
-			HasMany(x => x.Functions);
+			HasMany(x => x.Functions).Inverse();
 			Table("Classes");
 		}
 	}
@@ -54,10 +65,10 @@ namespace UICore.Mappings
 				.KeyProperty(x => x.ParentId)
 				.KeyProperty(x => x.ChildId)
 				.Mapped();
-			Map(x => x.ThreadId);
-			Map(x => x.ParentId);
-			Map(x => x.ChildId);
-			Map(x => x.HitCount);
+			Map(x => x.ThreadId).Index("Calls_ThreadIndex");
+			Map(x => x.ParentId).Index("Calls_ParentIndex");
+			Map(x => x.ChildId).Index("Calls_ChildIndex");
+			Map(x => x.HitCount).Not.Nullable();
 			References(x => x.Thread, "ThreadId");
 			References(x => x.Parent, "ParentId");
 			References(x => x.Child, "ChildId");
@@ -74,10 +85,10 @@ namespace UICore.Mappings
 				.KeyProperty(x => x.FunctionId)
 				.Mapped();
 			Map(x => x.ThreadId);
-			Map(x => x.FunctionId);
-			Map(x => x.HitCount);
+			Map(x => x.FunctionId).Index("Samples_FunctionIndex");
+			Map(x => x.HitCount).Not.Nullable();
 			References(x => x.Thread, "ThreadId");
-			References(x => x.Function, "FunctionId");
+			//References(x => x.Function, "FunctionId");
 			Table("Samples");
 		}
 	}
@@ -89,7 +100,7 @@ namespace UICore.Mappings
 			Id(x => x.Id);
 			Map(x => x.Id);
 			Map(x => x.Name);
-			HasMany(x => x.Values);
+			HasMany(x => x.Values).Inverse();
 			Table("Counters");
 		}
 	}
@@ -102,7 +113,7 @@ namespace UICore.Mappings
 				.KeyProperty(x => x.CounterId)
 				.KeyProperty(x => x.Time)
 				.Mapped();
-			Map(x => x.CounterId);
+			Map(x => x.CounterId).Index("CounterValues_IdIndex");
 			Map(x => x.Time);
 			Map(x => x.Value);
 			References(x => x.Counter, "CounterId");

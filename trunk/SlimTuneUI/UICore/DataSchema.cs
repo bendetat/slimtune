@@ -3,6 +3,12 @@ using System.Collections.Generic;
 
 namespace UICore
 {
+	public class Property
+	{
+		public virtual string Name { get; set; }
+		public virtual string Value { get; set; }
+	}
+
 	public class ThreadInfo
 	{
 		public virtual int Id { get; set; }

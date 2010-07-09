@@ -23,6 +23,11 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
+using NHibernate;
+using NHibernate.Cfg;
+using NHibernate.Tool.hbm2ddl;
+using FluentNHibernate.Cfg;
+
 namespace UICore
 {
 	public struct CallGraph<T>
@@ -53,7 +58,8 @@ namespace UICore
 		//we use this so we don't have to check DateTime.Now on every single sample
 		protected int m_cachedSamples;
 
-		protected NHibernate.ISessionFactory m_sessionFactory;
+		protected ISessionFactory m_sessionFactory;
+		protected Configuration m_config;
 
 		protected object m_lock = new object();
 
@@ -90,6 +96,8 @@ namespace UICore
 			}
 		}
 
+		protected virtual void PreCreateSchema() { }
+		protected abstract void PrepareCommands();
 		public abstract void MapFunction(FunctionInfo funcInfo);
 		public abstract void MapClass(ClassInfo classInfo);
 		public abstract void UpdateThread(int threadId, bool? alive, string name);
@@ -101,7 +109,7 @@ namespace UICore
 		public abstract System.Data.DataSet RawQuery(string query);
 		public abstract System.Data.DataSet RawQuery(string query, int limit);
 		public abstract object RawQueryScalar(string query);
-		public abstract NHibernate.ISession OpenSession();
+		public abstract ISession OpenSession();
 		protected abstract void DoClearData();
 
 		public DataEngineBase(string name)
@@ -110,6 +118,32 @@ namespace UICore
 			m_calls = CallGraph<int>.Create();
 			m_samples = new SortedDictionary<int, SortedList<int, int>>();
 			m_lastFlush = DateTime.Now;
+		}
+
+		public void FinishConstruct(bool createNew, FluentConfiguration config)
+		{
+			CreateSessionFactory(config);
+			if(createNew)
+			{
+				PreCreateSchema();
+				var export = new SchemaExport(m_config);
+				export.Create(true, true);
+				WriteCoreProperties();
+			}
+			else
+			{
+				using(var session = OpenSession())
+				{
+					var crit = session.CreateCriteria<Property>();
+					var versionProp = session.Get<Property>("FileVersion");
+					if(versionProp == null || int.Parse(versionProp.Value) != 3)
+					{
+						throw new System.IO.InvalidDataException("Wrong file version.");
+					}
+				}
+			}
+
+			PrepareCommands();
 		}
 
 		public void ParseSample(Messages.Sample sample)
@@ -194,10 +228,35 @@ namespace UICore
 			}
 		}
 
-		public void CreateSessionFactory(FluentNHibernate.Cfg.FluentConfiguration config)
+		private void CreateSessionFactory(FluentConfiguration config)
 		{
 			config.Mappings(m => m.FluentMappings.AddFromAssemblyOf<DataEngineBase>());
+			m_config = config.BuildConfiguration();
 			m_sessionFactory = config.BuildSessionFactory();
+		}
+
+		public virtual void WriteProperty(string name, string value)
+		{
+			using(var session = OpenSession())
+			{
+				using(var transact = session.BeginTransaction())
+				{
+					var property = new Property()
+					{
+						Name = name,
+						Value = value
+					};
+					session.SaveOrUpdate(property);
+				}
+			}
+		}
+
+		protected void WriteCoreProperties()
+		{
+			WriteProperty("Application", "SlimTune Profiler");
+			WriteProperty("Version", System.Windows.Forms.Application.ProductVersion);
+			WriteProperty("FileVersion", "3");
+			WriteProperty("FileName", Name);
 		}
 
 		public virtual void FunctionTiming(int functionId, long time)

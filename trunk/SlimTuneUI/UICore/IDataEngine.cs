@@ -72,6 +72,8 @@ namespace UICore
 		string Engine { get; }
 		bool InMemory { get; }
 
+		void WriteProperty(string name, string value);
+
 		void MapFunction(FunctionInfo funcInfo);
 		void MapClass(ClassInfo classInfo);
 

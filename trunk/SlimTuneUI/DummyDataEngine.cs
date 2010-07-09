@@ -24,6 +24,10 @@ namespace SlimTuneUI
 			get { return true; }
 		}
 
+		public void WriteProperty(string name, string value)
+		{
+		}
+
 		public void MapFunction(UICore.FunctionInfo funcInfo)
 		{
 		}

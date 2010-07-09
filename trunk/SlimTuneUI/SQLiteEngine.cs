@@ -31,6 +31,7 @@ using UICore;
 using System.Data.SQLite;
 using FluentNHibernate.Cfg;
 using FluentNHibernate.Cfg.Db;
+using NHibernate.Cfg;
 
 namespace SlimTuneUI
 {
@@ -69,12 +70,9 @@ namespace SlimTuneUI
 			string connStr = "Data Source=:memory:;";
 			m_database = new SQLiteConnection(connStr);
 			m_database.Open();
-			CreateSchema();
 
 			var config = Fluently.Configure().Database(SQLiteConfiguration.Standard.ConnectionString(connStr));
-			CreateSessionFactory(config);
-
-			PrepareCommands();
+			FinishConstruct(true, config);
 		}
 
 		public SQLiteEngine(string name, bool createNew)
@@ -85,25 +83,18 @@ namespace SlimTuneUI
 			{
 				if(File.Exists(name))
 					File.Delete(name);
-
-				m_database = new SQLiteConnection(connStr);
-				m_database.Open();
-				CreateSchema();
 			}
 			else
 			{
 				if(!File.Exists(name))
 					throw new InvalidOperationException();
-
-				m_database = new SQLiteConnection(connStr);
-				m_database.Open();
 			}
 
+			m_database = new SQLiteConnection(connStr);
+			m_database.Open();
 
 			var config = Fluently.Configure().Database(SQLiteConfiguration.Standard.ConnectionString(connStr));
-			CreateSessionFactory(config);
-
-			PrepareCommands();
+			FinishConstruct(createNew, config);
 		}
 
 		~SQLiteEngine()
@@ -331,50 +322,11 @@ namespace SlimTuneUI
 			}
 		}
 
-		private void CreateSchema()
+		protected override void PreCreateSchema()
 		{
 			Command("PRAGMA count_changes=TRUE");
 			Command("PRAGMA synchronous=OFF");
 			Command("PRAGMA journal_mode=MEMORY");
-
-			Command("CREATE TABLE Properties (Name TEXT (256), Value TEXT (256))");
-			WriteProperties();
-
-			Command("CREATE TABLE Snapshots (Id INT PRIMARY KEY, Name TEXT (256), DateTime INTEGER)");
-			Command("CREATE TABLE Functions (Id INT PRIMARY KEY, ClassId INT, IsNative INT NOT NULL, Name TEXT (1024), Signature TEXT (2048))");
-			Command("CREATE TABLE Classes (Id INT PRIMARY KEY, Name TEXT (1024))");
-
-			Command("CREATE TABLE Threads (Id INT PRIMARY KEY, IsAlive INT, Name TEXT(256))");
-
-			//We will look up results in ParentId order when updating this table
-			Command("CREATE TABLE Calls " + kCallsSchema);
-			Command("CREATE INDEX Calls_ParentIndex ON Calls(ParentId);");
-			Command("CREATE INDEX Calls_ChildIndex ON Calls(ChildId);");
-			Command("CREATE INDEX Calls_Compound ON Calls(ThreadId, ParentId, ChildId);");
-
-			Command("CREATE TABLE Samples " + kSamplesSchema);
-			Command("CREATE INDEX Samples_FunctionIndex ON Samples(FunctionId);");
-			Command("CREATE INDEX Samples_Compound ON Samples(ThreadId, FunctionId);");
-
-			Command("CREATE TABLE Timings (FunctionId INT, RangeMin INT, RangeMax INT, HitCount INT)");
-			Command("CREATE INDEX Timings_FunctionIndex ON Timings(FunctionId);");
-			Command("CREATE INDEX Timings_Compound ON Timings(FunctionId, RangeMin);");
-
-			Command("CREATE TABLE Counters (Id INT PRIMARY KEY, Name TEXT(256))");
-			Command("CREATE TABLE CounterValues (CounterId INT, Time INT, Value NUMERIC)");
-			Command("CREATE INDEX CounterValues_IdIndex ON Counters(Id);");
-		}
-
-		private void WriteProperty(string name, string value)
-		{
-			Command(string.Format("INSERT INTO Properties (Name, Value) VALUES ('{0}', '{1}')", name, value));
-		}
-
-		private void WriteProperties()
-		{
-			WriteProperty("Application", "SlimTune Profiler");
-			WriteProperty("Version", System.Windows.Forms.Application.ProductVersion);
-			WriteProperty("FileVersion", "2");
 		}
 
 		private SQLiteCommand CreateCommand(string commandText, int paramCount)
@@ -385,7 +337,7 @@ namespace SlimTuneUI
 			return command;
 		}
 
-		private void PrepareCommands()
+		protected override void PrepareCommands()
 		{
 			m_mapFunctionCmd = CreateCommand("INSERT INTO Functions (Id, ClassId, IsNative, Name, Signature) VALUES (?, ?, ?, ?, ?)", 5);
 			m_mapClassCmd = CreateCommand("INSERT INTO Classes (Id, Name) VALUES (?, ?)", 2);

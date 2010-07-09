@@ -29,7 +29,11 @@ using System.Data.SqlServerCe;
 
 using UICore;
 
-#if FALSE
+using System.Data.SQLite;
+using FluentNHibernate.Cfg;
+using FluentNHibernate.Cfg.Db;
+using NHibernate.Tool.hbm2ddl;
+
 namespace SlimTuneUI
 {
 	[Obsolete,
@@ -47,7 +51,7 @@ namespace SlimTuneUI
 		SqlCeCommand m_addFunctionCmd;
 		SqlCeCommand m_addClassCmd;
 
-		SqlCeCommand m_callersCmd;
+		SqlCeCommand m_callsCmd;
 		SqlCeCommand m_samplesCmd;
 		SqlCeCommand m_threadsCmd;
 		SqlCeCommand m_timingsCmd;
@@ -75,22 +79,14 @@ namespace SlimTuneUI
 				{
 					engine.CreateDatabase();
 				}
-
-				m_sqlConn = new SqlCeConnection(connStr);
-				m_sqlConn.Open();
-				CreateSchema();
-			}
-			else
-			{
-				m_sqlConn = new SqlCeConnection(connStr);
-				m_sqlConn.Open();
 			}
 
-			CreateCommands();
-			m_callers = CallGraph<int>.Create();
-			m_samples = new SortedDictionary<int, SortedList<int, int>>();
+			m_sqlConn = new SqlCeConnection(connStr);
+			m_sqlConn.Open();
+
+			var config = Fluently.Configure().Database(MsSqlCeConfiguration.Standard.ConnectionString(connStr));
+			FinishConstruct(createNew, config);
 			m_timings = new Dictionary<int, List<long>>(2048);
-			m_lastFlush = DateTime.Now;
 		}
 
 		public override void MapFunction(FunctionInfo funcInfo)
@@ -183,9 +179,9 @@ namespace SlimTuneUI
 				Stopwatch timer = new Stopwatch();
 				timer.Start();
 
-				using(var callersSet = m_callersCmd.ExecuteResultSet(ResultSetOptions.Updatable | ResultSetOptions.Scrollable))
+				using(var callsSet = m_callsCmd.ExecuteResultSet(ResultSetOptions.Updatable | ResultSetOptions.Scrollable))
 				{
-					FlushCallers(callersSet);
+					FlushCalls(callsSet);
 				}
 
 				using(var samplesSet = m_samplesCmd.ExecuteResultSet(ResultSetOptions.Updatable | ResultSetOptions.Scrollable))
@@ -223,11 +219,16 @@ namespace SlimTuneUI
 				cmd.ExecuteNonQuery();
 
 				int id = (int) RawQueryScalar("SELECT MAX(Id) FROM Snapshots");
-				ExecuteNonQuery(string.Format("CREATE TABLE Callers_{0} {1}", id, kCallersSchema));
-				ExecuteNonQuery(string.Format("INSERT INTO Callers_{0} SELECT * FROM Callers", id));
+				ExecuteNonQuery(string.Format("CREATE TABLE Calls_{0} {1}", id, kCallsSchema));
+				ExecuteNonQuery(string.Format("INSERT INTO Calls_{0} SELECT * FROM Calls", id));
 				ExecuteNonQuery(string.Format("CREATE TABLE Samples_{0} {1}", id, kSamplesSchema));
 				ExecuteNonQuery(string.Format("INSERT INTO Samples_{0} SELECT * FROM Samples", id));
 			}
+		}
+
+		public override NHibernate.ISession OpenSession()
+		{
+			return m_sessionFactory.OpenSession(m_sqlConn);
 		}
 
 		public override DataSet RawQuery(string query, int limit)
@@ -252,6 +253,21 @@ namespace SlimTuneUI
 			return command.ExecuteScalar();
 		}
 
+		public override void WriteProperty(string name, string value)
+		{
+			var updateCmd = new SqlCeCommand("UPDATE Properties SET Value = @Value WHERE Name = @Name", m_sqlConn);
+			updateCmd.Parameters.Add("@Name", name);
+			updateCmd.Parameters.Add("@Value", value);
+			var count = updateCmd.ExecuteNonQuery();
+			if (count == 0)
+			{
+				var insertCmd = new SqlCeCommand("INSERT INTO Properties (Name, Value) VALUES (@Name, @Value)", m_sqlConn);
+				insertCmd.Parameters.Add("@Name", name);
+				insertCmd.Parameters.Add("@Value", value);
+				insertCmd.ExecuteNonQuery();
+			}
+		}
+
 		public override void Dispose()
 		{
 			if(m_sqlConn != null)
@@ -260,43 +276,19 @@ namespace SlimTuneUI
 
 		protected override void DoClearData()
 		{
-			new SqlCeCommand("UPDATE Callers SET HitCount = 0", m_sqlConn).ExecuteNonQuery();
+			new SqlCeCommand("UPDATE Calls SET HitCount = 0", m_sqlConn).ExecuteNonQuery();
 			new SqlCeCommand("UPDATE Samples SET HitCount = 0", m_sqlConn).ExecuteNonQuery();
 		}
 
-		private void ExecuteNonQuery(string query)
+		private int ExecuteNonQuery(string query)
 		{
 			using(var command = new SqlCeCommand(query, m_sqlConn))
 			{
-				command.ExecuteNonQuery();
+				return command.ExecuteNonQuery();
 			}
 		}
 
-		private void CreateSchema()
-		{
-			ExecuteNonQuery("CREATE TABLE Snapshots (Id INT PRIMARY KEY IDENTITY, Name NVARCHAR (256), DateTime DATETIME)");
-			ExecuteNonQuery("CREATE TABLE Functions (Id INT PRIMARY KEY, ClassId INT, IsNative INT NOT NULL, Name NVARCHAR (1024), Signature NVARCHAR (2048))");
-			ExecuteNonQuery("CREATE TABLE Classes (Id INT PRIMARY KEY, Name NVARCHAR (1024))");
-
-			ExecuteNonQuery("CREATE TABLE Threads (Id INT NOT NULL, IsAlive INT, Name NVARCHAR(256))");
-			ExecuteNonQuery("ALTER TABLE Threads ADD CONSTRAINT pk_Id PRIMARY KEY (Id)");
-
-			//We will look up results in CallerId order when updating this table
-			ExecuteNonQuery("CREATE TABLE Callers " + kCallersSchema);
-			ExecuteNonQuery("CREATE INDEX CallerIndex ON Callers(CallerId);");
-			ExecuteNonQuery("CREATE INDEX CalleeIndex ON Callers(CalleeId);");
-			ExecuteNonQuery("CREATE INDEX Compound ON Callers(ThreadId, CallerId, CalleeId);");
-
-			ExecuteNonQuery("CREATE TABLE Samples " + kSamplesSchema);
-			ExecuteNonQuery("CREATE INDEX FunctionIndex ON Samples(FunctionId);");
-			ExecuteNonQuery("CREATE INDEX Compound ON Samples(ThreadId, FunctionId);");
-
-			ExecuteNonQuery("CREATE TABLE Timings (FunctionId INT, RangeMin BIGINT, RangeMax BIGINT, HitCount INT)");
-			ExecuteNonQuery("CREATE INDEX FunctionIndex ON Timings(FunctionId);");
-			ExecuteNonQuery("CREATE INDEX Compound ON Timings(FunctionId, RangeMin);");
-		}
-
-		private void CreateCommands()
+		protected override void  PrepareCommands()
 		{
 			m_addFunctionCmd = m_sqlConn.CreateCommand();
 			m_addFunctionCmd.CommandType = CommandType.TableDirect;
@@ -306,20 +298,20 @@ namespace SlimTuneUI
 			m_addClassCmd.CommandType = CommandType.TableDirect;
 			m_addClassCmd.CommandText = "Classes";
 
-			m_callersCmd = m_sqlConn.CreateCommand();
-			m_callersCmd.CommandType = CommandType.TableDirect;
-			m_callersCmd.CommandText = "Callers";
-			m_callersCmd.IndexName = "Compound";
+			m_callsCmd = m_sqlConn.CreateCommand();
+			m_callsCmd.CommandType = CommandType.TableDirect;
+			m_callsCmd.CommandText = "Calls";
+			//m_callsCmd.IndexName = "Compound";
 
 			m_samplesCmd = m_sqlConn.CreateCommand();
 			m_samplesCmd.CommandType = CommandType.TableDirect;
 			m_samplesCmd.CommandText = "Samples";
-			m_samplesCmd.IndexName = "Compound";
+			//m_samplesCmd.IndexName = "Compound";
 
 			m_timingsCmd = m_sqlConn.CreateCommand();
 			m_timingsCmd.CommandType = CommandType.TableDirect;
 			m_timingsCmd.CommandText = "Timings";
-			m_timingsCmd.IndexName = "Compound";
+			//m_timingsCmd.IndexName = "Compound";
 
 			m_threadsCmd = m_sqlConn.CreateCommand();
 			m_threadsCmd.CommandType = CommandType.TableDirect;
@@ -327,26 +319,26 @@ namespace SlimTuneUI
 			m_threadsCmd.IndexName = "pk_Id";
 		}
 
-		private void FlushCallers(SqlCeResultSet resultSet)
+		private void FlushCalls(SqlCeResultSet resultSet)
 		{
 			//a lock is already taken at this point
 			int hitsOrdinal = resultSet.GetOrdinal("HitCount");
-			int calleeOrdinal = resultSet.GetOrdinal("CalleeId");
-			int callerOrdinal = resultSet.GetOrdinal("CallerId");
+			int childOrdinal = resultSet.GetOrdinal("ChildId");
+			int parentOrdinal = resultSet.GetOrdinal("ParentId");
 			int threadOrdinal = resultSet.GetOrdinal("ThreadId");
 
-			foreach(KeyValuePair<int, SortedDictionary<int, SortedList<int, int>>> threadKvp in m_callers.Graph)
+			foreach(KeyValuePair<int, SortedDictionary<int, SortedList<int, int>>> threadKvp in m_calls.Graph)
 			{
 				int threadId = threadKvp.Key;
-				foreach(KeyValuePair<int, SortedList<int, int>> callerKvp in threadKvp.Value)
+				foreach(KeyValuePair<int, SortedList<int, int>> parentKvp in threadKvp.Value)
 				{
-					int callerId = callerKvp.Key;
-					foreach(KeyValuePair<int, int> hitsKvp in callerKvp.Value)
+					int parentId = parentKvp.Key;
+					foreach(KeyValuePair<int, int> hitsKvp in parentKvp.Value)
 					{
-						int calleeId = hitsKvp.Key;
+						int childId = hitsKvp.Key;
 						int hits = hitsKvp.Value;
 
-						bool result = resultSet.Seek(DbSeekOptions.FirstEqual, threadId, callerId, calleeId);
+						bool result = resultSet.Seek(DbSeekOptions.FirstEqual, threadId, parentId, childId);
 						if(result && resultSet.Read())
 						{
 							//found it, update the hit count and move on
@@ -357,10 +349,10 @@ namespace SlimTuneUI
 						else
 						{
 							//not in the db, create a new record
-							CreateRecord(resultSet, threadId, callerId, calleeId, hits);
+							CreateRecord(resultSet, threadId, parentId, childId, hits);
 						}
 					}
-					callerKvp.Value.Clear();
+					parentKvp.Value.Clear();
 				}
 			}
 		}
@@ -540,16 +532,15 @@ namespace SlimTuneUI
 			}
 		}
 
-		private void CreateRecord(SqlCeResultSet resultSet, int threadId, int callerId, int calleeId, int hits)
+		private void CreateRecord(SqlCeResultSet resultSet, int threadId, int parentId, int childId, int hits)
 		{
 			//a lock is not needed
 			var row = resultSet.CreateRecord();
 			row["ThreadId"] = threadId;
-			row["CallerId"] = callerId;
-			row["CalleeId"] = calleeId;
+			row["ParentId"] = parentId;
+			row["ChildId"] = childId;
 			row["HitCount"] = hits;
 			resultSet.Insert(row, DbInsertOptions.PositionOnInsertedRow);
 		}
 	}
 }
-#endif
