@@ -9,7 +9,7 @@ namespace UICore.Mappings
 	{
 		public PropertyMap()
 		{
-			Id(x => x.Name);
+			Id(x => x.Name).GeneratedBy.Assigned();
 			Map(x => x.Name);
 			Map(x => x.Value);
 			Table("Properties");
@@ -20,7 +20,7 @@ namespace UICore.Mappings
 	{
 		public ThreadInfoMap()
 		{
-			Id(x => x.Id);
+			Id(x => x.Id).GeneratedBy.Assigned();
 			Map(x => x.IsAlive);
 			Map(x => x.Name);
 			HasMany(x => x.Samples).Inverse();
@@ -33,12 +33,12 @@ namespace UICore.Mappings
 	{
 		public FunctionInfoMap()
 		{
-			Id(x => x.Id);
+			Id(x => x.Id).GeneratedBy.Assigned();
 			Map(x => x.Name);
 			Map(x => x.Signature);
 			Map(x => x.IsNative);
 			Map(x => x.ClassId);
-			References(x => x.Class, "ClassId");
+			//References(x => x.Class, "ClassId");
 			HasMany(x => x.CallsAsParent).Inverse();
 			HasMany(x => x.CallsAsChild).Inverse();
 			Table("Functions");
@@ -49,7 +49,7 @@ namespace UICore.Mappings
 	{
 		public ClassInfoMap()
 		{
-			Id(x => x.Id);
+			Id(x => x.Id).GeneratedBy.Assigned();
 			Map(x => x.Name);
 			HasMany(x => x.Functions).Inverse();
 			Table("Classes");
@@ -97,7 +97,7 @@ namespace UICore.Mappings
 	{
 		public CounterMap()
 		{
-			Id(x => x.Id);
+			Id(x => x.Id).GeneratedBy.Assigned();
 			Map(x => x.Id);
 			Map(x => x.Name);
 			HasMany(x => x.Values).Inverse();

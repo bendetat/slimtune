@@ -60,6 +60,7 @@ namespace UICore
 
 		protected ISessionFactory m_sessionFactory;
 		protected Configuration m_config;
+		protected ISession m_session;
 
 		protected object m_lock = new object();
 
@@ -98,11 +99,6 @@ namespace UICore
 
 		protected virtual void PreCreateSchema() { }
 		protected abstract void PrepareCommands();
-		public abstract void MapFunction(FunctionInfo funcInfo);
-		public abstract void MapClass(ClassInfo classInfo);
-		public abstract void UpdateThread(int threadId, bool? alive, string name);
-		public abstract void CounterName(int counterId, string name);
-		public abstract void PerfCounter(int counterId, long time, double value);
 		public abstract void Flush();
 		public abstract void Save(string file);
 		public abstract void Snapshot(string name);
@@ -120,7 +116,7 @@ namespace UICore
 			m_lastFlush = DateTime.Now;
 		}
 
-		public void FinishConstruct(bool createNew, FluentConfiguration config)
+		protected void FinishConstruct(bool createNew, FluentConfiguration config)
 		{
 			CreateSessionFactory(config);
 			if(createNew)
@@ -144,6 +140,14 @@ namespace UICore
 			}
 
 			PrepareCommands();
+			m_session = OpenSession();
+		}
+
+		private void CreateSessionFactory(FluentConfiguration config)
+		{
+			config.Mappings(m => m.FluentMappings.AddFromAssemblyOf<DataEngineBase>());
+			m_config = config.BuildConfiguration();
+			m_sessionFactory = config.BuildSessionFactory();
 		}
 
 		public void ParseSample(Messages.Sample sample)
@@ -228,13 +232,6 @@ namespace UICore
 			}
 		}
 
-		private void CreateSessionFactory(FluentConfiguration config)
-		{
-			config.Mappings(m => m.FluentMappings.AddFromAssemblyOf<DataEngineBase>());
-			m_config = config.BuildConfiguration();
-			m_sessionFactory = config.BuildSessionFactory();
-		}
-
 		public virtual void WriteProperty(string name, string value)
 		{
 			using(var session = OpenSession())
@@ -282,6 +279,94 @@ namespace UICore
 			else
 			{
 				++key1Table[key2];
+			}
+		}
+
+		public virtual void MapFunction(FunctionInfo funcInfo)
+		{
+			//using(var session = OpenSession())
+			{
+				using(var tx = m_session.BeginTransaction())
+				{
+					m_session.Save(funcInfo);
+					tx.Commit();
+				}
+			}
+		}
+
+		public virtual void MapClass(ClassInfo classInfo)
+		{
+			using(var tx = m_session.BeginTransaction())
+			{
+				m_session.Save(classInfo);
+				tx.Commit();
+			}
+		}
+
+		public virtual void UpdateThread(int threadId, bool? alive, string name)
+		{
+			var ti = m_session.Get<ThreadInfo>(threadId);
+			bool insert = ti == null;
+			if(ti == null)
+				ti = new ThreadInfo();
+
+			if(alive.HasValue)
+			{
+				ti.IsAlive = alive.Value;
+			}
+
+			if(name != null)
+			{
+				ti.Name = name;
+			}
+
+			using(var tx = m_session.BeginTransaction())
+			{
+				if(insert)
+					m_session.Save(ti);
+				else
+					m_session.Update(ti);
+
+				tx.Commit();
+			}
+		}
+
+		public virtual void CounterName(int counterId, string name)
+		{
+			lock(m_lock)
+			{
+				using(var tx = m_session.BeginTransaction())
+				{
+					var counter = m_session.Get<Counter>(counterId);
+					bool insert = counter == null;
+					if(counter == null)
+						counter = new Counter() { Id = counterId };
+					counter.Name = name;
+
+					if(insert)
+						m_session.Save(counter);
+					else
+						m_session.Update(counter);
+					tx.Commit();
+				}
+			}
+		}
+
+		public virtual void PerfCounter(int counterId, long time, double value)
+		{
+			lock(m_lock)
+			{
+				using(var tx = m_session.BeginTransaction())
+				{
+					var cv = new CounterValue()
+					{
+						CounterId = counterId,
+						Time = time,
+						Value = value
+					};
+					m_session.Save(cv);
+					tx.Commit();
+				}
 			}
 		}
 

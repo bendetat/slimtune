@@ -41,18 +41,10 @@ namespace SlimTuneUI
 	{
 		SQLiteConnection m_database;
 
-		SQLiteCommand m_mapFunctionCmd;
-		SQLiteCommand m_mapClassCmd;
-		SQLiteCommand m_insertThreadCmd;
-		SQLiteCommand m_updateThreadAliveCmd;
-		SQLiteCommand m_updateThreadNameCmd;
 		SQLiteCommand m_insertCallerCmd;
 		SQLiteCommand m_updateCallerCmd;
 		SQLiteCommand m_insertSampleCmd;
 		SQLiteCommand m_updateSampleCmd;
-
-		SQLiteCommand m_insertCounterCmd;
-		SQLiteCommand m_counterNameCmd;
 
 		public override string Extension
 		{
@@ -93,92 +85,14 @@ namespace SlimTuneUI
 			m_database = new SQLiteConnection(connStr);
 			m_database.Open();
 
-			var config = Fluently.Configure().Database(SQLiteConfiguration.Standard.ConnectionString(connStr));
+			var config = Fluently.Configure().Database(SQLiteConfiguration.Standard
+				.ConnectionString(connStr));
 			FinishConstruct(createNew, config);
 		}
 
 		~SQLiteEngine()
 		{
 			Dispose();
-		}
-
-		public override void MapFunction(FunctionInfo funcInfo)
-		{
-			lock(m_lock)
-			{
-				m_mapFunctionCmd.Parameters[0].Value = funcInfo.Id;
-				m_mapFunctionCmd.Parameters[1].Value = funcInfo.ClassId;
-				m_mapFunctionCmd.Parameters[2].Value = funcInfo.IsNative ? 1 : 0;
-				m_mapFunctionCmd.Parameters[3].Value = funcInfo.Name;
-				m_mapFunctionCmd.Parameters[4].Value = funcInfo.Signature;
-				m_mapFunctionCmd.ExecuteNonQuery();
-			}
-		}
-
-		public override void MapClass(ClassInfo classInfo)
-		{
-			lock(m_lock)
-			{
-				m_mapClassCmd.Parameters[0].Value = classInfo.Id;
-				m_mapClassCmd.Parameters[1].Value = classInfo.Name;
-				m_mapClassCmd.ExecuteNonQuery();
-			}
-		}
-
-		public override void UpdateThread(int threadId, bool? alive, string name)
-		{
-			lock(m_lock)
-			{
-				bool insert = false;
-				if(alive.HasValue)
-				{
-					m_updateThreadAliveCmd.Parameters[0].Value = alive.Value ? 1 : 0;
-					m_updateThreadAliveCmd.Parameters[1].Value = threadId;
-					int count = m_updateThreadAliveCmd.ExecuteNonQuery();
-					if(count == 0)
-						insert = true;
-				}
-
-				if(!insert && name != null)
-				{
-					m_updateThreadNameCmd.Parameters[0].Value = name;
-					m_updateThreadNameCmd.Parameters[1].Value = threadId;
-					int count = m_updateThreadNameCmd.ExecuteNonQuery();
-					if(count == 0)
-						insert = true;
-				}
-
-				if(insert)
-				{
-					bool aliveValue = alive.HasValue ? alive.Value : true;
-					string nameValue = name ?? string.Empty;
-					m_insertThreadCmd.Parameters[0].Value = threadId;
-					m_insertThreadCmd.Parameters[1].Value = aliveValue ? 1 : 0;
-					m_insertThreadCmd.Parameters[2].Value = nameValue;
-					m_insertThreadCmd.ExecuteNonQuery();
-				}
-			}
-		}
-
-		public override void CounterName(int counterId, string name)
-		{
-			lock(m_lock)
-			{
-				m_counterNameCmd.Parameters[0].Value = counterId;
-				m_counterNameCmd.Parameters[1].Value = name;
-				m_counterNameCmd.ExecuteNonQuery();
-			}
-		}
-
-		public override void PerfCounter(int counterId, long time, double value)
-		{
-			lock(m_lock)
-			{
-				m_insertCounterCmd.Parameters[0].Value = counterId;
-				m_insertCounterCmd.Parameters[1].Value = time;
-				m_insertCounterCmd.Parameters[2].Value = value;
-				m_insertCounterCmd.ExecuteNonQuery();
-			}
 		}
 
 		public override void Flush()
@@ -225,7 +139,7 @@ namespace SlimTuneUI
 				var cmd = string.Format("INSERT INTO Snapshots (Name, DateTime) VALUES ({0}, {1})", name, DateTime.Now.ToFileTime());
 				Command(cmd);
 
-				int id = (int) RawQueryScalar("SELECT MAX(Id) FROM Snapshots");
+				int id = (int) Command("SELECT MAX(Id) FROM Snapshots");
 				Command(string.Format("CREATE TABLE Calls_{0} {1}", id, kCallsSchema));
 				Command(string.Format("INSERT INTO Calls_{0} SELECT * FROM Callers", id));
 				Command(string.Format("CREATE TABLE Samples_{0} {1}", id, kSamplesSchema));
@@ -308,23 +222,23 @@ namespace SlimTuneUI
 
 		protected override void DoClearData()
 		{
-			RawQueryScalar("UPDATE Calls SET HitCount = 0");
-			RawQueryScalar("UPDATE Samples SET HitCount = 0");
-			RawQueryScalar("DELETE FROM CounterValues");
-			RawQueryScalar("DELETE FROM Counters");
+			Command("UPDATE Calls SET HitCount = 0");
+			Command("UPDATE Samples SET HitCount = 0");
+			Command("DELETE FROM CounterValues");
+			Command("DELETE FROM Counters");
 		}
 
-		private void Command(string command)
+		private int Command(string command)
 		{
 			using(SQLiteCommand cmd = new SQLiteCommand(command, m_database))
 			{
-				cmd.ExecuteNonQuery();
+				return cmd.ExecuteNonQuery();
 			}
 		}
 
 		protected override void PreCreateSchema()
 		{
-			Command("PRAGMA count_changes=TRUE");
+			//Command("PRAGMA count_changes=TRUE");
 			Command("PRAGMA synchronous=OFF");
 			Command("PRAGMA journal_mode=MEMORY");
 		}
@@ -339,21 +253,11 @@ namespace SlimTuneUI
 
 		protected override void PrepareCommands()
 		{
-			m_mapFunctionCmd = CreateCommand("INSERT INTO Functions (Id, ClassId, IsNative, Name, Signature) VALUES (?, ?, ?, ?, ?)", 5);
-			m_mapClassCmd = CreateCommand("INSERT INTO Classes (Id, Name) VALUES (?, ?)", 2);
-
-			m_insertThreadCmd = CreateCommand("INSERT INTO Threads (Id, IsAlive, Name) VALUES (?, ?, ?)", 3);
-			m_updateThreadAliveCmd = CreateCommand("UPDATE Threads SET IsAlive = ? WHERE Id=?", 2);
-			m_updateThreadNameCmd = CreateCommand("UPDATE Threads SET Name = ? WHERE Id=?", 2);
-
 			m_insertCallerCmd = CreateCommand("INSERT INTO Calls (ThreadId, ParentId, ChildId, HitCount) VALUES (?, ?, ?, ?)", 4);
 			m_updateCallerCmd = CreateCommand("UPDATE Calls SET HitCount = HitCount + ? WHERE ThreadId=? AND ParentId=? AND ChildId=?", 4);
 
 			m_insertSampleCmd = CreateCommand("INSERT INTO Samples (ThreadId, FunctionId, HitCount) VALUES (?, ?, ?)", 3);
 			m_updateSampleCmd = CreateCommand("UPDATE Samples SET HitCount = HitCount + ? WHERE ThreadId=? AND FunctionId=?", 3);
-
-			m_insertCounterCmd = CreateCommand("INSERT INTO CounterValues (CounterId, Time, Value) VALUES (?, ?, ?)", 3);
-			m_counterNameCmd = CreateCommand("REPLACE INTO Counters (Id, Name) VALUES (?, ?)", 2);
 		}
 
 		private int FlushCalls()
@@ -374,7 +278,7 @@ namespace SlimTuneUI
 						m_updateCallerCmd.Parameters[1].Value = threadId;
 						m_updateCallerCmd.Parameters[2].Value = parentId;
 						m_updateCallerCmd.Parameters[3].Value = childId;
-						int count = Convert.ToInt32(m_updateCallerCmd.ExecuteScalar());
+						int count = m_updateCallerCmd.ExecuteNonQuery();
 						++queryCount;
 
 						if(count == 0)
@@ -407,7 +311,7 @@ namespace SlimTuneUI
 					m_updateSampleCmd.Parameters[0].Value = threadKvp.Value;
 					m_updateSampleCmd.Parameters[1].Value = threadKvp.Key;
 					m_updateSampleCmd.Parameters[2].Value = sampleKvp.Key;
-					int count = Convert.ToInt32(m_updateSampleCmd.ExecuteScalar());
+					int count = Convert.ToInt32(m_updateSampleCmd.ExecuteNonQuery());
 					++queryCount;
 
 					if(count == 0)
@@ -428,17 +332,10 @@ namespace SlimTuneUI
 		public override void Dispose()
 		{
 			//and this is why C# could really use some RAII constructs
-			m_mapFunctionCmd.Dispose();
-			m_mapClassCmd.Dispose();
-			m_insertThreadCmd.Dispose();
-			m_updateThreadAliveCmd.Dispose();
-			m_updateThreadNameCmd.Dispose();
 			m_insertCallerCmd.Dispose();
 			m_updateCallerCmd.Dispose();
 			m_insertSampleCmd.Dispose();
 			m_updateSampleCmd.Dispose();
-			m_insertCounterCmd.Dispose();
-			m_counterNameCmd.Dispose();
 
 			m_database.Dispose();
 			GC.SuppressFinalize(this);

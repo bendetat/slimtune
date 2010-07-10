@@ -48,9 +48,6 @@ namespace SlimTuneUI
 
 		SqlCeConnection m_sqlConn;
 
-		SqlCeCommand m_addFunctionCmd;
-		SqlCeCommand m_addClassCmd;
-
 		SqlCeCommand m_callsCmd;
 		SqlCeCommand m_samplesCmd;
 		SqlCeCommand m_threadsCmd;
@@ -89,68 +86,6 @@ namespace SlimTuneUI
 			m_timings = new Dictionary<int, List<long>>(2048);
 		}
 
-		public override void MapFunction(FunctionInfo funcInfo)
-		{
-			var resultSet = m_addFunctionCmd.ExecuteResultSet(ResultSetOptions.Updatable);
-			var row = resultSet.CreateRecord();
-			row["Id"] = funcInfo.Id;
-			row["ClassId"] = funcInfo.ClassId != 0 ? (object) funcInfo.ClassId : null;
-			row["IsNative"] = funcInfo.IsNative ? 1 : 0;
-			row["Name"] = funcInfo.Name;
-			row["Signature"] = funcInfo.Signature;
-			resultSet.Insert(row);
-		}
-
-		public override void MapClass(ClassInfo classInfo)
-		{
-			var resultSet = m_addClassCmd.ExecuteResultSet(ResultSetOptions.Updatable);
-			var row = resultSet.CreateRecord();
-			row["Id"] = classInfo.Id;
-			row["Name"] = classInfo.Name;
-			resultSet.Insert(row);
-		}
-
-		public override void UpdateThread(int threadId, bool? alive, string name)
-		{
-			lock(m_lock)
-			{
-				using(var resultSet = m_threadsCmd.ExecuteResultSet(ResultSetOptions.Updatable))
-				{
-					int isAliveOrdinal = resultSet.GetOrdinal("IsAlive");
-					int nameOrdinal = resultSet.GetOrdinal("Name");
-
-					if(!resultSet.Seek(DbSeekOptions.FirstEqual, threadId))
-					{
-						var threadRow = resultSet.CreateRecord();
-						threadRow["Id"] = threadId;
-						threadRow[nameOrdinal] = name;
-						if(alive.HasValue)
-							threadRow[isAliveOrdinal] = alive.Value ? 1 : 0;
-						else
-							threadRow[isAliveOrdinal] = null;
-
-						resultSet.Insert(threadRow);
-						return;
-					}
-
-					if(!resultSet.Read())
-						return;
-
-					if(alive.HasValue)
-					{
-						resultSet.SetInt32(isAliveOrdinal, alive.Value ? 1 : 0);
-						resultSet.Update();
-					}
-
-					if(name != null)
-					{
-						resultSet.SetString(nameOrdinal, name);
-						resultSet.Update();
-					}
-				}
-			}
-		}
-
 		public override void FunctionTiming(int functionId, long time)
 		{
 			lock(m_lock)
@@ -159,14 +94,6 @@ namespace SlimTuneUI
 					m_timings.Add(functionId, new List<long>(16));
 				m_timings[functionId].Add(time);
 			}
-		}
-
-		public override void CounterName(int counterId, string name)
-		{
-		}
-
-		public override void PerfCounter(int counterId, long time, double value)
-		{
 		}
 
 		public override void Flush()
@@ -253,21 +180,6 @@ namespace SlimTuneUI
 			return command.ExecuteScalar();
 		}
 
-		public override void WriteProperty(string name, string value)
-		{
-			var updateCmd = new SqlCeCommand("UPDATE Properties SET Value = @Value WHERE Name = @Name", m_sqlConn);
-			updateCmd.Parameters.Add("@Name", name);
-			updateCmd.Parameters.Add("@Value", value);
-			var count = updateCmd.ExecuteNonQuery();
-			if (count == 0)
-			{
-				var insertCmd = new SqlCeCommand("INSERT INTO Properties (Name, Value) VALUES (@Name, @Value)", m_sqlConn);
-				insertCmd.Parameters.Add("@Name", name);
-				insertCmd.Parameters.Add("@Value", value);
-				insertCmd.ExecuteNonQuery();
-			}
-		}
-
 		public override void Dispose()
 		{
 			if(m_sqlConn != null)
@@ -288,16 +200,8 @@ namespace SlimTuneUI
 			}
 		}
 
-		protected override void  PrepareCommands()
+		protected override void PrepareCommands()
 		{
-			m_addFunctionCmd = m_sqlConn.CreateCommand();
-			m_addFunctionCmd.CommandType = CommandType.TableDirect;
-			m_addFunctionCmd.CommandText = "Functions";
-
-			m_addClassCmd = m_sqlConn.CreateCommand();
-			m_addClassCmd.CommandType = CommandType.TableDirect;
-			m_addClassCmd.CommandText = "Classes";
-
 			m_callsCmd = m_sqlConn.CreateCommand();
 			m_callsCmd.CommandType = CommandType.TableDirect;
 			m_callsCmd.CommandText = "Calls";
