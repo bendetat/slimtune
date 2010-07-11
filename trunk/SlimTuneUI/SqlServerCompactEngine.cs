@@ -182,6 +182,7 @@ namespace SlimTuneUI
 
 		public override void Dispose()
 		{
+			base.Dispose();
 			if(m_sqlConn != null)
 				m_sqlConn.Dispose();
 		}

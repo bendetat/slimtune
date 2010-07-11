@@ -332,6 +332,7 @@ namespace SlimTuneUI
 
 		public override void Dispose()
 		{
+			base.Dispose();
 			//and this is why C# could really use some RAII constructs
 			m_insertCallerCmd.Dispose();
 			m_updateCallerCmd.Dispose();

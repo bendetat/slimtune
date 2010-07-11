@@ -339,7 +339,11 @@ namespace UICore
 
 		#region IDisposable Members
 
-		public abstract void Dispose();
+		public virtual void Dispose()
+		{
+			m_session.Dispose();
+			m_sessionFactory.Dispose();
+		}
 
 		#endregion
 	}
