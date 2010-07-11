@@ -76,6 +76,7 @@ struct ThreadContext
 
 struct FunctionInfo
 {
+	void* ParentProfiler;
 	const unsigned int Id;
 	unsigned int ClassId;
 	std::wstring Name;
@@ -87,8 +88,9 @@ struct FunctionInfo
 	volatile bool TriggerInstrumentation;
 	volatile bool DisableInstrumentation;
 
-	FunctionInfo(unsigned int id, FunctionID nativeId)
-		: Id(id),
+	FunctionInfo(void* parentProfiler, unsigned int id, FunctionID nativeId)
+		: ParentProfiler(parentProfiler),
+		Id(id),
 		NativeId(nativeId),
 		TriggerInstrumentation(false),
 		DisableInstrumentation(false)

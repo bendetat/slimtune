@@ -96,7 +96,7 @@ m_instDepth(0)
 
 	const wchar_t* invalidName = L"$INVALID$";
 
-	FunctionInfo* invalidFunc = new FunctionInfo(0, 0);
+	FunctionInfo* invalidFunc = new FunctionInfo(this, 0, 0);
 	invalidFunc->Name = invalidName;
 	m_functions.push_back(invalidFunc);
 
@@ -128,6 +128,10 @@ HRESULT ClrProfiler::QueryInterface(REFIID riid, void **ppvObject)
 	else if(riid == IID_ICorProfilerCallback2)
 	{
 		*ppvObject = (ICorProfilerCallback2 *)this;
+	}
+	else if(riid == IID_ICorProfilerCallback3)
+	{
+		*ppvObject = (ICorProfilerCallback3 *)this;
 	}
 	else
 	{
@@ -581,7 +585,7 @@ UINT_PTR ClrProfiler::MapFunction(FunctionID functionId, bool deferNameLookup)
 	if(newId == 0)
 	{
 		newId = m_functionRemapper.Alloc();
-		info = new FunctionInfo(newId, functionId);
+		info = new FunctionInfo(this, newId, functionId);
 		info->IsNative = FALSE;
 		m_functions.push_back(info);
 	}
@@ -646,7 +650,7 @@ unsigned int ClrProfiler::MapUnmanaged(UINT_PTR address)
 	if(id == 0)
 	{
 		id = m_functionRemapper.Alloc();
-		FunctionInfo* info = new FunctionInfo(id, address);
+		FunctionInfo* info = new FunctionInfo(this, id, address);
 		m_functions.push_back(info);
 
 		Messages::MapFunction mapFunction = {0};
@@ -845,10 +849,8 @@ bool ClrProfiler::ResumeTarget()
 }
 
 
-void ClrProfiler::Enter(FunctionID functionId, UINT_PTR clientData, COR_PRF_FRAME_INFO frameInfo, COR_PRF_FUNCTION_ARGUMENT_INFO *argumentInfo)
+void ClrProfiler::Enter(FunctionID functionId, FunctionInfo* info, COR_PRF_FRAME_INFO frameInfo, COR_PRF_FUNCTION_ARGUMENT_INFO *argumentInfo)
 {
-	FunctionInfo* info = reinterpret_cast<FunctionInfo*>(clientData);
-
 	ThreadID thread;
 	m_ProfilerInfo->GetCurrentThreadID(&thread);
 
@@ -969,14 +971,14 @@ void ClrProfiler::LeaveImpl(FunctionID functionId, FunctionInfo* info, MessageId
 	InterlockedDecrement(&m_instDepth);
 }
 
-void ClrProfiler::Leave(FunctionID functionId, UINT_PTR clientData, COR_PRF_FRAME_INFO frameInfo, COR_PRF_FUNCTION_ARGUMENT_RANGE *argumentRange)
+void ClrProfiler::Leave(FunctionID functionId, FunctionInfo* info, COR_PRF_FRAME_INFO frameInfo, COR_PRF_FUNCTION_ARGUMENT_RANGE *argumentRange)
 {
-	LeaveImpl(functionId, reinterpret_cast<FunctionInfo*>(clientData), MID_LeaveFunction);
+	LeaveImpl(functionId, info, MID_LeaveFunction);
 }
 
-void ClrProfiler::Tailcall(FunctionID functionId, UINT_PTR clientData, COR_PRF_FRAME_INFO frameInfo)
+void ClrProfiler::Tailcall(FunctionID functionId, FunctionInfo* info, COR_PRF_FRAME_INFO frameInfo)
 {
-	LeaveImpl(functionId, reinterpret_cast<FunctionInfo*>(clientData), MID_TailCall);
+	LeaveImpl(functionId, info, MID_TailCall);
 }
 
 HRESULT ClrProfiler::StackWalkGlobal(FunctionID funcId, UINT_PTR ip, COR_PRF_FRAME_INFO frameInfo, ULONG32 contextSize, BYTE contextBytes[], void *clientData)
