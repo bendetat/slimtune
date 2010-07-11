@@ -130,6 +130,7 @@ private:
 
 struct IProfilerData
 {
+	virtual const GUID* GetSessionId() = 0;
 	virtual const FunctionInfo* GetFunction(unsigned int id) = 0;
 	virtual const ClassInfo* GetClass(unsigned int id) = 0;
 	virtual const ThreadInfo* GetThread(unsigned int id) = 0;

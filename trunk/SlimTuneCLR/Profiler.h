@@ -80,6 +80,7 @@ public:
 	void SetSamplerActive(bool active) { m_samplerActive = active; }
 	ProfilerMode GetMode() const { return m_config.Mode; }
 	
+	const GUID* GetSessionId() { return &m_sessionId; }
 	const FunctionInfo* GetFunction(unsigned int id);
 	const ClassInfo* GetClass(unsigned int id);
 	const ThreadInfo* GetThread(unsigned int id);
@@ -149,6 +150,7 @@ private:
 	volatile LONG m_eventMask;
 	ProfilerConfig m_config;
 
+	GUID m_sessionId;
 	boost::scoped_ptr<IProfilerServer> m_server;
 	boost::scoped_ptr<boost::thread> m_ioThread;
 	volatile bool m_samplerActive;

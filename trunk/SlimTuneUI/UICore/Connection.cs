@@ -133,8 +133,7 @@ namespace UICore
 				{
 					try
 					{
-						string text = client.Receive();
-						if(text == null)
+						if(!client.Receive())
 							break;
 					}
 					catch(System.Net.Sockets.SocketException)

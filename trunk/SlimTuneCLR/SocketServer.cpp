@@ -355,6 +355,7 @@ void SocketServer::Accept(TcpConnectionPtr conn, const boost::system::error_code
 
 		//activate the new connection
 		m_connections.push_back(conn);
+		conn->Write(m_profilerData.GetSessionId(), sizeof(GUID));
 		conn->BeginRead();
 
 		if(m_connections.size() == 1 && m_onConnect)

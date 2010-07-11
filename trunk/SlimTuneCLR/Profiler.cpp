@@ -213,6 +213,7 @@ STDMETHODIMP ClrProfiler::Initialize(IUnknown *pICorProfilerInfoUnk)
 
 	//CONFIG: Server type?
 	m_samplerActive = false;
+	CoCreateGuid(&m_sessionId);
 	m_server.reset(IProfilerServer::CreateSocketServer(*this, static_cast<unsigned short>(m_config.ListenPort), m_lock));
 	m_server->SetCallbacks(boost::bind(&ClrProfiler::OnConnect, this), boost::bind(&ClrProfiler::OnDisconnect, this));
 	m_server->Start();

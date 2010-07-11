@@ -61,6 +61,7 @@ namespace UICore
 		BufferedStream m_bufferedStream;
 		BinaryReader m_reader;
 		BinaryWriter m_writer;
+		Guid? m_sessionId;
 		Dictionary<int, FunctionInfo> m_functions = new Dictionary<int, FunctionInfo>();
 		Dictionary<int, ClassInfo> m_classes = new Dictionary<int, ClassInfo>();
 		Dictionary<int, ThreadContext> m_threads = new Dictionary<int, ThreadContext>();
@@ -111,12 +112,20 @@ namespace UICore
 			m_writer.Write((byte) ClientRequest.CR_Resume);
 		}
 
-		public string Receive()
+		public bool Receive()
 		{
 			try
 			{
 				if(m_stream == null)
-					return string.Empty;
+					return true;
+
+				if(m_sessionId == null)
+				{
+					byte[] guidBytes = m_reader.ReadBytes(16);
+					m_sessionId = new Guid(guidBytes);
+					OnSessionId();
+					return true;
+				}
 
 				MessageId messageId = (MessageId) m_reader.ReadByte();
 				//Debug.WriteLine(string.Format("Message: {0}", messageId));
@@ -187,12 +196,18 @@ namespace UICore
 					//break;
 				}
 
-				return string.Empty;
+				return true;
 			}
 			catch(IOException)
 			{
-				return null;
+				return false;
 			}
+		}
+
+		private void OnSessionId()
+		{
+			Debug.Assert(m_sessionId != null);
+			m_data.WriteProperty("SessionId", m_sessionId.Value.ToString());
 		}
 
 		private void MapFunction(Messages.MapFunction mapFunc)
