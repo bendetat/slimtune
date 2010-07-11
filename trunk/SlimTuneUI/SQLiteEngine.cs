@@ -153,6 +153,11 @@ namespace SlimTuneUI
 			return m_sessionFactory.OpenSession(m_database);
 		}
 
+		public override NHibernate.IStatelessSession OpenStatelessSession()
+		{
+			return m_sessionFactory.OpenStatelessSession(m_database);
+		}
+
 		public override DataSet RawQuery(string query, int limit)
 		{
 			query += "\nLIMIT " + limit.ToString();

@@ -93,6 +93,7 @@ namespace UICore
 		void Save(string file);
 
 		ISession OpenSession();
+		IStatelessSession OpenStatelessSession();
 
 		DataSet RawQuery(string query);
 		DataSet RawQuery(string query, int limit);

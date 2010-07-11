@@ -60,7 +60,7 @@ namespace UICore
 
 		protected ISessionFactory m_sessionFactory;
 		protected Configuration m_config;
-		protected ISession m_session;
+		protected IStatelessSession m_statelessSession;
 
 		protected object m_lock = new object();
 
@@ -106,6 +106,7 @@ namespace UICore
 		public abstract System.Data.DataSet RawQuery(string query, int limit);
 		public abstract object RawQueryScalar(string query);
 		public abstract ISession OpenSession();
+		public abstract IStatelessSession OpenStatelessSession();
 		protected abstract void DoClearData();
 
 		public DataEngineBase(string name)
@@ -138,7 +139,7 @@ namespace UICore
 				}
 			}
 
-			m_session = OpenSession();
+			m_statelessSession = OpenStatelessSession();
 			PrepareCommands();
 			WriteCoreProperties();
 		}
@@ -234,19 +235,11 @@ namespace UICore
 
 		public virtual void WriteProperty(string name, string value)
 		{
-			using(var tx = m_session.BeginTransaction())
+			using(var session = OpenSession())
+			using(var tx = session.BeginTransaction())
 			{
-				var prop = m_session.Get<Property>(name);
-				bool insert = prop == null;
-				if(prop == null)
-					prop = new Property() { Name = name };
-				prop.Value = value;
-
-				if(insert)
-					m_session.Save(prop);
-				else
-					m_session.Update(prop);
-
+				var prop = new Property() { Name = name, Value = value };
+				session.SaveOrUpdateCopy(prop);
 				tx.Commit();
 			}
 		}
@@ -286,18 +279,18 @@ namespace UICore
 
 		public virtual void MapFunction(FunctionInfo funcInfo)
 		{
-			using(var tx = m_session.BeginTransaction())
+			using(var tx = m_statelessSession.BeginTransaction())
 			{
-				m_session.Save(funcInfo);
+				m_statelessSession.Insert(funcInfo);
 				tx.Commit();
 			}
 		}
 
 		public virtual void MapClass(ClassInfo classInfo)
 		{
-			using(var tx = m_session.BeginTransaction())
+			using(var tx = m_statelessSession.BeginTransaction())
 			{
-				m_session.Save(classInfo);
+				m_statelessSession.Insert(classInfo);
 				tx.Commit();
 			}
 		}
@@ -305,26 +298,28 @@ namespace UICore
 		public virtual void UpdateThread(int threadId, bool alive, string name)
 		{
 			var ti = new ThreadInfo() { Id = threadId, IsAlive = alive, Name = name };
-			using(var tx = m_session.BeginTransaction())
+			using(var session = OpenSession())
+			using(var tx = session.BeginTransaction())
 			{
-				m_session.SaveOrUpdateCopy(ti, ti.Id);
+				session.SaveOrUpdateCopy(ti, ti.Id);
 				tx.Commit();
 			}
 		}
 
 		public virtual void CounterName(int counterId, string name)
 		{
-			using(var tx = m_session.BeginTransaction())
+			using(var session = OpenSession())
+			using(var tx = session.BeginTransaction())
 			{
 				var counter = new Counter() { Id = counterId, Name = name };
-				m_session.SaveOrUpdateCopy(counter);
+				session.SaveOrUpdateCopy(counter);
 				tx.Commit();
 			}
 		}
 
 		public virtual void PerfCounter(int counterId, long time, double value)
 		{
-			using(var tx = m_session.BeginTransaction())
+			using(var tx = m_statelessSession.BeginTransaction())
 			{
 				var cv = new CounterValue()
 				{
@@ -332,7 +327,7 @@ namespace UICore
 					Time = time,
 					Value = value
 				};
-				m_session.Save(cv);
+				m_statelessSession.Insert(cv);
 				tx.Commit();
 			}
 		}
@@ -341,8 +336,8 @@ namespace UICore
 
 		public virtual void Dispose()
 		{
-			if(m_session != null)
-				m_session.Dispose();
+			if(m_statelessSession != null)
+				m_statelessSession.Dispose();
 			if(m_sessionFactory != null)
 				m_sessionFactory.Dispose();
 		}
