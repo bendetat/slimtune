@@ -341,8 +341,10 @@ namespace UICore
 
 		public virtual void Dispose()
 		{
-			m_session.Dispose();
-			m_sessionFactory.Dispose();
+			if(m_session != null)
+				m_session.Dispose();
+			if(m_sessionFactory != null)
+				m_sessionFactory.Dispose();
 		}
 
 		#endregion

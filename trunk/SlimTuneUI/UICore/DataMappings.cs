@@ -50,7 +50,7 @@ namespace UICore.Mappings
 		{
 			Id(x => x.Id).GeneratedBy.Assigned();
 			Map(x => x.Name);
-			HasMany(x => x.Functions).Inverse();
+			//HasMany(x => x.Functions).Inverse();
 			Table("Classes");
 		}
 	}

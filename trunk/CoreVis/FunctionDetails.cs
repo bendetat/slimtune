@@ -14,38 +14,6 @@ namespace SlimTuneUI.CoreVis
 	[DisplayName("Function Details")]
 	public partial class FunctionDetails : UserControl, IVisualizer
 	{
-		private const string kSearchQuery = @"
-SELECT Id, Name
-FROM Functions F
-JOIN (
-	SELECT ParentId, SUM(HitCount) ""HitCount""
-	FROM Calls
-	WHERE ChildId = 0
-	GROUP BY ParentId
-) C
-ON F.Id = C.ParentId
-WHERE Name LIKE '%{0}%'
-ORDER BY Name
-";
-
-		const string kInFunctionQuery = @"
-SELECT SUM(HitCount)
-FROM Calls
-WHERE ParentId = {0} AND ChildId = 0
-";
-		const string kCalleesQuery = @"
-SELECT C.ChildId, Name, HitCount
-FROM Functions
-JOIN (
-	SELECT ChildId, SUM(HitCount) HitCount
-	FROM Calls
-	WHERE ParentId = {0}
-	GROUP BY ChildId
-) C
-ON Id = ChildId
-ORDER BY HitCount DESC
-";
-
 		ProfilerWindowBase m_mainWindow;
 		Connection m_connection;
 		ColorRotator m_colors = new ColorRotator();
@@ -57,7 +25,7 @@ ORDER BY HitCount DESC
 
 		public FunctionDetails()
 		{
-			InitializeComponent();		
+			InitializeComponent();
 		}
 
 		public bool Initialize(ProfilerWindowBase mainWindow, Connection connection)
@@ -69,6 +37,7 @@ ORDER BY HitCount DESC
 
 			m_mainWindow = mainWindow;
 			m_connection = connection;
+			m_refreshTimer.Enabled = m_connection.IsConnected;
 
 			UpdateFunctionList();
 			return true;
@@ -88,12 +57,14 @@ ORDER BY HitCount DESC
 		private void UpdateFunctionList()
 		{
 			FunctionList.Items.Clear();
-			var data = m_connection.DataEngine.RawQuery(string.Format(kSearchQuery, SearchBox.Text), 250);
-			foreach(DataRow row in data.Tables[0].Rows)
+			using(var session = m_connection.DataEngine.OpenSession())
 			{
-				int id = Convert.ToInt32(row["Id"]);
-				string name = Convert.ToString(row["Name"]);
-				FunctionList.Items.Add(new FunctionEntry(id, name));
+				var list = session.CreateQuery("from FunctionInfo where Name like :search order by Name")
+					.SetMaxResults(250)
+					.SetString("search", "%" + SearchBox.Text + "%")
+					.List<FunctionInfo>();
+				foreach(var entry in list)
+					FunctionList.Items.Add(new FunctionEntry(entry.Id, entry.Name));
 			}
 
 			if(FunctionList.Items.Count > 0)
@@ -118,63 +89,57 @@ ORDER BY HitCount DESC
 			pane.Title.Text = "Function Breakdown (samples)";
 
 			using(var transact = new TransactionHandle(m_connection.DataEngine))
+			using(var session = m_connection.DataEngine.OpenSession())
 			{
-				//find time in function
-				//SQLite can't do RIGHT OUTER JOIN and I can't figure out how to get this with a LEFT OUTER JOIN.
-				//so I'm just sending two queries instead
-				var inFunc = Convert.ToInt32(m_connection.DataEngine.RawQueryScalar(string.Format(kInFunctionQuery, entry.Id)));
-				var data = m_connection.DataEngine.RawQuery(string.Format(kCalleesQuery, entry.Id));
-
-				int totalHits = inFunc;
-				foreach(DataRow row in data.Tables[0].Rows)
-				{
-					int hitCount = Convert.ToInt32(row["HitCount"]);
-					totalHits += hitCount;
-				}
+				var totalHits = Convert.ToDouble(session.CreateQuery("select sum(c.HitCount) from Call c where c.ParentId = :parentId")
+					.SetInt32("parentId", entry.Id)
+					.UniqueResult());
+				var inFunc = Convert.ToInt32(session.CreateQuery("select c.HitCount from Call c where c.ParentId = :parentId and c.ChildId = 0")
+					.SetInt32("parentId", entry.Id)
+					.UniqueResult());
+				var children = session.CreateQuery("select c from Call c inner join fetch c.Child where c.ParentId = :parentId order by c.HitCount desc")
+					.SetInt32("parentId", entry.Id)
+					.List<Call>();
 
 				int index = 1;
-				double otherTotal = 0;
+				double pieTotal = 0;
 				int otherCount = 0;
 				string otherName = null;
-				
+
 				const double Significant = 0.01;
 				double inFuncFraction = (double) inFunc / totalHits;
 				if(inFunc > 0 && inFuncFraction >= Significant)
 				{
 					//add a slice for self if it is significant
 					pane.AddPieSlice((double) inFunc, m_colors.ColorForIndex(0), 0.0, "(self)");
+					pieTotal += inFunc;
 				}
 				else
 				{
 					//otherwise just add it to the other pile
 					++otherCount;
 					otherName = "(self)";
-					otherTotal += inFunc;
 				}
 
-				foreach(DataRow row in data.Tables[0].Rows)
+				foreach(var call in children)
 				{
-					int id = Convert.ToInt32(row["ChildId"]);
-					string name = Convert.ToString(row["Name"]);
-					double hitCount = Convert.ToDouble(row["HitCount"]);
-
-					//only take the first 8 significant results, and compile the rest into "(other)"
-					double fraction = hitCount / totalHits;
+					double fraction = call.HitCount / totalHits;
 					if(index < 8 && fraction > 0.02)
 					{
-						var slice = pane.AddPieSlice(hitCount, m_colors.ColorForIndex(1 + index++), 0.0, name);
+						var slice = pane.AddPieSlice(call.HitCount, m_colors.ColorForIndex(1 + index++), 0.0, call.Child.Name);
+						pieTotal += call.HitCount;
 						if(fraction < 0.03)
 							slice.LabelType = PieLabelType.None;
 					}
 					else
 					{
 						++otherCount;
-						otherName = name;
-						otherTotal += hitCount;
+						otherName = call.Child.Name;
 					}
 				}
 
 				//If we only found one "other" function, no sense marking it as other
+				double otherTotal = totalHits - pieTotal;
 				if(otherCount == 1)
 				{
 					var slice = pane.AddPieSlice(otherTotal, m_colors.ColorForIndex(index + 1), 0.0, otherName);

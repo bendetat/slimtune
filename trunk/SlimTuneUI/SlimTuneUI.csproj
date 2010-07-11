@@ -81,6 +81,12 @@
     <Compile Include="ConnectProgress.Designer.cs">
       <DependentUpon>ConnectProgress.cs</DependentUpon>
     </Compile>
+    <Compile Include="HqlVisualizer.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="HqlVisualizer.designer.cs">
+      <DependentUpon>HqlVisualizer.cs</DependentUpon>
+    </Compile>
     <Compile Include="DummyDataEngine.cs" />
     <Compile Include="ProfilerWindow.cs">
       <SubType>Form</SubType>
@@ -95,6 +101,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="ConnectProgress.resx">
       <DependentUpon>ConnectProgress.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="HqlVisualizer.resx">
+      <DependentUpon>HqlVisualizer.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ProfilerWindow.resx">
       <DependentUpon>ProfilerWindow.cs</DependentUpon>
