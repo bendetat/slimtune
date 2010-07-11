@@ -165,24 +165,20 @@ ULONG ClrProfiler::Release()
 
 STDMETHODIMP ClrProfiler::Initialize(IUnknown *pICorProfilerInfoUnk)
 {
-	//multiple active profilers are not a supported configuration
-	//this is possible with .NET 4.0
-	if(g_Profiler != NULL)
-		return E_FAIL;
-
 	//Get the COM interfaces
-	HRESULT hr = pICorProfilerInfoUnk->QueryInterface(IID_ICorProfilerInfo, (LPVOID*) &m_ProfilerInfo);
+	HRESULT hr = pICorProfilerInfoUnk->QueryInterface(IID_ICorProfilerInfo, (void**) &m_ProfilerInfo);
 	if (FAILED(hr))
 		return E_FAIL;
 
-	hr = pICorProfilerInfoUnk->QueryInterface(IID_ICorProfilerInfo2, (LPVOID*) &m_ProfilerInfo2);
+	hr = pICorProfilerInfoUnk->QueryInterface(IID_ICorProfilerInfo2, (void**) &m_ProfilerInfo2);
 	if (FAILED(hr))
 	{
 		//we've decided not to support .NET before 2.0.
 		return E_FAIL;
 	}
 
-	//TODO: Query for ICorProfilerInfo3
+	//Query for .NET 4.0 (not required)
+	pICorProfilerInfoUnk->QueryInterface(IID_ICorProfilerInfo3, (void**) &m_ProfilerInfo3);
 
 	m_config.LoadEnv();
 	//m_config.SampleUnmanaged = true;
@@ -195,7 +191,10 @@ STDMETHODIMP ClrProfiler::Initialize(IUnknown *pICorProfilerInfoUnk)
 	hr = SetInitialEventMask();
 	assert(SUCCEEDED(hr));
 
-	hr = m_ProfilerInfo2->SetFunctionIDMapper(StaticFunctionMapper);
+	if(m_ProfilerInfo3 != 0)
+		hr = m_ProfilerInfo3->SetFunctionIDMapper2(StaticFunctionMapper2, this);
+	else
+		hr = m_ProfilerInfo2->SetFunctionIDMapper(StaticFunctionMapper);
 	assert(SUCCEEDED(hr));
 
 #ifdef X86
@@ -448,11 +447,10 @@ void ClrProfiler::SetInstrument(unsigned int id, bool enable)
 	m_functions[id]->TriggerInstrumentation = enable;
 }
 
-// this function is called by the CLR when a function has been mapped to an ID
-UINT_PTR ClrProfiler::StaticFunctionMapper(FunctionID functionId, BOOL *pbHookFunction)
+UINT_PTR ClrProfiler::StaticFunctionMapper2(FunctionID functionId, void* clientData, BOOL* pbHookFunction)
 {
 	UINT_PTR retVal = functionId;
-	ClrProfiler* profiler = g_Profiler;
+	ClrProfiler* profiler = static_cast<ClrProfiler*>(clientData);
 	if(profiler == NULL)
 		return functionId;
 
@@ -486,6 +484,12 @@ UINT_PTR ClrProfiler::StaticFunctionMapper(FunctionID functionId, BOOL *pbHookFu
 	}
 
 	return retVal;
+}
+
+// this function is called by the CLR when a function has been mapped to an ID
+UINT_PTR ClrProfiler::StaticFunctionMapper(FunctionID functionId, BOOL* pbHookFunction)
+{
+	return StaticFunctionMapper2(functionId, g_Profiler, pbHookFunction);
 }
 
 unsigned int ClrProfiler::MapModule(ModuleID moduleId)

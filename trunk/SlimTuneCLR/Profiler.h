@@ -107,6 +107,7 @@ public:
 	void Tailcall(FunctionID functionID, FunctionInfo* info, COR_PRF_FRAME_INFO frameInfo);
 
 	static UINT_PTR _stdcall StaticFunctionMapper(FunctionID functionId, BOOL* pbHookFunction);
+	static UINT_PTR _stdcall StaticFunctionMapper2(FunctionID functionId, void* clientData, BOOL* pbHookFunction);
 
 	//overriden interface functions
 	STDMETHOD(ObjectAllocated)(ObjectID objectId, ClassID classId);
@@ -143,6 +144,7 @@ private:
 	//COM Interface pointers
 	SlimComPtr<ICorProfilerInfo> m_ProfilerInfo;
 	SlimComPtr<ICorProfilerInfo2> m_ProfilerInfo2;
+	SlimComPtr<ICorProfilerInfo3> m_ProfilerInfo3;
 
 	volatile LONG m_eventMask;
 	ProfilerConfig m_config;
