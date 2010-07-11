@@ -26,7 +26,7 @@
 
 #define STDMETHOD_IMPL(name,params) STDMETHOD(name)params { return S_OK; }
 
-class ProfilerBase : public ICorProfilerCallback2
+class ProfilerBase : public ICorProfilerCallback3
 {
 public:
 	ProfilerBase() { }
@@ -124,4 +124,9 @@ public:
 
 	STDMETHOD_IMPL(HandleCreated,(GCHandleID handleId, ObjectID initialObjectId));
 	STDMETHOD_IMPL(HandleDestroyed,(GCHandleID handleId));
+
+	//ICorProfiler3Callback
+	STDMETHOD_IMPL(InitializeForAttach,(IUnknown *pCorProfilerInfoUnk,void *pvClientData,UINT cbClientData));
+	STDMETHOD_IMPL(ProfilerAttachComplete,());
+	STDMETHOD_IMPL(ProfilerDetachSucceeded,());
 };
