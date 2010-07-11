@@ -93,12 +93,6 @@
     <Compile Include="NProfStyleVisualizer.designer.cs">
       <DependentUpon>NProfStyleVisualizer.cs</DependentUpon>
     </Compile>
-    <Compile Include="OrmTest.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="OrmTest.Designer.cs">
-      <DependentUpon>OrmTest.cs</DependentUpon>
-    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -115,9 +109,6 @@
     <EmbeddedResource Include="NProfStyleVisualizer.resx">
       <DependentUpon>NProfStyleVisualizer.cs</DependentUpon>
       <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="OrmTest.resx">
-      <DependentUpon>OrmTest.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
