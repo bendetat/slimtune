@@ -123,7 +123,7 @@ namespace UICore
 			{
 				PreCreateSchema();
 				var export = new SchemaExport(m_config);
-				export.Create(true, true);
+				export.Create(false, true);
 			}
 			else
 			{
@@ -266,7 +266,6 @@ namespace UICore
 
 		protected static void Increment(int key1, int key2, SortedDictionary<int, SortedList<int, int>> container)
 		{
-			//a lock is already taken at this point
 			SortedList<int, int> key1Table;
 			bool foundKey1Table = container.TryGetValue(key1, out key1Table);
 			if(!foundKey1Table)
@@ -287,13 +286,10 @@ namespace UICore
 
 		public virtual void MapFunction(FunctionInfo funcInfo)
 		{
-			//using(var session = OpenSession())
+			using(var tx = m_session.BeginTransaction())
 			{
-				using(var tx = m_session.BeginTransaction())
-				{
-					m_session.Save(funcInfo);
-					tx.Commit();
-				}
+				m_session.Save(funcInfo);
+				tx.Commit();
 			}
 		}
 
@@ -306,70 +302,38 @@ namespace UICore
 			}
 		}
 
-		public virtual void UpdateThread(int threadId, bool? alive, string name)
+		public virtual void UpdateThread(int threadId, bool alive, string name)
 		{
-			var ti = m_session.Get<ThreadInfo>(threadId);
-			bool insert = ti == null;
-			if(ti == null)
-				ti = new ThreadInfo();
-
-			if(alive.HasValue)
-			{
-				ti.IsAlive = alive.Value;
-			}
-
-			if(name != null)
-			{
-				ti.Name = name;
-			}
-
+			var ti = new ThreadInfo() { Id = threadId, IsAlive = alive, Name = name };
 			using(var tx = m_session.BeginTransaction())
 			{
-				if(insert)
-					m_session.Save(ti);
-				else
-					m_session.Update(ti);
-
+				m_session.SaveOrUpdateCopy(ti, ti.Id);
 				tx.Commit();
 			}
 		}
 
 		public virtual void CounterName(int counterId, string name)
 		{
-			lock(m_lock)
+			using(var tx = m_session.BeginTransaction())
 			{
-				using(var tx = m_session.BeginTransaction())
-				{
-					var counter = m_session.Get<Counter>(counterId);
-					bool insert = counter == null;
-					if(counter == null)
-						counter = new Counter() { Id = counterId };
-					counter.Name = name;
-
-					if(insert)
-						m_session.Save(counter);
-					else
-						m_session.Update(counter);
-					tx.Commit();
-				}
+				var counter = new Counter() { Id = counterId, Name = name };
+				m_session.SaveOrUpdateCopy(counter);
+				tx.Commit();
 			}
 		}
 
 		public virtual void PerfCounter(int counterId, long time, double value)
 		{
-			lock(m_lock)
+			using(var tx = m_session.BeginTransaction())
 			{
-				using(var tx = m_session.BeginTransaction())
+				var cv = new CounterValue()
 				{
-					var cv = new CounterValue()
-					{
-						CounterId = counterId,
-						Time = time,
-						Value = value
-					};
-					m_session.Save(cv);
-					tx.Commit();
-				}
+					CounterId = counterId,
+					Time = time,
+					Value = value
+				};
+				m_session.Save(cv);
+				tx.Commit();
 			}
 		}
 

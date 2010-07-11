@@ -85,8 +85,9 @@ namespace SlimTuneUI
 			m_database = new SQLiteConnection(connStr);
 			m_database.Open();
 
-			var config = Fluently.Configure().Database(SQLiteConfiguration.Standard
-				.ConnectionString(connStr));
+			var dbconfig = SQLiteConfiguration.Standard.ConnectionString(connStr);
+			//dbconfig.ShowSql();
+			var config = Fluently.Configure().Database(dbconfig);
 			FinishConstruct(createNew, config);
 		}
 

@@ -307,7 +307,7 @@ namespace UICore
 				info.Alive = alive;
 			}
 
-			m_data.UpdateThread(threadId, alive, name);
+			m_data.UpdateThread(threadId, alive, info.Name);
 		}
 
 		private void NameCounter(Messages.CounterName counterName)

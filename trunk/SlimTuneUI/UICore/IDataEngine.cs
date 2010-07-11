@@ -79,7 +79,7 @@ namespace UICore
 
 		void ParseSample(Messages.Sample sample);
 		void ClearData();
-		void UpdateThread(int threadId, bool? alive, string name);
+		void UpdateThread(int threadId, bool alive, string name);
 
 		void FunctionTiming(int functionId, long time);
 

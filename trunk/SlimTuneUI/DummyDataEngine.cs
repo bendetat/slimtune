@@ -44,7 +44,7 @@ namespace SlimTuneUI
 		{
 		}
 
-		public void UpdateThread(int threadId, bool? alive, string name)
+		public void UpdateThread(int threadId, bool alive, string name)
 		{
 		}
 
