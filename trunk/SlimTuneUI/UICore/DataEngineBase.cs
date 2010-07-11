@@ -124,7 +124,6 @@ namespace UICore
 				PreCreateSchema();
 				var export = new SchemaExport(m_config);
 				export.Create(true, true);
-				WriteCoreProperties();
 			}
 			else
 			{
@@ -139,8 +138,9 @@ namespace UICore
 				}
 			}
 
-			PrepareCommands();
 			m_session = OpenSession();
+			PrepareCommands();
+			WriteCoreProperties();
 		}
 
 		private void CreateSessionFactory(FluentConfiguration config)
@@ -234,17 +234,20 @@ namespace UICore
 
 		public virtual void WriteProperty(string name, string value)
 		{
-			using(var session = OpenSession())
+			using(var tx = m_session.BeginTransaction())
 			{
-				using(var transact = session.BeginTransaction())
-				{
-					var property = new Property()
-					{
-						Name = name,
-						Value = value
-					};
-					session.SaveOrUpdate(property);
-				}
+				var prop = m_session.Get<Property>(name);
+				bool insert = prop == null;
+				if(prop == null)
+					prop = new Property() { Name = name };
+				prop.Value = value;
+
+				if(insert)
+					m_session.Save(prop);
+				else
+					m_session.Update(prop);
+
+				tx.Commit();
 			}
 		}
 

@@ -10,7 +10,6 @@ namespace UICore.Mappings
 		public PropertyMap()
 		{
 			Id(x => x.Name).GeneratedBy.Assigned();
-			Map(x => x.Name);
 			Map(x => x.Value);
 			Table("Properties");
 		}
@@ -98,7 +97,6 @@ namespace UICore.Mappings
 		public CounterMap()
 		{
 			Id(x => x.Id).GeneratedBy.Assigned();
-			Map(x => x.Id);
 			Map(x => x.Name);
 			HasMany(x => x.Values).Inverse();
 			Table("Counters");
