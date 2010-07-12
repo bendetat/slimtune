@@ -100,6 +100,6 @@
 #include "SlimComPtr.h"
 #include "SlimTuneProfiler.h"
 #include "ProfilerBase.h"
-#include "Utilities.h"
 
 typedef boost::pool_allocator<unsigned int> UIntPoolAlloc;
+typedef boost::recursive_mutex Mutex;

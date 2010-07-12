@@ -82,7 +82,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				RegisterOutput="true"
+				RegisterOutput="false"
 				PerUserRedirection="true"
 				IgnoreImportLibrary="true"
 				AdditionalDependencies="corguids.lib winmm.lib dbghelp.lib pdh.lib"
@@ -182,7 +182,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				RegisterOutput="true"
+				RegisterOutput="false"
 				IgnoreImportLibrary="true"
 				AdditionalDependencies="corguids.lib winmm.lib dbghelp.lib pdh.lib"
 				Version="0.2.1.0"
@@ -282,7 +282,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				RegisterOutput="true"
+				RegisterOutput="false"
 				IgnoreImportLibrary="true"
 				AdditionalDependencies="corguids.lib winmm.lib dbghelp.lib pdh.lib"
 				Version="0.2.1.0"
@@ -384,7 +384,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				RegisterOutput="true"
+				RegisterOutput="false"
 				IgnoreImportLibrary="true"
 				AdditionalDependencies="corguids.lib winmm.lib dbghelp.lib pdh.lib"
 				Version="0.2.1.0"

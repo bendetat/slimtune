@@ -89,7 +89,6 @@ m_instDepth(0)
 	refCount = 1;
 	InterlockedIncrement((volatile LONG *)&ComServerLocks);
 
-	InitializeCriticalSectionAndSpinCount(&m_lock, 200);
 	m_modules.reserve(16);
 	m_classes.reserve(512);
 	m_functions.reserve(4096);
@@ -111,7 +110,6 @@ m_instDepth(0)
 
 ClrProfiler::~ClrProfiler()
 {
-	DeleteCriticalSection(&m_lock);
 	InterlockedDecrement((volatile LONG *)&ComServerLocks);
 }
 
@@ -265,7 +263,7 @@ STDMETHODIMP ClrProfiler::Shutdown()
 	//if we hold the lock when the server is going down, we can deadlock
 	{
 		//force everything else to finish
-		EnterLock localLock(&m_lock);
+		boost::recursive_mutex::scoped_lock EnterLock(m_lock);
 
 		//shut off profiling (in case we're unfortunate enough to get an activate request right here)
 		g_Profiler = NULL;
@@ -384,7 +382,7 @@ const FunctionInfo* ClrProfiler::GetFunction(unsigned int id)
 	if(!IsConnected())
 		return 0;
 
-	EnterLock localLock(&m_lock);
+	boost::recursive_mutex::scoped_lock EnterLock(m_lock);
 
 	if(id >= m_functions.size())
 		return NULL;
@@ -407,7 +405,7 @@ const ClassInfo* ClrProfiler::GetClass(unsigned int id)
 	if(!IsConnected())
 		return 0;
 
-	EnterLock localLock(&m_lock);
+	boost::recursive_mutex::scoped_lock EnterLock(m_lock);
 
 	if(id >= m_classes.size())
 		return NULL;
@@ -426,7 +424,7 @@ const ThreadInfo* ClrProfiler::GetThread(unsigned int id)
 	if(!IsConnected())
 		return 0;
 
-	EnterLock localLock(&m_lock);
+	boost::recursive_mutex::scoped_lock EnterLock(m_lock);
 
 	ThreadMap::iterator infoIt = m_threads.find(id);
 	if(infoIt == m_threads.end())
@@ -440,7 +438,7 @@ void ClrProfiler::SetInstrument(unsigned int id, bool enable)
 	if(!IsConnected())
 		return;
 
-	EnterLock localLock(&m_lock);
+	boost::recursive_mutex::scoped_lock EnterLock(m_lock);
 
 	if(id >= m_functions.size())
 		return;
@@ -501,7 +499,7 @@ unsigned int ClrProfiler::MapModule(ModuleID moduleId)
 unsigned int ClrProfiler::MapClass(mdTypeDef classDef, IMetaDataImport* metadata)
 {
 	assert(classDef != NULL);
-	EnterLock localLock(&m_lock);
+	boost::recursive_mutex::scoped_lock EnterLock(m_lock);
 
 	//a TypeDef is only unique within its module, so we'll combine the module and class
 	//if metadata is NULL, assume classDef is already fully combined
@@ -582,7 +580,7 @@ unsigned int ClrProfiler::MapClass(mdTypeDef classDef, IMetaDataImport* metadata
 
 UINT_PTR ClrProfiler::MapFunction(FunctionID functionId, bool deferNameLookup)
 {
-	EnterLock localLock(&m_lock);
+	boost::recursive_mutex::scoped_lock EnterLock(m_lock);
 
 	//Look up the FunctionInfo or create a new one
 	FunctionInfo* info;
@@ -634,7 +632,7 @@ UINT_PTR ClrProfiler::MapFunction(FunctionID functionId, bool deferNameLookup)
 
 unsigned int ClrProfiler::MapUnmanaged(UINT_PTR address)
 {
-	EnterLock localLock(&m_lock);
+	boost::recursive_mutex::scoped_lock EnterLock(m_lock);
 
 	//copied from http://msdn.microsoft.com/en-us/library/ms680578%28VS.85%29.aspx
 	ULONG64 buffer[(sizeof(SYMBOL_INFO) +
@@ -799,7 +797,7 @@ bool ClrProfiler::SuspendTarget()
 		return false;
 	}
 
-	EnterLock localLock(&m_lock);
+	boost::recursive_mutex::scoped_lock EnterLock(m_lock);
 
 	for(ThreadMap::iterator it = m_threads.begin(); it != m_threads.end(); ++it)
 	{
@@ -831,7 +829,7 @@ bool ClrProfiler::ResumeTarget()
 		return false;
 	}
 
-	EnterLock localLock(&m_lock);
+	boost::recursive_mutex::scoped_lock EnterLock(m_lock);
 
 	for(ThreadMap::iterator it = m_threads.begin(); it != m_threads.end(); ++it)
 	{
@@ -1024,7 +1022,7 @@ void ClrProfiler::StopSampleTimer()
 
 void ClrProfiler::OnSampleTimer()
 {
-	EnterLock localLock(&m_lock);
+	boost::recursive_mutex::scoped_lock EnterLock(m_lock);
 
 	//don't sample if we're not connected or not active
 	if(!IsSamplerActive() || !IsConnected())
@@ -1253,7 +1251,7 @@ HRESULT ClrProfiler::ThreadCreated(ThreadID threadId)
 
 	ThreadInfo* info = new ThreadInfo(id, threadId, &context);
 	{
-		EnterLock lock(&m_lock);
+		boost::recursive_mutex::scoped_lock EnterLock(m_lock);
 		m_threads[id] = info;
 	}
 
@@ -1266,7 +1264,7 @@ HRESULT ClrProfiler::ThreadCreated(ThreadID threadId)
 HRESULT ClrProfiler::ThreadDestroyed(ThreadID threadId)
 {
 	//taking the lock prevents this from intersecting with the stack walk
-	EnterLock lock(&m_lock);
+	boost::recursive_mutex::scoped_lock EnterLock(m_lock);
 
 	//it's possible we've never actually seen the thread before and have to map it
 	unsigned int& id = m_threadRemapper[threadId];
@@ -1330,7 +1328,7 @@ HRESULT ClrProfiler::ThreadNameChanged(ThreadID threadId, ULONG nameLen, WCHAR n
 
 HRESULT ClrProfiler::ThreadAssignedToOSThread(ThreadID managedThreadId, DWORD osThreadId)
 {
-	EnterLock lock(&m_lock);
+	boost::recursive_mutex::scoped_lock EnterLock(m_lock);
 	unsigned int& id = m_threadRemapper[managedThreadId];
 	assert(id != 0);
 	m_threads[id]->SystemId = osThreadId;
@@ -1354,7 +1352,7 @@ HRESULT ClrProfiler::ModuleLoadFinished(ModuleID moduleId, HRESULT hrStatus)
 	if(FAILED(hrStatus))
 		return S_OK;
 
-	EnterLock localLock(&m_lock);
+	boost::recursive_mutex::scoped_lock EnterLock(m_lock);
 
 	SlimComPtr<IMetaDataImport> metadata;
 	HRESULT hr = m_ProfilerInfo2->GetModuleMetaData(moduleId, ofRead, IID_IMetaDataImport, (IUnknown**) &metadata);

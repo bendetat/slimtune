@@ -164,7 +164,7 @@ private:
 	IdRemapper m_threadRemapper;
 	IdRemapper m_functionRemapper;
 
-	mutable CRITICAL_SECTION m_lock;
+	boost::recursive_mutex m_lock;
 	std::vector<ModuleInfo*> m_modules;
 	std::vector<ClassInfo*> m_classes;
 	std::vector<FunctionInfo*> m_functions;
