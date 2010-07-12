@@ -57,7 +57,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\external\boost_1_42_0"
+				AdditionalIncludeDirectories="..\external\boost_1_42_0;..\BackendCommon"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;_USRDLL;X86"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="0"
@@ -157,7 +157,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\external\boost_1_42_0"
+				AdditionalIncludeDirectories="..\external\boost_1_42_0;..\BackendCommon"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;_USRDLL;X64"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="0"
@@ -259,7 +259,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="..\external\boost_1_42_0"
+				AdditionalIncludeDirectories="..\external\boost_1_42_0;..\BackendCommon"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;_USRDLL;X86"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="2"
@@ -361,7 +361,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="..\external\boost_1_42_0"
+				AdditionalIncludeDirectories="..\external\boost_1_42_0;..\BackendCommon"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;_USRDLL;X64"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="2"
@@ -433,6 +433,10 @@
 			RelativePath="System.dll"
 			AssemblyName="System, Version=2.0.0.0, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL"
 			MinFrameworkVersion="131072"
+		/>
+		<ProjectReference
+			ReferencedProjectIdentifier="{EE90430E-2704-4098-8DAA-BBB27758F283}"
+			RelativePathToProject="..\BackendCommon\BackendCommon.vcproj"
 		/>
 	</References>
 	<Files>
@@ -681,39 +685,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\IdRemapper.h"
-				>
-			</File>
-			<File
-				RelativePath=".\IProfilerData.h"
-				>
-			</File>
-			<File
-				RelativePath=".\IProfilerServer.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\IProfilerServer.h"
-				>
-			</File>
-			<File
-				RelativePath=".\lockfree_list.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Memory.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\Memory.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Messages.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Messages.h"
 				>
 			</File>
 			<File
@@ -761,14 +737,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\RingBuffer.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\RingBuffer.h"
-				>
-			</File>
-			<File
 				RelativePath=".\SigFormat.h"
 				>
 			</File>
@@ -782,26 +750,6 @@
 			</File>
 			<File
 				RelativePath=".\SlimComPtr.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SocketServer.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\SocketServer.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Timer.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Timer.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Utilities.h"
 				>
 			</File>
 			<File
