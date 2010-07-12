@@ -30,6 +30,7 @@ namespace UICore
 
 		public virtual IList<Call> CallsAsParent { get; set; }
 		public virtual IList<Call> CallsAsChild { get; set; }
+		public virtual IList<Sample> Samples { get; set; }
 	}
 
 	public class ClassInfo

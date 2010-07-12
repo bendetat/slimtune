@@ -198,8 +198,8 @@ namespace SlimTuneUI
 					dataRow[0] = reader.RecordsAffected;
 					dataTable.Rows.Add(dataRow);
 				}
-			}
-			while(reader.NextResult());
+			} while(reader.NextResult());
+
 			return dataSet;
 		}
 		
