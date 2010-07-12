@@ -48,13 +48,19 @@ namespace UICore
 		protected const string kCallsSchema = "(ThreadId INT NOT NULL, ParentId INT NOT NULL, ChildId INT NOT NULL, HitCount INT NOT NULL)";
 		protected const string kSamplesSchema = "(ThreadId INT NOT NULL, FunctionId INT NOT NULL, HitCount INT NOT NULL)";
 
+		private const int kFunctionCacheSize = 64;
+		private const int kClassCacheSize = 32;
+
+		private List<FunctionInfo> m_functionCache = new List<FunctionInfo>(kFunctionCacheSize);
+		private List<ClassInfo> m_classCache = new List<ClassInfo>(kClassCacheSize);
+
 		//Everything is stored sorted so that we can sprint through the database quickly
-		protected CallGraph<int> m_calls;
+		protected CallGraph<int> m_calls = CallGraph<int>.Create();
 		//this is: FunctionId, ThreadId, HitCount
-		protected SortedDictionary<int, SortedList<int, int>> m_samples;
+		protected SortedDictionary<int, SortedList<int, int>> m_samples = new SortedDictionary<int, SortedList<int, int>>();
 
 		protected volatile bool m_allowFlush = true;
-		protected DateTime m_lastFlush;
+		protected DateTime m_lastFlush = DateTime.Now;
 		//we use this so we don't have to check DateTime.Now on every single sample
 		protected int m_cachedSamples;
 
@@ -99,7 +105,7 @@ namespace UICore
 
 		protected virtual void PreCreateSchema() { }
 		protected abstract void PrepareCommands();
-		public abstract void Flush();
+		protected abstract void DoFlush();
 		public abstract void Save(string file);
 		public abstract void Snapshot(string name);
 		public abstract System.Data.DataSet RawQuery(string query);
@@ -112,9 +118,6 @@ namespace UICore
 		public DataEngineBase(string name)
 		{
 			Name = name;
-			m_calls = CallGraph<int>.Create();
-			m_samples = new SortedDictionary<int, SortedList<int, int>>();
-			m_lastFlush = DateTime.Now;
 		}
 
 		protected void FinishConstruct(bool createNew, FluentConfiguration config)
@@ -149,6 +152,31 @@ namespace UICore
 			config.Mappings(m => m.FluentMappings.AddFromAssemblyOf<DataEngineBase>());
 			m_config = config.BuildConfiguration();
 			m_sessionFactory = config.BuildSessionFactory();
+		}
+
+		public void Flush()
+		{
+			lock(m_lock)
+			{
+				if(!m_allowFlush)
+					return;
+
+				using(var tx = m_statelessSession.BeginTransaction())
+				{
+					//flush functions
+					foreach(var f in m_functionCache)
+						m_statelessSession.Insert(f);
+					m_functionCache.Clear();
+					//flush classes
+					foreach(var c in m_classCache)
+						m_statelessSession.Insert(c);
+					m_classCache.Clear();
+
+					tx.Commit();
+				}
+
+				DoFlush();
+			}
 		}
 
 		public void ParseSample(Messages.Sample sample)
@@ -279,20 +307,16 @@ namespace UICore
 
 		public virtual void MapFunction(FunctionInfo funcInfo)
 		{
-			using(var tx = m_statelessSession.BeginTransaction())
-			{
-				m_statelessSession.Insert(funcInfo);
-				tx.Commit();
-			}
+			m_functionCache.Add(funcInfo);
+			if(m_functionCache.Count >= kFunctionCacheSize)
+				Flush();
 		}
 
 		public virtual void MapClass(ClassInfo classInfo)
 		{
-			using(var tx = m_statelessSession.BeginTransaction())
-			{
-				m_statelessSession.Insert(classInfo);
-				tx.Commit();
-			}
+			m_classCache.Add(classInfo);
+			if(m_classCache.Count >= kClassCacheSize)
+				Flush();
 		}
 
 		public virtual void UpdateThread(int threadId, bool alive, string name)

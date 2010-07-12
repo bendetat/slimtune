@@ -96,37 +96,31 @@ namespace SlimTuneUI
 			}
 		}
 
-		public override void Flush()
+		protected override void DoFlush()
 		{
-			if(!AllowFlush)
-				return;
+			Stopwatch timer = new Stopwatch();
+			timer.Start();
 
-			lock(m_lock)
+			using(var callsSet = m_callsCmd.ExecuteResultSet(ResultSetOptions.Updatable | ResultSetOptions.Scrollable))
 			{
-				Stopwatch timer = new Stopwatch();
-				timer.Start();
-
-				using(var callsSet = m_callsCmd.ExecuteResultSet(ResultSetOptions.Updatable | ResultSetOptions.Scrollable))
-				{
-					FlushCalls(callsSet);
-				}
-
-				using(var samplesSet = m_samplesCmd.ExecuteResultSet(ResultSetOptions.Updatable | ResultSetOptions.Scrollable))
-				{
-					FlushSamples(samplesSet);
-				}
-
-				using(var timingsSet = m_timingsCmd.ExecuteResultSet(ResultSetOptions.Updatable | ResultSetOptions.Scrollable))
-				{
-					FlushTimings(timingsSet);
-				}
-
-				m_lastFlush = DateTime.Now;
-				m_cachedSamples = 0;
-				//m_cachedTimings = 0;
-				timer.Stop();
-				Debug.WriteLine(string.Format("Database update took {0} milliseconds.", timer.ElapsedMilliseconds));
+				FlushCalls(callsSet);
 			}
+
+			using(var samplesSet = m_samplesCmd.ExecuteResultSet(ResultSetOptions.Updatable | ResultSetOptions.Scrollable))
+			{
+				FlushSamples(samplesSet);
+			}
+
+			using(var timingsSet = m_timingsCmd.ExecuteResultSet(ResultSetOptions.Updatable | ResultSetOptions.Scrollable))
+			{
+				FlushTimings(timingsSet);
+			}
+
+			m_lastFlush = DateTime.Now;
+			m_cachedSamples = 0;
+			//m_cachedTimings = 0;
+			timer.Stop();
+			Debug.WriteLine(string.Format("Database update took {0} milliseconds.", timer.ElapsedMilliseconds));
 		}
 
 		public override void Save(string file)

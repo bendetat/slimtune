@@ -96,30 +96,24 @@ namespace SlimTuneUI
 			Dispose();
 		}
 
-		public override void Flush()
+		protected override void DoFlush()
 		{
-			if(!AllowFlush)
-				return;
+			Stopwatch timer = new Stopwatch();
+			timer.Start();
+			int queryCount = 0;
 
-			lock(m_lock)
+			using(SQLiteTransaction transact = m_database.BeginTransaction())
 			{
-				Stopwatch timer = new Stopwatch();
-				timer.Start();
-				int queryCount = 0;
-
-				using(SQLiteTransaction transact = m_database.BeginTransaction())
-				{
-					queryCount += FlushCalls();
-					queryCount += FlushSamples();
-					transact.Commit();
-				}
-
-				m_lastFlush = DateTime.Now;
-				m_cachedSamples = 0;
-				//m_cachedTimings = 0;
-				timer.Stop();
-				Debug.WriteLine(string.Format("Database update took {0} milliseconds for {1} queries.", timer.ElapsedMilliseconds, queryCount));
+				queryCount += FlushCalls();
+				queryCount += FlushSamples();
+				transact.Commit();
 			}
+
+			m_lastFlush = DateTime.Now;
+			m_cachedSamples = 0;
+			//m_cachedTimings = 0;
+			timer.Stop();
+			Debug.WriteLine(string.Format("Database update took {0} milliseconds for {1} queries.", timer.ElapsedMilliseconds, queryCount));
 		}
 
 		public override void Save(string file)
