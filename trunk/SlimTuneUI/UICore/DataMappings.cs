@@ -77,22 +77,22 @@ namespace UICore.Mappings
 	{
 		public CallMap()
 		{
-			CompositeId()
-				.KeyProperty(x => x.ThreadId)
-				.KeyProperty(x => x.ParentId)
-				.KeyProperty(x => x.ChildId)
-				.Mapped();
-			Map(x => x.ThreadId).Index("Calls_ThreadIndex");
-			Map(x => x.ParentId).Index("Calls_ParentIndex");
-			Map(x => x.ChildId).Index("Calls_ChildIndex");
+			ReadOnly();
+			Id(x => x.Id);
+
+			Map(x => x.ThreadId).Index("Calls_ThreadIndex, Calls_Composite")
+				.UniqueKey("Calls_Unique");
+			Map(x => x.ParentId).Index("Calls_ParentIndex, Calls_Composite")
+				.UniqueKey("Calls_Unique");
+			Map(x => x.ChildId).Index("Calls_ChildIndex, Calls_Composite")
+				.UniqueKey("Calls_Unique");
 			Map(x => x.HitCount)
 				.Not.Nullable();
-			References(x => x.Thread, "ThreadId")
-				.ReadOnly();
-			References(x => x.Parent, "ParentId")
-				.ReadOnly();
-			References(x => x.Child, "ChildId")
-				.ReadOnly();
+
+			References(x => x.Thread, "ThreadId");
+			References(x => x.Parent, "ParentId");
+			References(x => x.Child, "ChildId");
+
 			Table("Calls");
 		}
 	}
@@ -101,17 +101,13 @@ namespace UICore.Mappings
 	{
 		public SampleMap()
 		{
-			CompositeId()
-				.KeyProperty(x => x.ThreadId)
-				.KeyProperty(x => x.FunctionId)
-				.Mapped();
-			Map(x => x.ThreadId);
-			Map(x => x.FunctionId).Index("Samples_FunctionIndex");
+			ReadOnly();
+			Id(x => x.Id);
+			Map(x => x.ThreadId).Index("Samples_ThreadIndex, Samples_Composite");
+			Map(x => x.FunctionId).Index("Samples_FunctionIndex, Samples_Composite");
 			Map(x => x.HitCount).Not.Nullable();
-			References(x => x.Thread, "ThreadId")
-				.ReadOnly();
-			/*References(x => x.Function, "FunctionId")
-				.ReadOnly();*/
+			References(x => x.Thread, "ThreadId");
+			//References(x => x.Function, "FunctionId");
 			Table("Samples");
 		}
 	}

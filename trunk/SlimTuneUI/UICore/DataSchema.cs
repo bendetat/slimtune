@@ -42,6 +42,7 @@ namespace UICore
 
 	public class Call
 	{
+		public virtual int Id { get; set; }
 		public virtual int ThreadId { get; set; }
 		public virtual int ParentId { get; set; }
 		public virtual int ChildId { get; set; }
@@ -73,6 +74,7 @@ namespace UICore
 
 	public class Sample
 	{
+		public virtual int Id { get; set; }
 		public virtual int ThreadId { get; set; }
 		public virtual int FunctionId { get; set; }
 		public virtual int HitCount { get; set; }
