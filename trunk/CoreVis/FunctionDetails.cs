@@ -91,12 +91,12 @@ namespace SlimTuneUI.CoreVis
 			using(var transact = new TransactionHandle(m_connection.DataEngine))
 			using(var session = m_connection.DataEngine.OpenSession())
 			{
-				var totalHits = Convert.ToDouble(session.CreateQuery("select sum(c.HitCount) from Call c where c.ParentId = :parentId")
+				double totalHits = session.CreateQuery("select sum(c.HitCount) from Call c where c.ParentId = :parentId")
 					.SetInt32("parentId", entry.Id)
-					.UniqueResult());
-				var inFunc = Convert.ToInt32(session.CreateQuery("select c.HitCount from Call c where c.ParentId = :parentId and c.ChildId = 0")
+					.UniqueResult<long>();
+				double inFunc = session.CreateQuery("select sum(c.HitCount) from Call c where c.ParentId = :parentId and c.ChildId = 0")
 					.SetInt32("parentId", entry.Id)
-					.UniqueResult());
+					.UniqueResult<long>();
 				var children = session.CreateQuery("select c from Call c inner join fetch c.Child where c.ParentId = :parentId order by c.HitCount desc")
 					.SetInt32("parentId", entry.Id)
 					.List<Call>();
@@ -107,11 +107,11 @@ namespace SlimTuneUI.CoreVis
 				string otherName = null;
 
 				const double Significant = 0.01;
-				double inFuncFraction = (double) inFunc / totalHits;
+				var inFuncFraction = inFunc / totalHits;
 				if(inFunc > 0 && inFuncFraction >= Significant)
 				{
 					//add a slice for self if it is significant
-					pane.AddPieSlice((double) inFunc, m_colors.ColorForIndex(0), 0.0, "(self)");
+					pane.AddPieSlice(inFunc, m_colors.ColorForIndex(0), 0.0, "(self)");
 					pieTotal += inFunc;
 				}
 				else

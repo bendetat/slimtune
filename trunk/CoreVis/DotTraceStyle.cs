@@ -57,8 +57,8 @@ SELECT C1.ChildId AS ""Id"", HitCount, Name AS ""Function"", Signature, CASE Tot
 	ELSE (1.0 * C1.HitCount / TotalCalls)
 	END AS ""Percent""
 FROM Calls C1
-JOIN Functions
-	ON C1.ChildId = Id
+JOIN Functions F
+	ON C1.ChildId = F.Id
 JOIN (SELECT ParentId, SUM(HitCount) AS ""TotalCalls"" FROM Calls WHERE ThreadId = {1} GROUP BY ParentId) C2
 	ON C1.ParentId = C2.ParentId
 WHERE C1.ParentId = {0} AND ThreadId = {1}
@@ -263,44 +263,51 @@ WHERE C1.ParentId = {0} AND C1.ChildId = 0 AND C1.ThreadId = {1}
 
 		private void UpdateChildren(TreeNode node)
 		{
-			using(var transact = new TransactionHandle(m_connection.DataEngine))
+			try
 			{
-				var parent = (NodeData) node.Tag;
-				var data = m_connection.DataEngine.RawQuery(string.Format(kChildQuery, parent.Id, parent.ThreadId));
-
-				//find out what the current number of calls by the parent is
-				//var parentHits = Convert.ToInt32(m_connection.StorageEngine.QueryScalar(string.Format(kParentHits, parent.Id, parent.ThreadId)));
-				foreach(DataRow row in data.Tables[0].Rows)
+				using(var transact = new TransactionHandle(m_connection.DataEngine))
 				{
-					string name = Convert.ToString(row["Function"]) + Convert.ToString(row["Signature"]);
-					string rawString = @"{0:P2} {1} - {2:P2} - {3}{4}{5}";
-					string tipString = "[Id {6}] {3}{4}{5}\r\n{0:P3} of thread - {1} samples - {2:P3} of parent\r\n{7:P3} outside children - {8} samples";
-					string niceString = @"\1{0:P2} \2{1} \0- \3{2:P2} \0- {3}\2{4}\0{5}";
+					var parent = (NodeData) node.Tag;
+					var data = m_connection.DataEngine.RawQuery(string.Format(kChildQuery, parent.Id, parent.ThreadId));
 
-					string signature, funcName, classAndFunc, baseName;
-					BreakName(name, out signature, out funcName, out classAndFunc, out baseName);
-					decimal percentOfParent = Convert.ToDecimal(row["Percent"]);
-					decimal percent = percentOfParent * parent.Percent;
-					int id = Convert.ToInt32(row["Id"]);
+					//find out what the current number of calls by the parent is
+					//var parentHits = Convert.ToInt32(m_connection.StorageEngine.QueryScalar(string.Format(kParentHits, parent.Id, parent.ThreadId)));
+					foreach(DataRow row in data.Tables[0].Rows)
+					{
+						string name = Convert.ToString(row["Function"]) + Convert.ToString(row["Signature"]);
+						string rawString = @"{0:P2} {1} - {2:P2} - {3}{4}{5}";
+						string tipString = "[Id {6}] {3}{4}{5}\r\n{0:P3} of thread - {1} samples - {2:P3} of parent\r\n{7:P3} outside children - {8} samples";
+						string niceString = @"\1{0:P2} \2{1} \0- \3{2:P2} \0- {3}\2{4}\0{5}";
 
-					//find out how much time was spent exclusive of children
-					//we don't have children at this point so we have to query separately
-					var excl = m_connection.DataEngine.RawQuery(string.Format(kExclusiveQuery, id, parent.ThreadId));
-					var hasExcl = excl.Tables[0].Rows.Count > 0;
-					var exclRow = hasExcl ? excl.Tables[0].Rows[0] : null;
-					double exclPercent = exclRow != null ? Convert.ToDouble(exclRow["Percent"]) : 0.0;
-					int exclHits = exclRow != null ? Convert.ToInt32(exclRow["HitCount"]) : 0;
+						string signature, funcName, classAndFunc, baseName;
+						BreakName(name, out signature, out funcName, out classAndFunc, out baseName);
+						decimal percentOfParent = Convert.ToDecimal(row["Percent"]);
+						decimal percent = percentOfParent * parent.Percent;
+						int id = Convert.ToInt32(row["Id"]);
 
-					string nodeText = string.Format(rawString, percent, funcName, percentOfParent, baseName, classAndFunc, signature);
-					string tipText = string.Format(tipString, percent, Convert.ToInt32(row["HitCount"]), percentOfParent,
-						baseName, classAndFunc, signature, id, exclPercent, exclHits);
-					string formatText = string.Format(niceString, percent, funcName, percentOfParent,
-						baseName, classAndFunc, signature);
+						//find out how much time was spent exclusive of children
+						//we don't have children at this point so we have to query separately
+						var excl = m_connection.DataEngine.RawQuery(string.Format(kExclusiveQuery, id, parent.ThreadId));
+						var hasExcl = excl.Tables[0].Rows.Count > 0;
+						var exclRow = hasExcl ? excl.Tables[0].Rows[0] : null;
+						double exclPercent = exclRow != null ? Convert.ToDouble(exclRow["Percent"]) : 0.0;
+						int exclHits = exclRow != null ? Convert.ToInt32(exclRow["HitCount"]) : 0;
 
-					TreeNode newNode = new TreeNode(nodeText, new TreeNode[] { new TreeNode() });
-					newNode.Tag = new NodeData(id, (int) parent.ThreadId, name, percent, formatText, tipText);
-					node.Nodes.Add(newNode);
+						string nodeText = string.Format(rawString, percent, funcName, percentOfParent, baseName, classAndFunc, signature);
+						string tipText = string.Format(tipString, percent, Convert.ToInt32(row["HitCount"]), percentOfParent,
+							baseName, classAndFunc, signature, id, exclPercent, exclHits);
+						string formatText = string.Format(niceString, percent, funcName, percentOfParent,
+							baseName, classAndFunc, signature);
+
+						TreeNode newNode = new TreeNode(nodeText, new TreeNode[] { new TreeNode() });
+						newNode.Tag = new NodeData(id, (int) parent.ThreadId, name, percent, formatText, tipText);
+						node.Nodes.Add(newNode);
+					}
 				}
+			}
+			catch(Exception ex)
+			{
+				Console.Write(ex.Message);
 			}
 		}
 
