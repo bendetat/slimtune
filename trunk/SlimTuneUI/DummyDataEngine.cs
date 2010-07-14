@@ -24,6 +24,11 @@ namespace SlimTuneUI
 			get { return true; }
 		}
 
+		public System.Data.IDbConnection Connection
+		{
+			get { return null; }
+		}
+
 		public void WriteProperty(string name, string value)
 		{
 		}

@@ -63,6 +63,11 @@ namespace SlimTuneUI
 			get { return "SQL Server Compact"; }
 		}
 
+		public override IDbConnection Connection
+		{
+			get { return m_sqlConn; }
+		}
+
 		public SqlServerCompactEngine(string dbFile, bool createNew)
 			: base(dbFile)
 		{
@@ -145,16 +150,6 @@ namespace SlimTuneUI
 				ExecuteNonQuery(string.Format("CREATE TABLE Samples_{0} {1}", id, kSamplesSchema));
 				ExecuteNonQuery(string.Format("INSERT INTO Samples_{0} SELECT * FROM Samples", id));
 			}
-		}
-
-		public override NHibernate.ISession OpenSession()
-		{
-			return m_sessionFactory.OpenSession(m_sqlConn);
-		}
-
-		public override NHibernate.IStatelessSession OpenStatelessSession()
-		{
-			return m_sessionFactory.OpenStatelessSession(m_sqlConn);
 		}
 
 		public override DataSet RawQuery(string query, int limit)

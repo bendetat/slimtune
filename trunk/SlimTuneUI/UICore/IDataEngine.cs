@@ -71,6 +71,7 @@ namespace UICore
 		string Extension { get; }
 		string Engine { get; }
 		bool InMemory { get; }
+		IDbConnection Connection { get; }
 
 		void WriteProperty(string name, string value);
 

@@ -56,6 +56,11 @@ namespace SlimTuneUI
 			get { return "SQLite"; }
 		}
 
+		public override IDbConnection Connection
+		{
+			get { return m_database; }
+		}
+
 		public SQLiteEngine()
 			: base("memory")
 		{
@@ -140,16 +145,6 @@ namespace SlimTuneUI
 				Command(string.Format("CREATE TABLE Samples_{0} {1}", id, kSamplesSchema));
 				Command(string.Format("INSERT INTO Samples_{0} SELECT * FROM Samples", id));
 			}
-		}
-
-		public override NHibernate.ISession OpenSession()
-		{
-			return m_sessionFactory.OpenSession(m_database);
-		}
-
-		public override NHibernate.IStatelessSession OpenStatelessSession()
-		{
-			return m_sessionFactory.OpenStatelessSession(m_database);
 		}
 
 		public override DataSet RawQuery(string query, int limit)

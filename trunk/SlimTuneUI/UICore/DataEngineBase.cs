@@ -86,6 +86,11 @@ namespace UICore
 			get;
 		}
 
+		public abstract System.Data.IDbConnection Connection
+		{
+			get;
+		}
+
 		public virtual bool InMemory
 		{
 			get { return false; }
@@ -111,8 +116,6 @@ namespace UICore
 		public abstract System.Data.DataSet RawQuery(string query);
 		public abstract System.Data.DataSet RawQuery(string query, int limit);
 		public abstract object RawQueryScalar(string query);
-		public abstract ISession OpenSession();
-		public abstract IStatelessSession OpenStatelessSession();
 		protected abstract void DoClearData();
 
 		public DataEngineBase(string name)
@@ -127,7 +130,7 @@ namespace UICore
 			{
 				PreCreateSchema();
 				var export = new SchemaExport(m_config);
-				export.Create(false, true);
+				export.Execute(true, true, false, Connection, Console.Out);
 			}
 			else
 			{
@@ -152,6 +155,16 @@ namespace UICore
 			config.Mappings(m => m.FluentMappings.AddFromAssemblyOf<DataEngineBase>());
 			m_config = config.BuildConfiguration();
 			m_sessionFactory = config.BuildSessionFactory();
+		}
+
+		public virtual NHibernate.ISession OpenSession()
+		{
+			return m_sessionFactory.OpenSession(Connection);
+		}
+
+		public virtual NHibernate.IStatelessSession OpenStatelessSession()
+		{
+			return m_sessionFactory.OpenStatelessSession(Connection);
 		}
 
 		public void Flush()
