@@ -72,13 +72,19 @@ namespace SlimTuneUI
 
 		void Connection_Disconnected(object sender, EventArgs e)
 		{
-			if(!this.IsDisposed)
+			try
 			{
-				this.Invoke((System.Action) delegate
+				if(!this.IsDisposed)
 				{
-					StatusLabel.Text = "Status: Stopped";
-					SnapshotButton.Enabled = false;
-				});
+					this.Invoke((System.Action) delegate
+					{
+						StatusLabel.Text = "Status: Stopped";
+						SnapshotButton.Enabled = false;
+					});
+				}
+			}
+			catch
+			{
 			}
 		}
 

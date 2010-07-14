@@ -168,7 +168,6 @@ namespace SlimTuneUI
 			// 
 			// SnapshotButton
 			// 
-			this.SnapshotButton.Enabled = false;
 			this.SnapshotButton.Location = new System.Drawing.Point(10, 38);
 			this.SnapshotButton.Name = "SnapshotButton";
 			this.SnapshotButton.Size = new System.Drawing.Size(75, 23);

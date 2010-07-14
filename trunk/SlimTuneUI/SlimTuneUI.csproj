@@ -81,12 +81,6 @@
     <Compile Include="ConnectProgress.Designer.cs">
       <DependentUpon>ConnectProgress.cs</DependentUpon>
     </Compile>
-    <Compile Include="HqlVisualizer.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="HqlVisualizer.designer.cs">
-      <DependentUpon>HqlVisualizer.cs</DependentUpon>
-    </Compile>
     <Compile Include="DummyDataEngine.cs" />
     <Compile Include="ProfilerWindow.cs">
       <SubType>Form</SubType>
@@ -102,9 +96,6 @@
     <EmbeddedResource Include="ConnectProgress.resx">
       <DependentUpon>ConnectProgress.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="HqlVisualizer.resx">
-      <DependentUpon>HqlVisualizer.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="ProfilerWindow.resx">
       <DependentUpon>ProfilerWindow.cs</DependentUpon>
     </EmbeddedResource>
@@ -118,9 +109,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="SlimTune.resx">
       <DependentUpon>SlimTune.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SqlVisualizer.resx">
-      <DependentUpon>SqlVisualizer.cs</DependentUpon>
     </EmbeddedResource>
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -150,12 +138,6 @@
     <Compile Include="SQLiteEngine.cs" />
     <Compile Include="SQLiteMemoryEngine.cs" />
     <Compile Include="SqlServerCompactEngine.cs" />
-    <Compile Include="SqlVisualizer.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="SqlVisualizer.designer.cs">
-      <DependentUpon>SqlVisualizer.cs</DependentUpon>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Backends\dbghelp.dll">
