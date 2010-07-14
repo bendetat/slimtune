@@ -16,6 +16,17 @@ namespace UICore.Mappings
 		}
 	}
 
+	public class SnapshotMap : ClassMap<Snapshot>
+	{
+		public SnapshotMap()
+		{
+			Id(x => x.Id);
+			Map(x => x.Name);
+			Map(x => x.DateTime);
+			Table("Snapshots");
+		}
+	}
+
 	public class ThreadInfoMap : ClassMap<ThreadInfo>
 	{
 		public ThreadInfoMap()

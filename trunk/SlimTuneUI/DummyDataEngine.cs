@@ -98,6 +98,11 @@ namespace SlimTuneUI
 			throw new NotImplementedException();
 		}
 
+		public NHibernate.ISession OpenSnapshot(int index)
+		{
+			throw new NotImplementedException();
+		}
+
 		public System.Data.DataSet RawQuery(string query)
 		{
 			throw new NotImplementedException();

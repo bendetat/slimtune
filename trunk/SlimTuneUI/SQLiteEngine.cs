@@ -114,7 +114,6 @@ namespace SlimTuneUI
 				transact.Commit();
 			}
 
-			m_lastFlush = DateTime.Now;
 			m_cachedSamples = 0;
 			//m_cachedTimings = 0;
 			timer.Stop();
@@ -136,14 +135,18 @@ namespace SlimTuneUI
 			{
 				Flush();
 
-				var cmd = string.Format("INSERT INTO Snapshots (Name, DateTime) VALUES ({0}, {1})", name, DateTime.Now.ToFileTime());
-				Command(cmd);
+				var cmd = CreateCommand("INSERT INTO Snapshots (Name, DateTime) VALUES (?, ?)", 2);
+				cmd.Parameters[0].Value = name;
+				cmd.Parameters[1].Value = DateTime.Now.ToFileTime();
+				cmd.ExecuteNonQuery();
 
-				int id = (int) Command("SELECT MAX(Id) FROM Snapshots");
-				Command(string.Format("CREATE TABLE Calls_{0} {1}", id, kCallsSchema));
+				int id = Convert.ToInt32(RawQueryScalar("SELECT MAX(Id) FROM Snapshots"));
+				/*Command(string.Format("CREATE TABLE Calls_{0} {1}", id, kCallsSchema));
 				Command(string.Format("INSERT INTO Calls_{0} SELECT * FROM Callers", id));
 				Command(string.Format("CREATE TABLE Samples_{0} {1}", id, kSamplesSchema));
-				Command(string.Format("INSERT INTO Samples_{0} SELECT * FROM Samples", id));
+				Command(string.Format("INSERT INTO Samples_{0} SELECT * FROM Samples", id));*/
+				Command(string.Format("CREATE TABLE Calls_{0} AS SELECT * FROM Calls", id));
+				Command(string.Format("CREATE TABLE Samples_{0} AS SELECT * FROM Samples", id));
 			}
 		}
 

@@ -121,7 +121,6 @@ namespace SlimTuneUI
 				FlushTimings(timingsSet);
 			}
 
-			m_lastFlush = DateTime.Now;
 			m_cachedSamples = 0;
 			//m_cachedTimings = 0;
 			timer.Stop();

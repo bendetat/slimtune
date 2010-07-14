@@ -95,6 +95,7 @@ namespace UICore
 
 		ISession OpenSession();
 		IStatelessSession OpenStatelessSession();
+		ISession OpenSnapshot(int snapshot);
 
 		DataSet RawQuery(string query);
 		DataSet RawQuery(string query, int limit);

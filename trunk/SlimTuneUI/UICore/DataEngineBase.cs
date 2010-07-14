@@ -59,14 +59,16 @@ namespace UICore
 		//this is: FunctionId, ThreadId, HitCount
 		protected SortedDictionary<int, SortedList<int, int>> m_samples = new SortedDictionary<int, SortedList<int, int>>();
 
-		protected volatile bool m_allowFlush = true;
-		protected DateTime m_lastFlush = DateTime.Now;
+		private volatile bool m_allowFlush = true;
+		private DateTime m_lastFlush = DateTime.Now;
 		//we use this so we don't have to check DateTime.Now on every single sample
 		protected int m_cachedSamples;
 
-		protected ISessionFactory m_sessionFactory;
-		protected Configuration m_config;
-		protected IStatelessSession m_statelessSession;
+		private ISessionFactory m_sessionFactory;
+		private FluentConfiguration m_fluentConfig;
+		private Configuration m_config;
+		private IStatelessSession m_statelessSession;
+		private Dictionary<int, ISessionFactory> m_snapshotFactories = new Dictionary<int,ISessionFactory>(8);
 
 		protected object m_lock = new object();
 
@@ -152,8 +154,8 @@ namespace UICore
 
 		private void CreateSessionFactory(FluentConfiguration config)
 		{
-			config.Mappings(m => m.FluentMappings.AddFromAssemblyOf<DataEngineBase>());
-			m_config = config.BuildConfiguration();
+			m_fluentConfig = config.Mappings(m => m.FluentMappings.AddFromAssemblyOf<DataEngineBase>());
+			m_config = m_fluentConfig.BuildConfiguration();
 			m_sessionFactory = config.BuildSessionFactory();
 		}
 
@@ -165,6 +167,29 @@ namespace UICore
 		public virtual NHibernate.IStatelessSession OpenStatelessSession()
 		{
 			return m_sessionFactory.OpenStatelessSession(Connection);
+		}
+
+		private void ForciblyInjectNamingStrategy(int snapshot)
+		{
+			var prop = typeof(FluentConfiguration).GetProperty("Configuration", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+			var cfg = (Configuration) prop.GetValue(m_fluentConfig, null);
+			cfg.SetNamingStrategy(new SnapshotNamingStrategy(snapshot));
+		}
+
+		public virtual NHibernate.ISession OpenSnapshot(int snapshot)
+		{
+			ISessionFactory factory = null;
+			if(!m_snapshotFactories.TryGetValue(snapshot, out factory))
+			{
+				ForciblyInjectNamingStrategy(snapshot);
+				var config = m_fluentConfig.BuildConfiguration();
+				factory = config.BuildSessionFactory();
+				m_snapshotFactories.Add(snapshot, factory);
+			}
+
+			var session = factory.OpenSession(Connection);
+			session.FlushMode = FlushMode.Never;
+			return session;
 		}
 
 		public void Flush()
@@ -189,6 +214,7 @@ namespace UICore
 				}
 
 				DoFlush();
+				m_lastFlush = DateTime.Now;
 			}
 		}
 

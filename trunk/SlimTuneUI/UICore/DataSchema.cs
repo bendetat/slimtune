@@ -9,6 +9,13 @@ namespace UICore
 		public virtual string Value { get; set; }
 	}
 
+	public class Snapshot
+	{
+		public virtual int Id { get; set; }
+		public virtual string Name { get; set; }
+		public virtual long DateTime { get; set; }
+	}
+
 	public class ThreadInfo
 	{
 		public virtual int Id { get; set; }
