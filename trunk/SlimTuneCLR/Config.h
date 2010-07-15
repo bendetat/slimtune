@@ -49,8 +49,10 @@ struct ProfilerConfig
 	bool WaitForConnection;
 	bool SuspendOnConnection;
 
-	bool TrackMemory;
 	bool AllowInlining;
+
+	bool TrackGarbageCollections;
+	bool TrackObjectAllocations;
 
 	//Instrumentation properties
 	bool InstrumentSmallFunctions;

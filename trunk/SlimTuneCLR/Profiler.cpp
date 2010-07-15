@@ -347,10 +347,14 @@ HRESULT ClrProfiler::SetInitialEventMask()
 	if(!m_config.AllowInlining)
 		eventMask |= COR_PRF_DISABLE_INLINING;
 
-	if(m_config.TrackMemory)
+	if(m_config.TrackGarbageCollections)
+	{
+		eventMask |= COR_PRF_MONITOR_GC;
+	}
+
+	if(m_config.TrackObjectAllocations)
 	{
 		eventMask |= COR_PRF_MONITOR_CLASS_LOADS;
-		eventMask |= COR_PRF_MONITOR_GC;
 		eventMask |= COR_PRF_MONITOR_OBJECT_ALLOCATED | COR_PRF_ENABLE_OBJECT_ALLOCATED;
 	}
 

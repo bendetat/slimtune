@@ -144,4 +144,12 @@ namespace UICore
 		public virtual int Generation { get; set; }
 		public virtual long Time { get; set; }
 	}
+
+	public class Allocation
+	{
+		public virtual int Id { get; set; }
+		public virtual int ClassId { get; set; }
+		public virtual long Size { get; set; }
+		public virtual long Count { get; set; }
+	}
 }

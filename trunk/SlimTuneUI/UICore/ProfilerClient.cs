@@ -199,6 +199,11 @@ namespace UICore
 						GarbageCollection(garbageCollected);
 						break;
 
+					case MessageId.MID_GenerationSizes:
+						var generationSizes = Messages.GenerationSizes.Read(m_reader);
+						Console.WriteLine("Gen0 size: {0}", generationSizes.Sizes[0]);
+						break;
+
 					case MessageId.MID_KeepAlive:
 						//don't really need to do anything
 						Debug.WriteLine("Keep alive.");

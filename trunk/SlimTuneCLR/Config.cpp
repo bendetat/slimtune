@@ -29,8 +29,9 @@ ProfilerConfig::ProfilerConfig()
 	WaitForConnection = false;
 	SuspendOnConnection = false;
 
-	TrackMemory = false;
 	AllowInlining = false;
+	TrackGarbageCollections = false;
+	TrackObjectAllocations = false;
 
 	CycleTiming = false;
 	InstrumentSmallFunctions = false;
@@ -81,8 +82,10 @@ void ParseVar(ProfilerConfig& config, wchar_t* var)
 		ParseRef(valueStr, config.WaitForConnection);
 	else if(_wcsicmp(var, L"suspendonconnection") == 0)
 		ParseRef(valueStr, config.SuspendOnConnection);
-	else if(_wcsicmp(var, L"trackmemory") == 0)
-		ParseRef(valueStr, config.TrackMemory);
+	else if(_wcsicmp(var, L"trackgarbagecollections") == 0)
+		ParseRef(valueStr, config.TrackGarbageCollections);
+	else if(_wcsicmp(var, L"trackobjectallocations") == 0)
+		ParseRef(valueStr, config.TrackObjectAllocations);
 	else if(_wcsicmp(var, L"allowinlining") == 0)
 		ParseRef(valueStr, config.AllowInlining);
 	else if(_wcsicmp(var, L"cycletiming") == 0)

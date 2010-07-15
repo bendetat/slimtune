@@ -24,10 +24,34 @@
 #include "NativeHooks.h"
 #include "Timer.h"
 
+HRESULT ClrProfiler::GenerationBounds()
+{
+	assert(m_server->Connected());
+
+	ULONG rangeCount = 0;
+	HRESULT hr = m_ProfilerInfo2->GetGenerationBounds(m_genRanges.size(), &rangeCount, &m_genRanges[0]);
+	CHECK_HR(hr);
+	assert(rangeCount <= 5);
+
+	Messages::GenerationSizes gsMsg;
+	gsMsg.GenerationCount = rangeCount;
+	QueryTimer(gsMsg.TimeStamp);
+	for(size_t i = 0; i < rangeCount; ++i)
+	{
+		unsigned int gen = m_genRanges[i].generation;
+		gsMsg.Sizes[gen] = m_genRanges[i].rangeLength;
+	}
+
+	gsMsg.Write(*m_server);
+	return S_OK;
+}
+
 HRESULT ClrProfiler::GarbageCollectionStarted(int cGenerations, BOOL generationCollected[], COR_PRF_GC_REASON reason)
 {
 	if(!m_server->Connected())
 		return S_OK;
+
+	GenerationBounds();
 
 	int maxGen = 0;
 	for(int g = 0; g < cGenerations; ++g)
@@ -47,6 +71,10 @@ HRESULT ClrProfiler::GarbageCollectionStarted(int cGenerations, BOOL generationC
 
 HRESULT ClrProfiler::GarbageCollectionFinished()
 {
+	if(!m_server->Connected())
+		return S_OK;
+
+	GenerationBounds();
 	return S_OK;
 }
 

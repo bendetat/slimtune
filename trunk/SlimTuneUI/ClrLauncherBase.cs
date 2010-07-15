@@ -130,9 +130,14 @@ namespace SlimTuneUI
 		}
 
 		[Category("Memory"),
-		DisplayName("Track memory"),
-		Description("Whether or not to enable memory tracking.")]
-		public bool TrackMemory { get; set; }
+		DisplayName("Track object allocations"),
+		Description("Whether or not to monitor object allocations.")]
+		public bool TrackAllocs { get; set; }
+
+		[Category("Memory"),
+		DisplayName("Track garbage collections"),
+		Description("Whether or not to monitor garbage collections.")]
+		public bool TrackGC { get; set; }
 
 		[Browsable(false)]
 		public abstract bool RequiresAdmin

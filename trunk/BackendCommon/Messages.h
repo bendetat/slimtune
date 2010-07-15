@@ -41,6 +41,7 @@ enum MessageId
 
 	MID_ObjectAllocated = 0x20,
 	MID_GarbageCollected,
+	MID_GenerationSizes,
 
 	MID_CreateThread = 0x40,
 	MID_DestroyThread,
@@ -128,7 +129,7 @@ namespace Messages
 	struct ObjectAllocated
 	{
 		unsigned int ClassId;
-		size_t Size;
+		unsigned __int64 Size;
 		unsigned int FunctionId;
 		unsigned __int64 TimeStamp;
 
@@ -138,6 +139,15 @@ namespace Messages
 	struct GarbageCollection
 	{
 		unsigned int Generation;
+		unsigned __int64 TimeStamp;
+
+		void Write(IProfilerServer& server);
+	};
+
+	struct GenerationSizes
+	{
+		unsigned int GenerationCount;
+		unsigned __int64 Sizes[5];
 		unsigned __int64 TimeStamp;
 
 		void Write(IProfilerServer& server);

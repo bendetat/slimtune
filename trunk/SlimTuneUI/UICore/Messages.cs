@@ -42,6 +42,7 @@ namespace UICore
 
 		MID_ObjectAllocated = 0x20,
 		MID_GarbageCollected,
+		MID_GenerationSizes,
 
 		MID_CreateThread = 0x40,
 		MID_DestroyThread,
@@ -268,6 +269,24 @@ namespace UICore
 			{
 				var result = new GarbageCollected();
 				result.Generation = Utilities.Read7BitEncodedInt(reader);
+				result.TimeStamp = Utilities.Read7BitEncodedInt64(reader);
+				return result;
+			}
+		}
+
+		public struct GenerationSizes
+		{
+			public int Generations;
+			public long[] Sizes;
+			public long TimeStamp;
+
+			public static GenerationSizes Read(BinaryReader reader)
+			{
+				var result = new GenerationSizes();
+				result.Generations = Utilities.Read7BitEncodedInt(reader);
+				result.Sizes = new long[result.Generations];
+				for(int i = 0; i < result.Sizes.Length; ++i)
+					result.Sizes[i] = Utilities.Read7BitEncodedInt64(reader);
 				result.TimeStamp = Utilities.Read7BitEncodedInt64(reader);
 				return result;
 			}

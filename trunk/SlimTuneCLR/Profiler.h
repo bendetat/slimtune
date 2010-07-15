@@ -143,6 +143,9 @@ private:
 
 	void LeaveImpl(FunctionID functionId, FunctionInfo* info, MessageId message);
 
+	HRESULT GenerationBounds();
+	boost::array<COR_PRF_GC_GENERATION_RANGE, 5> m_genRanges;
+
 	//IUnknown stuff.
 	volatile ULONG refCount;
 

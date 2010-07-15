@@ -146,6 +146,20 @@ namespace Messages
 		server.Write(buffer, bufPtr - buffer);
 	}
 
+	void GenerationSizes::Write(IProfilerServer& server)
+	{
+		char buffer[128];
+		char* bufPtr = buffer;
+
+		*bufPtr++ = MID_GenerationSizes;
+		bufPtr = Write7BitEncodedInt(bufPtr, GenerationCount);
+		for(size_t i = 0; i < GenerationCount; ++i)
+			bufPtr = Write7BitEncodedInt64(bufPtr, Sizes[i]);
+		bufPtr = Write7BitEncodedInt64(bufPtr, TimeStamp);
+
+		server.Write(buffer, bufPtr - buffer);
+	}
+
 	void PerfCounter::Write(IProfilerServer& server)
 	{
 		char buffer[24];
