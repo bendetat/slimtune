@@ -27,6 +27,7 @@ using NHibernate;
 using NHibernate.Cfg;
 using NHibernate.Tool.hbm2ddl;
 using FluentNHibernate.Cfg;
+using FluentNHibernate.Cfg.Db;
 
 namespace UICore
 {
@@ -65,7 +66,7 @@ namespace UICore
 		protected int m_cachedSamples;
 
 		private ISessionFactory m_sessionFactory;
-		private FluentConfiguration m_fluentConfig;
+		private IPersistenceConfigurer m_configurer;
 		private Configuration m_config;
 		private IStatelessSession m_statelessSession;
 		private Dictionary<int, ISessionFactory> m_snapshotFactories = new Dictionary<int,ISessionFactory>(8);
@@ -125,9 +126,10 @@ namespace UICore
 			Name = name;
 		}
 
-		protected void FinishConstruct(bool createNew, FluentConfiguration config)
+		protected void FinishConstruct(bool createNew, IPersistenceConfigurer configurer)
 		{
-			CreateSessionFactory(config);
+			m_configurer = configurer;
+			CreateSessionFactory(configurer);
 			if(createNew)
 			{
 				PreCreateSchema();
@@ -152,10 +154,12 @@ namespace UICore
 			WriteCoreProperties();
 		}
 
-		private void CreateSessionFactory(FluentConfiguration config)
+		private void CreateSessionFactory(IPersistenceConfigurer configurer)
 		{
-			m_fluentConfig = config.Mappings(m => m.FluentMappings.AddFromAssemblyOf<DataEngineBase>());
-			m_config = m_fluentConfig.BuildConfiguration();
+			var baseConfig = new Configuration();
+			var config = Fluently.Configure(baseConfig).Database(configurer);
+			var fluentConfig = config.Mappings(m => m.FluentMappings.AddFromAssemblyOf<DataEngineBase>());
+			m_config = fluentConfig.BuildConfiguration();
 			m_sessionFactory = config.BuildSessionFactory();
 		}
 
@@ -169,20 +173,14 @@ namespace UICore
 			return m_sessionFactory.OpenStatelessSession(Connection);
 		}
 
-		private void ForciblyInjectNamingStrategy(int snapshot)
-		{
-			var prop = typeof(FluentConfiguration).GetProperty("Configuration", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-			var cfg = (Configuration) prop.GetValue(m_fluentConfig, null);
-			cfg.SetNamingStrategy(new SnapshotNamingStrategy(snapshot));
-		}
-
 		public virtual NHibernate.ISession OpenSnapshot(int snapshot)
 		{
 			ISessionFactory factory = null;
 			if(!m_snapshotFactories.TryGetValue(snapshot, out factory))
 			{
-				ForciblyInjectNamingStrategy(snapshot);
-				var config = m_fluentConfig.BuildConfiguration();
+				var baseConfig = new Configuration().SetNamingStrategy(new SnapshotNamingStrategy(snapshot));
+				var fluentConfig = Fluently.Configure(baseConfig).Database(m_configurer);
+				var config = fluentConfig.BuildConfiguration();
 				factory = config.BuildSessionFactory();
 				m_snapshotFactories.Add(snapshot, factory);
 			}

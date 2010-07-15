@@ -86,8 +86,8 @@ namespace SlimTuneUI
 			m_sqlConn = new SqlCeConnection(connStr);
 			m_sqlConn.Open();
 
-			var config = Fluently.Configure().Database(MsSqlCeConfiguration.Standard.ConnectionString(connStr));
-			FinishConstruct(createNew, config);
+			var dbconfig = MsSqlCeConfiguration.Standard.ConnectionString(connStr);
+			FinishConstruct(createNew, dbconfig);
 			m_timings = new Dictionary<int, List<long>>(2048);
 		}
 
