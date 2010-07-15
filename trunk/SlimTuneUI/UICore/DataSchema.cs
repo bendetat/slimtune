@@ -137,4 +137,11 @@ namespace UICore
 			return 23 + CounterId + (int) Time;
 		}
 	}
+
+	public class GarbageCollection
+	{
+		public virtual int Id { get; set; }
+		public virtual int Generation { get; set; }
+		public virtual long Time { get; set; }
+	}
 }

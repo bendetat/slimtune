@@ -44,8 +44,6 @@
 // global reference to the profiler object (ie this) used by the static functions
 ClrProfiler* g_Profiler = NULL;
 
-#define CHECK_HR(hr) if(FAILED(hr)) return (hr);
-
 struct IoThreadFunc
 {
 	IoThreadFunc(IProfilerServer& server) : m_server(server)
@@ -61,15 +59,6 @@ private:
 
 	void operator=(const IoThreadFunc&) { }
 };
-
-unsigned int ClassIdFromTypeDefAndModule(mdTypeDef classDef, ModuleID module)
-{
-	unsigned short classDefLow = classDef & 0xffff;
-	unsigned short moduleLow = module & 0xffff;
-	unsigned int fullClassId = (moduleLow << 16) | (classDefLow);
-
-	return fullClassId;
-}
 
 //This is used to block StackWalk64 from trying to go to disk for symbols, which can cause deadlocks
 void* CALLBACK FunctionTableAccess(HANDLE hProcess, DWORD64 AddrBase)
@@ -108,6 +97,7 @@ m_instDepth(0)
 	m_modules.push_back(invalidMod);
 
 	m_allocatedPending = false;
+	m_collectionInProgress = 0;
 }
 
 ClrProfiler::~ClrProfiler()
@@ -499,6 +489,15 @@ UINT_PTR ClrProfiler::StaticFunctionMapper(FunctionID functionId, BOOL* pbHookFu
 unsigned int ClrProfiler::MapModule(ModuleID moduleId)
 {
 	return 0;
+}
+
+unsigned int ClrProfiler::ClassIdFromTypeDefAndModule(mdTypeDef classDef, ModuleID module)
+{
+	unsigned short classDefLow = classDef & 0xffff;
+	unsigned short moduleLow = module & 0xffff;
+	unsigned int fullClassId = (moduleLow << 16) | (classDefLow);
+
+	return fullClassId;
 }
 
 unsigned int ClrProfiler::MapClass(mdTypeDef classDef, IMetaDataImport* metadata)
@@ -1225,74 +1224,6 @@ void ClrProfiler::OnSampleTimer()
 		StartSampleTimer(0);
 }
 
-HRESULT ClrProfiler::ObjectAllocated(ObjectID objectId, ClassID classId)
-{
-	if(!m_server->Connected())
-		return S_OK;
-
-	Mutex::scoped_lock EnterLock(m_lock);
-
-	//look up basic class info
-	ModuleID moduleId;
-	mdTypeDef token;
-	HRESULT hr = m_ProfilerInfo->GetClassIDInfo(classId, &moduleId, &token);
-	CHECK_HR(hr);
-
-	int mappedModuleId = m_moduleRemapper[moduleId];
-	ModuleInfo* moduleInfo = m_modules[mappedModuleId];
-
-	//get the internal id we're using for this class
-	unsigned int nativeId = ClassIdFromTypeDefAndModule(token, mappedModuleId);
-
-	//if an alloc is pending, this is a re-run on mostly acquired data
-	//if not, we go through and fill out the structure
-	if(!m_allocatedPending)
-	{
-		ULONG size = 0;
-		m_ProfilerInfo->GetObjectSize(objectId, &size);
-		CHECK_HR(hr);
-
-		unsigned int parentId = -1;
-		std::vector<unsigned int, UIntPoolAlloc> functions;
-		functions.reserve(1);
-		WalkData data = { this, &functions, 0, 0 };
-		HRESULT snapshotResult = m_ProfilerInfo2->DoStackSnapshot(NULL, StackWalkGlobal_OneShot, COR_PRF_SNAPSHOT_DEFAULT,
-			&data, NULL, 0);
-		if(SUCCEEDED(snapshotResult) || snapshotResult == CORPROF_E_STACKSNAPSHOT_ABORTED)
-		{
-			if(functions.size() > 0)
-				parentId = functions[0];
-		}
-
-		m_allocMsg.Size = size;
-		m_allocMsg.FunctionId = parentId;
-		QueryTimer(m_allocMsg.TimeStamp);
-
-		if(nativeId == 0)
-		{
-			//this class hasn't been loaded yet, mark it as pending
-			//we will come back when ClassLoadFinished hits
-			m_allocatedPending = true;
-			m_allocatedObject = objectId;
-			m_allocatedClass = classId;
-			return S_OK;
-		}
-	}
-
-	//either way at this point, we should be ready to map the class and fire the message
-	if(nativeId == 0)
-	{
-		//just bail out and hope this works out later
-		return S_OK;
-	}
-
-	m_allocMsg.ClassId = MapClass(nativeId, 0);
-	m_allocMsg.Write(*m_server);
-	m_allocatedPending = false;
-
-	return S_OK;
-}
-
 HRESULT ClrProfiler::ThreadCreated(ThreadID threadId)
 {
 	//Map the new thread
@@ -1550,11 +1481,6 @@ HRESULT ClrProfiler::RuntimeThreadResumed(ThreadID threadId)
 		context.Suspended = false;
 	}
 
-	return S_OK;
-}
-
-HRESULT ClrProfiler::GarbageCollectionStarted(int cGenerations, BOOL generationCollected[], COR_PRF_GC_REASON reason)
-{
 	return S_OK;
 }
 

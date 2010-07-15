@@ -152,4 +152,15 @@ namespace UICore.Mappings
 			Table("CounterValues");
 		}
 	}
+
+	public class GarbageCollectionMap : ClassMap<GarbageCollection>
+	{
+		public GarbageCollectionMap()
+		{
+			Id(x => x.Id);
+			Map(x => x.Generation);
+			Map(x => x.Time);
+			Table("GarbageCollections");
+		}
+	}
 }

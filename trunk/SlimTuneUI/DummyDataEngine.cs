@@ -118,6 +118,11 @@ namespace SlimTuneUI
 			throw new NotImplementedException();
 		}
 
+		public void GarbageCollection(int generation, long time)
+		{
+			throw new NotImplementedException();
+		}
+
 		#region IDisposable Members
 
 		public void Dispose()

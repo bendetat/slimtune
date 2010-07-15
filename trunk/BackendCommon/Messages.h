@@ -40,8 +40,7 @@ enum MessageId
 	MID_TransitionIn,				//From unmanaged to managed (back into the runtime)
 
 	MID_ObjectAllocated = 0x20,
-	MID_CollectionStarted,
-	MID_CollectionFinished,
+	MID_GarbageCollected,
 
 	MID_CreateThread = 0x40,
 	MID_DestroyThread,
@@ -131,6 +130,14 @@ namespace Messages
 		unsigned int ClassId;
 		size_t Size;
 		unsigned int FunctionId;
+		unsigned __int64 TimeStamp;
+
+		void Write(IProfilerServer& server);
+	};
+
+	struct GarbageCollection
+	{
+		unsigned int Generation;
 		unsigned __int64 TimeStamp;
 
 		void Write(IProfilerServer& server);

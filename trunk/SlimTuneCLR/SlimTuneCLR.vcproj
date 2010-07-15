@@ -717,6 +717,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Profiler_Memory.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ProfilerBase.h"
 				>
 			</File>

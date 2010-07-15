@@ -52,6 +52,7 @@
 #endif
 
 #define ASSERT_HR(x) _ASSERT(SUCCEEDED(x))
+#define CHECK_HR(hr) if(FAILED(hr)) return (hr);
 
 inline bool operator< (const GUID& lhs, const GUID& rhs)
 {
@@ -113,6 +114,7 @@ public:
 	//overriden interface functions
 	STDMETHOD(ObjectAllocated)(ObjectID objectId, ClassID classId);
 	STDMETHOD(GarbageCollectionStarted)(int cGenerations, BOOL generationCollected[], COR_PRF_GC_REASON reason);
+	STDMETHOD(GarbageCollectionFinished)();
 	STDMETHOD(ClassLoadFinished)(ClassID classId, HRESULT hrStatus);
 
 	STDMETHOD(ThreadCreated)(ThreadID threadId);
@@ -196,6 +198,8 @@ private:
 	ClassID m_allocatedClass;
 	Messages::ObjectAllocated m_allocMsg;
 
+	volatile ULONG m_collectionInProgress;
+
 	void OnConnect();
 	void OnDisconnect();
 
@@ -217,6 +221,7 @@ private:
 
 	static HRESULT CALLBACK StackWalkGlobal(FunctionID funcId, UINT_PTR ip, COR_PRF_FRAME_INFO frameInfo, ULONG32 contextSize, BYTE context[], void *clientData);
 	static HRESULT CALLBACK StackWalkGlobal_OneShot(FunctionID funcId, UINT_PTR ip, COR_PRF_FRAME_INFO frameInfo, ULONG32 contextSize, BYTE context[], void *clientData);
+	static unsigned int ClassIdFromTypeDefAndModule(mdTypeDef classDef, ModuleID module);
 };
 
 extern ClrProfiler* g_Profiler;

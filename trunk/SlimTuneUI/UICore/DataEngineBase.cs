@@ -395,6 +395,20 @@ namespace UICore
 			}
 		}
 
+		public virtual void GarbageCollection(int generation, long time)
+		{
+			using(var tx = m_statelessSession.BeginTransaction())
+			{
+				var gc = new GarbageCollection()
+				{
+					Generation = generation,
+					Time = time
+				};
+				m_statelessSession.Insert(gc);
+				tx.Commit();
+			}
+		}
+
 		#region IDisposable Members
 
 		public virtual void Dispose()

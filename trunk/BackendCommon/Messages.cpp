@@ -134,6 +134,18 @@ namespace Messages
 		server.Write(buffer, bufPtr - buffer);
 	}
 
+	void GarbageCollection::Write(IProfilerServer& server)
+	{
+		char buffer[16];
+		char* bufPtr = buffer;
+
+		*bufPtr++ = MID_GarbageCollected;
+		bufPtr = Write7BitEncodedInt(bufPtr, Generation);
+		bufPtr = Write7BitEncodedInt64(bufPtr, TimeStamp);
+
+		server.Write(buffer, bufPtr - buffer);
+	}
+
 	void PerfCounter::Write(IProfilerServer& server)
 	{
 		char buffer[24];

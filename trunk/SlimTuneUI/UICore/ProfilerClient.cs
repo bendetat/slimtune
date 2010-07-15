@@ -194,6 +194,11 @@ namespace UICore
 						//Console.WriteLine("Allocated class #{0} of size {1} in function {2}.", objectAllocated.ClassId, objectAllocated.Size, objectAllocated.FunctionId);
 						break;
 
+					case MessageId.MID_GarbageCollected:
+						var garbageCollected = Messages.GarbageCollected.Read(m_reader);
+						GarbageCollection(garbageCollected);
+						break;
+
 					case MessageId.MID_KeepAlive:
 						//don't really need to do anything
 						Debug.WriteLine("Keep alive.");
@@ -379,6 +384,11 @@ namespace UICore
 		{
 			var request = new Requests.GetCounterName(counterId);
 			request.Write(m_writer);
+		}
+
+		private void GarbageCollection(Messages.GarbageCollected gc)
+		{
+			m_data.GarbageCollection(gc.Generation, gc.TimeStamp);
 		}
 
 		#region IDisposable Members

@@ -41,8 +41,7 @@ namespace UICore
 		MID_TransitionIn,				//From unmanaged to managed (back into the runtime)
 
 		MID_ObjectAllocated = 0x20,
-		MID_CollectionStarted,
-		MID_CollectionFinished,
+		MID_GarbageCollected,
 
 		MID_CreateThread = 0x40,
 		MID_DestroyThread,
@@ -255,6 +254,20 @@ namespace UICore
 				result.ClassId = Utilities.Read7BitEncodedInt(reader);
 				result.Size = Utilities.Read7BitEncodedInt64(reader);
 				result.FunctionId = Utilities.Read7BitEncodedInt(reader);
+				result.TimeStamp = Utilities.Read7BitEncodedInt64(reader);
+				return result;
+			}
+		}
+
+		public struct GarbageCollected
+		{
+			public int Generation;
+			public long TimeStamp;
+
+			public static GarbageCollected Read(BinaryReader reader)
+			{
+				var result = new GarbageCollected();
+				result.Generation = Utilities.Read7BitEncodedInt(reader);
 				result.TimeStamp = Utilities.Read7BitEncodedInt64(reader);
 				return result;
 			}
