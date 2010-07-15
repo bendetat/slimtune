@@ -30,7 +30,7 @@ class TcpConnection : public boost::enable_shared_from_this<TcpConnection>
 private:
 	SocketServer& m_server;
 	boost::asio::ip::tcp::socket m_socket;
-	boost::recursive_mutex& m_lock;
+	Mutex& m_lock;
 
 	unsigned int m_parseOffset;
 	unsigned int m_recvSize;
@@ -42,7 +42,7 @@ private:
 	bool ContinueRead(const boost::system::error_code& err, size_t);
 	void HandleRead( const boost::system::error_code& err, size_t);
 
-	TcpConnection(SocketServer& server, boost::asio::io_service& io, boost::recursive_mutex& lock);
+	TcpConnection(SocketServer& server, boost::asio::io_service& io, Mutex& lock);
 
 	void SendFunction(const Requests::GetFunctionMapping& request);
 	void SendClass(const Requests::GetClassMapping& request);
@@ -53,7 +53,7 @@ private:
 public:
 	~TcpConnection();
 
-	static TcpConnectionPtr Create(SocketServer& server, boost::asio::io_service& io, boost::recursive_mutex& lock)
+	static TcpConnectionPtr Create(SocketServer& server, boost::asio::io_service& io, Mutex& lock)
 	{
 		return TcpConnectionPtr(new TcpConnection(server, io, lock));
 	}
@@ -70,7 +70,7 @@ public:
 	void Write(const void* data, size_t size);
 };
 
-TcpConnection::TcpConnection(SocketServer& server, boost::asio::io_service& io, boost::recursive_mutex& lock)
+TcpConnection::TcpConnection(SocketServer& server, boost::asio::io_service& io, Mutex& lock)
 : m_server(server),
 m_socket(io),
 m_lock(lock),
@@ -84,7 +84,7 @@ TcpConnection::~TcpConnection()
 
 void TcpConnection::BeginRead(unsigned int offset)
 {
-	boost::recursive_mutex::scoped_lock EnterLock(m_lock);
+	Mutex::scoped_lock EnterLock(m_lock);
 
 	m_recvSize = kBufferSize - offset;
 	boost::asio::async_read(m_socket, boost::asio::buffer(&m_recvBuffer[0] + offset, m_recvSize),
@@ -101,7 +101,7 @@ void TcpConnection::BeginRead(unsigned int offset)
 
 void TcpConnection::Write(const void* data, size_t size)
 {
-	boost::recursive_mutex::scoped_lock EnterLock(m_lock);
+	Mutex::scoped_lock EnterLock(m_lock);
 
 	boost::asio::async_write(m_socket, boost::asio::buffer(data, size),
 		boost::bind(&SocketServer::HandleWrite, &m_server,
@@ -172,7 +172,7 @@ bool TcpConnection::ContinueRead(const boost::system::error_code&, size_t bytesR
 	if(bytesRead < 1)
 		return false;
 
-	boost::recursive_mutex::scoped_lock EnterLock(m_lock);
+	Mutex::scoped_lock EnterLock(m_lock);
 
 	size_t prevBytes = kBufferSize - m_recvSize;
 	size_t bytesToParse = bytesRead + prevBytes - m_parseOffset;
@@ -246,6 +246,19 @@ bool TcpConnection::ContinueRead(const boost::system::error_code&, size_t bytesR
 		case CR_Resume:
 			{
 				m_server.ProfilerData().ResumeTarget();
+				break;
+			}
+
+		case CR_SetSamplerActive:
+			{
+				if(bytesToParse < 2)
+					goto FinishRead;
+
+				++bufPtr;
+				char active = *bufPtr;
+				bytesParsed = 1;
+				m_server.ProfilerData().SetSamplerActive(active != 0);
+				break;
 			}
 
 		default:
@@ -277,7 +290,7 @@ FinishRead:
 
 void TcpConnection::HandleRead(const boost::system::error_code& err, size_t bytesRead)
 {
-	boost::recursive_mutex::scoped_lock EnterLock(m_lock);
+	Mutex::scoped_lock EnterLock(m_lock);
 
 	//this means the read ended, so we'll launch a new one
 	BeginRead(m_parseOffset);
@@ -289,7 +302,7 @@ void TcpConnection::HandleWrite(const boost::system::error_code& err, size_t)
 
 }
 
-SocketServer::SocketServer(IProfilerData& profilerData, unsigned short port, boost::recursive_mutex& lock)
+SocketServer::SocketServer(IProfilerData& profilerData, unsigned short port, Mutex& lock)
 : m_profilerData(profilerData),
 m_io(),
 m_acceptor(m_io, tcp::endpoint(tcp::v4(), port)),
@@ -314,7 +327,7 @@ void SocketServer::OnTimerGlobal(LPVOID lpParameter, BOOLEAN TimerOrWaitFired)
 
 void SocketServer::Start()
 {
-	boost::recursive_mutex::scoped_lock EnterLock(m_lock);
+	Mutex::scoped_lock EnterLock(m_lock);
 
 	TcpConnectionPtr conn = TcpConnection::Create(*this, m_acceptor.io_service(), m_lock);
 	m_acceptor.async_accept(conn->GetSocket(),
@@ -332,7 +345,7 @@ void SocketServer::Stop()
 {
 	DeleteTimerQueueTimer(NULL, m_keepAliveTimer, INVALID_HANDLE_VALUE);
 
-	boost::recursive_mutex::scoped_lock EnterLock(m_lock);
+	Mutex::scoped_lock EnterLock(m_lock);
 
 	int oldLength = InterlockedExchange(&m_writeLength, 0);
 	char* bufferPos = m_sendBuffer.Alloc(0);
@@ -351,7 +364,7 @@ void SocketServer::Accept(TcpConnectionPtr conn, const boost::system::error_code
 {
 	if(!error)
 	{
-		boost::recursive_mutex::scoped_lock EnterLock(m_lock);
+		Mutex::scoped_lock EnterLock(m_lock);
 
 		//activate the new connection
 		m_connections.push_back(conn);
@@ -372,7 +385,7 @@ void SocketServer::HandleWrite(TcpConnectionPtr source, const boost::system::err
 		std::string errorMessage = error.message();
 
 		//we can remove this connection from our list
-		boost::recursive_mutex::scoped_lock EnterLock(m_lock);
+		Mutex::scoped_lock EnterLock(m_lock);
 
 		std::vector<TcpConnectionPtr>::iterator deadConn = std::find(m_connections.begin(), m_connections.end(), source);
 		//this callback will trigger multiple times when multiple writes are queued up,
@@ -411,7 +424,7 @@ void SocketServer::Write(const void* data, size_t sizeBytes, bool forceFlush)
 	assert(sizeBytes < FlushSize); //this function will break otherwise
 
 #ifndef LOCKLESS
-	boost::recursive_mutex::scoped_lock EnterLock(m_lock);
+	Mutex::scoped_lock EnterLock(m_lock);
 #endif
 
 	char* bufferPos = m_sendBuffer.Alloc((LONG) sizeBytes);

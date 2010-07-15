@@ -72,6 +72,8 @@ enum ClientRequest
 
 	CR_GetThreadInfo = 0x10,
 
+	CR_SetSamplerActive = 0x60,
+
 	CR_Suspend = 0x70,
 	CR_Resume,
 
@@ -129,6 +131,7 @@ namespace Messages
 	{
 		unsigned int ClassId;
 		size_t Size;
+		unsigned int FunctionId;
 	};
 
 	//Also used for DestroyThread

@@ -141,6 +141,8 @@ struct IProfilerData
 
 	virtual bool SuspendTarget() = 0;
 	virtual bool ResumeTarget() = 0;
+
+	virtual void SetSamplerActive(bool active) = 0;
 };
 
 #endif

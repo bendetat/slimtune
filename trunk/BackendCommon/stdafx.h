@@ -92,6 +92,5 @@
 #include <vector>
 #include <unordered_map>
 
-#include "Utilities.h"
-
 typedef boost::pool_allocator<unsigned int> UIntPoolAlloc;
+typedef boost::recursive_mutex Mutex;

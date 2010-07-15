@@ -24,7 +24,7 @@
 #include "SocketServer.h"
 #include "IProfilerData.h"
 
-IProfilerServer* IProfilerServer::CreateSocketServer(IProfilerData& profiler, unsigned short port, boost::recursive_mutex& lock)
+IProfilerServer* IProfilerServer::CreateSocketServer(IProfilerData& profiler, unsigned short port, Mutex& lock)
 {
 	return new SocketServer(profiler, port, lock);
 }

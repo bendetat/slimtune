@@ -33,7 +33,7 @@ typedef boost::shared_ptr<class TcpConnection> TcpConnectionPtr;
 class SocketServer : public IProfilerServer
 {
 public:
-	SocketServer(IProfilerData& profilerData, unsigned short port, boost::recursive_mutex& lock);
+	SocketServer(IProfilerData& profilerData, unsigned short port, Mutex& lock);
 	~SocketServer();
 
 	IProfilerData& ProfilerData() { return m_profilerData; }
@@ -58,7 +58,7 @@ private:
 	HANDLE m_keepAliveTimer;
 
 	std::vector<TcpConnectionPtr> m_connections;
-	boost::recursive_mutex& m_lock;
+	Mutex& m_lock;
 	ServerCallback m_onConnect;
 	ServerCallback m_onDisconnect;
 
