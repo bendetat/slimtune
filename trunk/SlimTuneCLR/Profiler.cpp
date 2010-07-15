@@ -106,6 +106,8 @@ m_instDepth(0)
 	ModuleInfo* invalidMod = new ModuleInfo(0);
 	invalidMod->Name = invalidName;
 	m_modules.push_back(invalidMod);
+
+	m_allocatedPending = false;
 }
 
 ClrProfiler::~ClrProfiler()
@@ -357,8 +359,9 @@ HRESULT ClrProfiler::SetInitialEventMask()
 
 	if(m_config.TrackMemory)
 	{
-		//I'm not sure we should track these at all -- CLR Profiler is way better at this than us
+		eventMask |= COR_PRF_MONITOR_CLASS_LOADS;
 		eventMask |= COR_PRF_MONITOR_GC;
+		eventMask |= COR_PRF_MONITOR_OBJECT_ALLOCATED | COR_PRF_ENABLE_OBJECT_ALLOCATED;
 	}
 
 	//enabling stack snapshots causes instrumentation to switch to slow mode sadly
@@ -372,10 +375,6 @@ HRESULT ClrProfiler::SetInitialEventMask()
 		eventMask |= COR_PRF_MONITOR_ENTERLEAVE;
 		eventMask |= COR_PRF_MONITOR_CODE_TRANSITIONS;
 	}
-
-	eventMask |= COR_PRF_MONITOR_CLASS_LOADS;
-	eventMask |= COR_PRF_MONITOR_GC;
-	eventMask |= COR_PRF_MONITOR_OBJECT_ALLOCATED | COR_PRF_ENABLE_OBJECT_ALLOCATED;
 
 	m_eventMask = eventMask;
 	HRESULT hr = m_ProfilerInfo->SetEventMask(m_eventMask);
@@ -1233,34 +1232,63 @@ HRESULT ClrProfiler::ObjectAllocated(ObjectID objectId, ClassID classId)
 
 	Mutex::scoped_lock EnterLock(m_lock);
 
+	//look up basic class info
 	ModuleID moduleId;
 	mdTypeDef token;
 	HRESULT hr = m_ProfilerInfo->GetClassIDInfo(classId, &moduleId, &token);
 	CHECK_HR(hr);
 
-	ULONG size = 0;
-	m_ProfilerInfo->GetObjectSize(objectId, &size);
-	CHECK_HR(hr);
+	int mappedModuleId = m_moduleRemapper[moduleId];
+	ModuleInfo* moduleInfo = m_modules[mappedModuleId];
 
 	//get the internal id we're using for this class
-	unsigned int id = ClassIdFromTypeDefAndModule(token, moduleId);
+	unsigned int nativeId = ClassIdFromTypeDefAndModule(token, mappedModuleId);
 
-	std::vector<unsigned int, UIntPoolAlloc> functions;
-	functions.reserve(1);
-	unsigned int parentId = -1;
-	WalkData data = { this, &functions, 0, 0 };
-	HRESULT snapshotResult = m_ProfilerInfo2->DoStackSnapshot(NULL, StackWalkGlobal_OneShot, COR_PRF_SNAPSHOT_DEFAULT,
-		&data, NULL, 0);
-	if(SUCCEEDED(snapshotResult) || snapshotResult == CORPROF_E_STACKSNAPSHOT_ABORTED)
+	//if an alloc is pending, this is a re-run on mostly acquired data
+	//if not, we go through and fill out the structure
+	if(!m_allocatedPending)
 	{
-		parentId = functions[0];
+		ULONG size = 0;
+		m_ProfilerInfo->GetObjectSize(objectId, &size);
+		CHECK_HR(hr);
+
+		unsigned int parentId = -1;
+		std::vector<unsigned int, UIntPoolAlloc> functions;
+		functions.reserve(1);
+		WalkData data = { this, &functions, 0, 0 };
+		HRESULT snapshotResult = m_ProfilerInfo2->DoStackSnapshot(NULL, StackWalkGlobal_OneShot, COR_PRF_SNAPSHOT_DEFAULT,
+			&data, NULL, 0);
+		if(SUCCEEDED(snapshotResult) || snapshotResult == CORPROF_E_STACKSNAPSHOT_ABORTED)
+		{
+			if(functions.size() > 0)
+				parentId = functions[0];
+		}
+
+		m_allocMsg.Size = size;
+		m_allocMsg.FunctionId = parentId;
+		QueryTimer(m_allocMsg.TimeStamp);
+
+		if(nativeId == 0)
+		{
+			//this class hasn't been loaded yet, mark it as pending
+			//we will come back when ClassLoadFinished hits
+			m_allocatedPending = true;
+			m_allocatedObject = objectId;
+			m_allocatedClass = classId;
+			return S_OK;
+		}
 	}
 
-	Messages::ObjectAllocated allocMsg;
-	allocMsg.ClassId = id;
-	allocMsg.Size = size;
-	allocMsg.FunctionId = parentId;
-	//TODO: Send a message
+	//either way at this point, we should be ready to map the class and fire the message
+	if(nativeId == 0)
+	{
+		//just bail out and hope this works out later
+		return S_OK;
+	}
+
+	m_allocMsg.ClassId = MapClass(nativeId, 0);
+	m_allocMsg.Write(*m_server);
+	m_allocatedPending = false;
 
 	return S_OK;
 }
@@ -1545,6 +1573,11 @@ HRESULT ClrProfiler::ClassLoadFinished(ClassID classId, HRESULT hrStatus)
 
 	hr = MapClass(classDef, metaData);
 	CHECK_HR(hr);
+
+	if(m_allocatedPending)
+	{
+		ObjectAllocated(m_allocatedObject, m_allocatedClass);
+	}
 
 	return S_OK;
 }

@@ -78,7 +78,7 @@ namespace UICore
 				IntPtr lpEnvironment);
 
 		public static string CreateConfigString(ProfilerMode profilingMode, int listenPort, bool waitForConnection, bool includeNative,
-			int samplingInterval, int counterInterval, bool allowMethodInlining)
+			int samplingInterval, int counterInterval, bool allowMethodInlining, bool trackMemory)
 		{
 			string config = string.Empty;
 			config += string.Format("Mode={0};", (int) profilingMode);
@@ -88,6 +88,7 @@ namespace UICore
 			config += string.Format("SampleInterval={0};", samplingInterval);
 			config += string.Format("CounterInterval={0};", counterInterval);
             config += string.Format("AllowInlining={0};", allowMethodInlining ? 1 : 0);
+			config += string.Format("TrackMemory={0};", trackMemory ? 1 : 0);
 
 			return config;
 		}

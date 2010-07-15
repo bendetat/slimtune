@@ -112,6 +112,12 @@ namespace UICore
 			m_writer.Write((byte) ClientRequest.CR_Resume);
 		}
 
+		public void SetSamplerActive(bool active)
+		{
+			m_writer.Write((byte) ClientRequest.CR_SetSamplerActive);
+			m_writer.Write((byte) (active ? 1 : 0));
+		}
+
 		public bool Receive()
 		{
 			try
@@ -181,6 +187,11 @@ namespace UICore
 					case MessageId.MID_CounterName:
 						var counterName = Messages.CounterName.Read(m_reader);
 						NameCounter(counterName);
+						break;
+
+					case MessageId.MID_ObjectAllocated:
+						var objectAllocated = Messages.ObjectAllocated.Read(m_reader);
+						//Console.WriteLine("Allocated class #{0} of size {1} in function {2}.", objectAllocated.ClassId, objectAllocated.Size, objectAllocated.FunctionId);
 						break;
 
 					case MessageId.MID_KeepAlive:

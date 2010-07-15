@@ -120,6 +120,20 @@ namespace Messages
 		server.Write(buffer, bufPtr - buffer);
 	}
 
+	void ObjectAllocated::Write(IProfilerServer& server)
+	{
+		char buffer[32];
+		char* bufPtr = buffer;
+
+		*bufPtr++ = MID_ObjectAllocated;
+		bufPtr = Write7BitEncodedInt(bufPtr, ClassId);
+		bufPtr = Write7BitEncodedInt64(bufPtr, Size);
+		bufPtr = Write7BitEncodedInt(bufPtr, FunctionId);
+		bufPtr = Write7BitEncodedInt64(bufPtr, TimeStamp);
+
+		server.Write(buffer, bufPtr - buffer);
+	}
+
 	void PerfCounter::Write(IProfilerServer& server)
 	{
 		char buffer[24];

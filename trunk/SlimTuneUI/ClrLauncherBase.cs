@@ -129,6 +129,11 @@ namespace SlimTuneUI
 			}
 		}
 
+		[Category("Memory"),
+		DisplayName("Track memory"),
+		Description("Whether or not to enable memory tracking.")]
+		public bool TrackMemory { get; set; }
+
 		[Browsable(false)]
 		public abstract bool RequiresAdmin
 		{

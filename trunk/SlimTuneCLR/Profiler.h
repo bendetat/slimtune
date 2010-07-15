@@ -191,6 +191,11 @@ private:
 
 	boost::scoped_ptr<PerfCounter> m_counter;
 
+	bool m_allocatedPending;
+	ObjectID m_allocatedObject;
+	ClassID m_allocatedClass;
+	Messages::ObjectAllocated m_allocMsg;
+
 	void OnConnect();
 	void OnDisconnect();
 

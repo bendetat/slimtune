@@ -29,7 +29,7 @@ ProfilerConfig::ProfilerConfig()
 	WaitForConnection = false;
 	SuspendOnConnection = false;
 
-	TrackMemory = true;
+	TrackMemory = false;
 	AllowInlining = false;
 
 	CycleTiming = false;
@@ -82,7 +82,7 @@ void ParseVar(ProfilerConfig& config, wchar_t* var)
 	else if(_wcsicmp(var, L"suspendonconnection") == 0)
 		ParseRef(valueStr, config.SuspendOnConnection);
 	else if(_wcsicmp(var, L"trackmemory") == 0)
-		ParseRef(valueStr, config.AllowInlining);
+		ParseRef(valueStr, config.TrackMemory);
 	else if(_wcsicmp(var, L"allowinlining") == 0)
 		ParseRef(valueStr, config.AllowInlining);
 	else if(_wcsicmp(var, L"cycletiming") == 0)

@@ -36,13 +36,12 @@ enum MessageId
 	MID_EnterFunction = 0x10,
 	MID_LeaveFunction,
 	MID_TailCall,
+	MID_TransitionOut,				//From managed to unmanaged (out of the runtime)
+	MID_TransitionIn,				//From unmanaged to managed (back into the runtime)
 
 	MID_ObjectAllocated = 0x20,
 	MID_CollectionStarted,
 	MID_CollectionFinished,
-
-	MID_TransitionOut = 0x30,		//From managed to unmanaged (out of the runtime)
-	MID_TransitionIn,				//From unmanaged to managed (back into the runtime)
 
 	MID_CreateThread = 0x40,
 	MID_DestroyThread,
@@ -132,6 +131,9 @@ namespace Messages
 		unsigned int ClassId;
 		size_t Size;
 		unsigned int FunctionId;
+		unsigned __int64 TimeStamp;
+
+		void Write(IProfilerServer& server);
 	};
 
 	//Also used for DestroyThread
