@@ -112,6 +112,8 @@ public:
 
 	//overriden interface functions
 	STDMETHOD(ObjectAllocated)(ObjectID objectId, ClassID classId);
+	STDMETHOD(GarbageCollectionStarted)(int cGenerations, BOOL generationCollected[], COR_PRF_GC_REASON reason);
+	STDMETHOD(ClassLoadFinished)(ClassID classId, HRESULT hrStatus);
 
 	STDMETHOD(ThreadCreated)(ThreadID threadId);
 	STDMETHOD(ThreadDestroyed)(ThreadID threadId);
@@ -164,7 +166,7 @@ private:
 	IdRemapper m_threadRemapper;
 	IdRemapper m_functionRemapper;
 
-	boost::recursive_mutex m_lock;
+	Mutex m_lock;
 	std::vector<ModuleInfo*> m_modules;
 	std::vector<ClassInfo*> m_classes;
 	std::vector<FunctionInfo*> m_functions;
@@ -209,6 +211,7 @@ private:
 	};
 
 	static HRESULT CALLBACK StackWalkGlobal(FunctionID funcId, UINT_PTR ip, COR_PRF_FRAME_INFO frameInfo, ULONG32 contextSize, BYTE context[], void *clientData);
+	static HRESULT CALLBACK StackWalkGlobal_OneShot(FunctionID funcId, UINT_PTR ip, COR_PRF_FRAME_INFO frameInfo, ULONG32 contextSize, BYTE context[], void *clientData);
 };
 
 extern ClrProfiler* g_Profiler;

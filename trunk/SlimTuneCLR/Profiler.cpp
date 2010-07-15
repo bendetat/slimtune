@@ -263,7 +263,7 @@ STDMETHODIMP ClrProfiler::Shutdown()
 	//if we hold the lock when the server is going down, we can deadlock
 	{
 		//force everything else to finish
-		boost::recursive_mutex::scoped_lock EnterLock(m_lock);
+		Mutex::scoped_lock EnterLock(m_lock);
 
 		//shut off profiling (in case we're unfortunate enough to get an activate request right here)
 		g_Profiler = NULL;
@@ -373,8 +373,14 @@ HRESULT ClrProfiler::SetInitialEventMask()
 		eventMask |= COR_PRF_MONITOR_CODE_TRANSITIONS;
 	}
 
+	eventMask |= COR_PRF_MONITOR_CLASS_LOADS;
+	eventMask |= COR_PRF_MONITOR_GC;
+	eventMask |= COR_PRF_MONITOR_OBJECT_ALLOCATED | COR_PRF_ENABLE_OBJECT_ALLOCATED;
+
 	m_eventMask = eventMask;
-	return m_ProfilerInfo->SetEventMask(m_eventMask);
+	HRESULT hr = m_ProfilerInfo->SetEventMask(m_eventMask);
+	assert(SUCCEEDED(hr));
+	return hr;
 }
 
 const FunctionInfo* ClrProfiler::GetFunction(unsigned int id)
@@ -382,7 +388,7 @@ const FunctionInfo* ClrProfiler::GetFunction(unsigned int id)
 	if(!IsConnected())
 		return 0;
 
-	boost::recursive_mutex::scoped_lock EnterLock(m_lock);
+	Mutex::scoped_lock EnterLock(m_lock);
 
 	if(id >= m_functions.size())
 		return NULL;
@@ -405,7 +411,7 @@ const ClassInfo* ClrProfiler::GetClass(unsigned int id)
 	if(!IsConnected())
 		return 0;
 
-	boost::recursive_mutex::scoped_lock EnterLock(m_lock);
+	Mutex::scoped_lock EnterLock(m_lock);
 
 	if(id >= m_classes.size())
 		return NULL;
@@ -424,7 +430,7 @@ const ThreadInfo* ClrProfiler::GetThread(unsigned int id)
 	if(!IsConnected())
 		return 0;
 
-	boost::recursive_mutex::scoped_lock EnterLock(m_lock);
+	Mutex::scoped_lock EnterLock(m_lock);
 
 	ThreadMap::iterator infoIt = m_threads.find(id);
 	if(infoIt == m_threads.end())
@@ -438,7 +444,7 @@ void ClrProfiler::SetInstrument(unsigned int id, bool enable)
 	if(!IsConnected())
 		return;
 
-	boost::recursive_mutex::scoped_lock EnterLock(m_lock);
+	Mutex::scoped_lock EnterLock(m_lock);
 
 	if(id >= m_functions.size())
 		return;
@@ -499,7 +505,7 @@ unsigned int ClrProfiler::MapModule(ModuleID moduleId)
 unsigned int ClrProfiler::MapClass(mdTypeDef classDef, IMetaDataImport* metadata)
 {
 	assert(classDef != NULL);
-	boost::recursive_mutex::scoped_lock EnterLock(m_lock);
+	Mutex::scoped_lock EnterLock(m_lock);
 
 	//a TypeDef is only unique within its module, so we'll combine the module and class
 	//if metadata is NULL, assume classDef is already fully combined
@@ -547,9 +553,9 @@ unsigned int ClrProfiler::MapClass(mdTypeDef classDef, IMetaDataImport* metadata
 	if(info->Name.size() == 0 && !m_suspended)
 	{
 		//get a metadata if we don't have one
-		SlimComPtr<IMetaDataImport> freshMetadata;
 		if(metadata == NULL)
 		{
+			SlimComPtr<IMetaDataImport> freshMetadata;
 			HRESULT hr = m_ProfilerInfo->GetModuleMetaData(moduleInfo->NativeId, ofRead, IID_IMetaDataImport, (IUnknown**) &freshMetadata);
 			if(FAILED(hr))
 				return newId;
@@ -580,7 +586,7 @@ unsigned int ClrProfiler::MapClass(mdTypeDef classDef, IMetaDataImport* metadata
 
 UINT_PTR ClrProfiler::MapFunction(FunctionID functionId, bool deferNameLookup)
 {
-	boost::recursive_mutex::scoped_lock EnterLock(m_lock);
+	Mutex::scoped_lock EnterLock(m_lock);
 
 	//Look up the FunctionInfo or create a new one
 	FunctionInfo* info;
@@ -632,7 +638,7 @@ UINT_PTR ClrProfiler::MapFunction(FunctionID functionId, bool deferNameLookup)
 
 unsigned int ClrProfiler::MapUnmanaged(UINT_PTR address)
 {
-	boost::recursive_mutex::scoped_lock EnterLock(m_lock);
+	Mutex::scoped_lock EnterLock(m_lock);
 
 	//copied from http://msdn.microsoft.com/en-us/library/ms680578%28VS.85%29.aspx
 	ULONG64 buffer[(sizeof(SYMBOL_INFO) +
@@ -797,7 +803,7 @@ bool ClrProfiler::SuspendTarget()
 		return false;
 	}
 
-	boost::recursive_mutex::scoped_lock EnterLock(m_lock);
+	Mutex::scoped_lock EnterLock(m_lock);
 
 	for(ThreadMap::iterator it = m_threads.begin(); it != m_threads.end(); ++it)
 	{
@@ -829,7 +835,7 @@ bool ClrProfiler::ResumeTarget()
 		return false;
 	}
 
-	boost::recursive_mutex::scoped_lock EnterLock(m_lock);
+	Mutex::scoped_lock EnterLock(m_lock);
 
 	for(ThreadMap::iterator it = m_threads.begin(); it != m_threads.end(); ++it)
 	{
@@ -996,6 +1002,17 @@ HRESULT ClrProfiler::StackWalkGlobal(FunctionID funcId, UINT_PTR ip, COR_PRF_FRA
 	return S_OK;
 }
 
+HRESULT ClrProfiler::StackWalkGlobal_OneShot(FunctionID funcId, UINT_PTR ip, COR_PRF_FRAME_INFO frameInfo, ULONG32 contextSize, BYTE contextBytes[], void *clientData)
+{
+	if(funcId == 0)
+		return S_OK;
+
+	WalkData* data = static_cast<WalkData*>(clientData);
+	FunctionInfo* info = reinterpret_cast<FunctionInfo*>(data->profiler->MapFunction(funcId, true));
+	data->functions->push_back(info->Id);
+	return S_FALSE;
+}
+
 void ClrProfiler::OnSampleTimerGlobal(LPVOID lpParameter, BOOLEAN TimerOrWaitFired)
 {
 	ClrProfiler* profiler = static_cast<ClrProfiler*>(lpParameter);
@@ -1022,7 +1039,7 @@ void ClrProfiler::StopSampleTimer()
 
 void ClrProfiler::OnSampleTimer()
 {
-	boost::recursive_mutex::scoped_lock EnterLock(m_lock);
+	Mutex::scoped_lock EnterLock(m_lock);
 
 	//don't sample if we're not connected or not active
 	if(!IsSamplerActive() || !IsConnected())
@@ -1214,6 +1231,8 @@ HRESULT ClrProfiler::ObjectAllocated(ObjectID objectId, ClassID classId)
 	if(!m_server->Connected())
 		return S_OK;
 
+	Mutex::scoped_lock EnterLock(m_lock);
+
 	ModuleID moduleId;
 	mdTypeDef token;
 	HRESULT hr = m_ProfilerInfo->GetClassIDInfo(classId, &moduleId, &token);
@@ -1226,9 +1245,21 @@ HRESULT ClrProfiler::ObjectAllocated(ObjectID objectId, ClassID classId)
 	//get the internal id we're using for this class
 	unsigned int id = ClassIdFromTypeDefAndModule(token, moduleId);
 
+	std::vector<unsigned int, UIntPoolAlloc> functions;
+	functions.reserve(1);
+	unsigned int parentId = -1;
+	WalkData data = { this, &functions, 0, 0 };
+	HRESULT snapshotResult = m_ProfilerInfo2->DoStackSnapshot(NULL, StackWalkGlobal_OneShot, COR_PRF_SNAPSHOT_DEFAULT,
+		&data, NULL, 0);
+	if(SUCCEEDED(snapshotResult) || snapshotResult == CORPROF_E_STACKSNAPSHOT_ABORTED)
+	{
+		parentId = functions[0];
+	}
+
 	Messages::ObjectAllocated allocMsg;
 	allocMsg.ClassId = id;
 	allocMsg.Size = size;
+	allocMsg.FunctionId = parentId;
 	//TODO: Send a message
 
 	return S_OK;
@@ -1251,7 +1282,7 @@ HRESULT ClrProfiler::ThreadCreated(ThreadID threadId)
 
 	ThreadInfo* info = new ThreadInfo(id, threadId, &context);
 	{
-		boost::recursive_mutex::scoped_lock EnterLock(m_lock);
+		Mutex::scoped_lock EnterLock(m_lock);
 		m_threads[id] = info;
 	}
 
@@ -1264,7 +1295,7 @@ HRESULT ClrProfiler::ThreadCreated(ThreadID threadId)
 HRESULT ClrProfiler::ThreadDestroyed(ThreadID threadId)
 {
 	//taking the lock prevents this from intersecting with the stack walk
-	boost::recursive_mutex::scoped_lock EnterLock(m_lock);
+	Mutex::scoped_lock EnterLock(m_lock);
 
 	//it's possible we've never actually seen the thread before and have to map it
 	unsigned int& id = m_threadRemapper[threadId];
@@ -1328,7 +1359,7 @@ HRESULT ClrProfiler::ThreadNameChanged(ThreadID threadId, ULONG nameLen, WCHAR n
 
 HRESULT ClrProfiler::ThreadAssignedToOSThread(ThreadID managedThreadId, DWORD osThreadId)
 {
-	boost::recursive_mutex::scoped_lock EnterLock(m_lock);
+	Mutex::scoped_lock EnterLock(m_lock);
 	unsigned int& id = m_threadRemapper[managedThreadId];
 	assert(id != 0);
 	m_threads[id]->SystemId = osThreadId;
@@ -1352,7 +1383,7 @@ HRESULT ClrProfiler::ModuleLoadFinished(ModuleID moduleId, HRESULT hrStatus)
 	if(FAILED(hrStatus))
 		return S_OK;
 
-	boost::recursive_mutex::scoped_lock EnterLock(m_lock);
+	Mutex::scoped_lock EnterLock(m_lock);
 
 	SlimComPtr<IMetaDataImport> metadata;
 	HRESULT hr = m_ProfilerInfo2->GetModuleMetaData(moduleId, ofRead, IID_IMetaDataImport, (IUnknown**) &metadata);
@@ -1490,6 +1521,30 @@ HRESULT ClrProfiler::RuntimeThreadResumed(ThreadID threadId)
 		ThreadContext& context = it->second;
 		context.Suspended = false;
 	}
+
+	return S_OK;
+}
+
+HRESULT ClrProfiler::GarbageCollectionStarted(int cGenerations, BOOL generationCollected[], COR_PRF_GC_REASON reason)
+{
+	return S_OK;
+}
+
+HRESULT ClrProfiler::ClassLoadFinished(ClassID classId, HRESULT hrStatus)
+{
+	ModuleID moduleId;
+	mdTypeDef classDef;
+	ClassID parentClass;
+
+	HRESULT hr = m_ProfilerInfo2->GetClassIDInfo2(classId, &moduleId, &classDef, &parentClass, 0, 0, 0);
+	CHECK_HR(hr);
+
+	SlimComPtr<IMetaDataImport2> metaData;
+	hr = m_ProfilerInfo->GetModuleMetaData(moduleId, ofRead, IID_IMetaDataImport2, (IUnknown**) &metaData);
+	CHECK_HR(hr);
+
+	hr = MapClass(classDef, metaData);
+	CHECK_HR(hr);
 
 	return S_OK;
 }
