@@ -258,6 +258,7 @@ namespace UICore
 
 			ClassInfo classInfo = new ClassInfo { Id = mapClass.ClassId };
 			classInfo.Name = mapClass.Name;
+			classInfo.IsValueType = mapClass.IsValueType;
 			m_classes.Add(classInfo.Id, classInfo);
 
 			m_data.MapClass(classInfo);

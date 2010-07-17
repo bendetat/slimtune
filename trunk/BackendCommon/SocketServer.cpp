@@ -132,6 +132,7 @@ void TcpConnection::SendClass(const Requests::GetClassMapping& request)
 	{
 		Messages::MapClass mapping;
 		mapping.ClassId = request.ClassId;
+		mapping.IsValueType = classInfo->IsValueType;
 		wcscpy_s(mapping.Name, Messages::MapClass::MaxNameSize, classInfo->Name.c_str());
 		mapping.Write(m_server, classInfo->Name.size());
 	}

@@ -115,7 +115,8 @@ public:
 	STDMETHOD(ObjectAllocated)(ObjectID objectId, ClassID classId);
 	STDMETHOD(GarbageCollectionStarted)(int cGenerations, BOOL generationCollected[], COR_PRF_GC_REASON reason);
 	STDMETHOD(GarbageCollectionFinished)();
-	STDMETHOD(ClassLoadFinished)(ClassID classId, HRESULT hrStatus);
+	STDMETHOD(ObjectsAllocatedByClass)(ULONG classCount, ClassID* classIds, ULONG* cObjects);
+	STDMETHOD(ObjectReferences)(ObjectID objectId, ClassID classId, ULONG cObjectRefs, ObjectID* objectRefIds);
 
 	STDMETHOD(ThreadCreated)(ThreadID threadId);
 	STDMETHOD(ThreadDestroyed)(ThreadID threadId);
@@ -123,6 +124,7 @@ public:
 	STDMETHOD(ThreadAssignedToOSThread)(ThreadID managedThreadId, DWORD osThreadId);
 
 	STDMETHOD(ModuleLoadFinished)(ModuleID moduleId, HRESULT hrStatus);
+	STDMETHOD(ClassLoadFinished)(ClassID classId, HRESULT hrStatus);
 
 	STDMETHOD(JITCachedFunctionSearchStarted)(FunctionID functionId, BOOL* pbUseCachedFunction);
 

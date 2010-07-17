@@ -43,6 +43,7 @@ namespace UICore
 	public class ClassInfo
 	{
 		public virtual int Id { get; set; }
+		public virtual bool IsValueType { get; set; }
 		public virtual string Name { get; set; }
 		public virtual IList<FunctionInfo> Functions { get; set; }
 	}

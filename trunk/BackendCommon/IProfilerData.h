@@ -45,12 +45,14 @@ struct ClassInfo
 {
 	const unsigned int Id;
 	std::wstring Name;
+	int IsValueType;
 
 	size_t NativeId;
 
 	ClassInfo(unsigned int id, size_t nativeId)
 		: Id(id),
-		NativeId(nativeId)
+		NativeId(nativeId),
+		IsValueType(0)
 	{
 	}
 

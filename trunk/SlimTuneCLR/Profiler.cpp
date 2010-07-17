@@ -334,8 +334,6 @@ HRESULT ClrProfiler::SetInitialEventMask()
 	if(m_config.Mode == PM_Disabled)
 		return m_ProfilerInfo->SetEventMask(COR_PRF_MONITOR_NONE);
 
-	//Definitely need config for flags, although GC and ObjectAllocated might be one control.
-
 	//initialize with the required flags 
 	DWORD eventMask = 0;
 	eventMask |= COR_PRF_USE_PROFILE_IMAGES;
@@ -343,6 +341,8 @@ HRESULT ClrProfiler::SetInitialEventMask()
 	eventMask |= COR_PRF_MONITOR_THREADS;
 	//Need this to be able to map modules properly
 	eventMask |= COR_PRF_MONITOR_MODULE_LOADS;
+	//We want to be able to map classes properly
+	eventMask |= COR_PRF_MONITOR_CLASS_LOADS;
 	//Inlining can result in rather confusing traces
 	if(!m_config.AllowInlining)
 		eventMask |= COR_PRF_DISABLE_INLINING;
@@ -354,7 +354,6 @@ HRESULT ClrProfiler::SetInitialEventMask()
 
 	if(m_config.TrackObjectAllocations)
 	{
-		eventMask |= COR_PRF_MONITOR_CLASS_LOADS;
 		eventMask |= COR_PRF_MONITOR_OBJECT_ALLOCATED | COR_PRF_ENABLE_OBJECT_ALLOCATED;
 	}
 
@@ -567,7 +566,8 @@ unsigned int ClrProfiler::MapClass(mdTypeDef classDef, IMetaDataImport* metadata
 		//Get the actual class name
 		ULONG classLength = Messages::MapClass::MaxNameSize;
 		wchar_t className[Messages::MapClass::MaxNameSize];
-		HRESULT hr = metadata->GetTypeDefProps(classDef, className, classLength, &classLength, 0, 0);
+		mdToken extends;
+		HRESULT hr = metadata->GetTypeDefProps(classDef, className, classLength, &classLength, 0, &extends);
 		if(FAILED(hr))
 			return newId;
 
@@ -580,6 +580,11 @@ unsigned int ClrProfiler::MapClass(mdTypeDef classDef, IMetaDataImport* metadata
 		{
 			info->Name = std::wstring(&className[0], &className[classLength - 1]);
 			assert(wcslen(info->Name.c_str()) == info->Name.size());
+
+			const DWORD ValueType = 0x0200000e;
+			const DWORD Enum = 0x0200001f;
+			if(extends == ValueType || extends == Enum)
+				info->IsValueType = 1;
 		}
 	}
 

@@ -77,6 +77,7 @@ namespace UICore.Mappings
 			Id(x => x.Id)
 				.GeneratedBy.Assigned();
 			Map(x => x.Name);
+			Map(x => x.IsValueType);
 			HasMany(x => x.Functions)
 				.Inverse()
 				.ReadOnly();

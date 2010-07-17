@@ -49,6 +49,7 @@ namespace Messages
 
 		*bufPtr++ = MID_MapClass;
 		bufPtr = Write7BitEncodedInt(bufPtr, this->ClassId);
+		bufPtr = Write7BitEncodedInt(bufPtr, this->IsValueType);
 		bufPtr = WriteString(bufPtr, this->Name, nameCount);
 
 		server.Write(buffer, bufPtr - buffer);

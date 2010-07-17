@@ -110,6 +110,7 @@ namespace UICore
 			public const int MaxNameSize = 1024;
 
 			public int ClassId;
+			public bool IsValueType;
 			public string Name;
 
 			public static MapClass Read(BinaryReader reader)
@@ -117,6 +118,7 @@ namespace UICore
 				MapClass result = new MapClass();
 
 				result.ClassId = Utilities.Read7BitEncodedInt(reader);
+				result.IsValueType = Utilities.Read7BitEncodedInt(reader) != 0;
 				result.Name = reader.ReadString();
 
 				return result;

@@ -100,6 +100,7 @@ namespace Messages
 		static const int MaxNameSize = 1024;
 
 		unsigned int ClassId;
+		unsigned int IsValueType;
 		wchar_t Name[MaxNameSize];
 
 		void Write(IProfilerServer& server, size_t nameCount);
