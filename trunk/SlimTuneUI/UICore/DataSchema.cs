@@ -117,6 +117,7 @@ namespace UICore
 
 	public class CounterValue
 	{
+		public virtual int Id { get; set; }
 		public virtual int CounterId { get; set; }
 		public virtual Counter Counter { get; set; }
 		public virtual long Time { get; set; }

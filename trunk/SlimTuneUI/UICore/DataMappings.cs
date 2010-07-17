@@ -141,10 +141,11 @@ namespace UICore.Mappings
 	{
 		public CounterValueMap()
 		{
-			CompositeId()
+			/*CompositeId()
 				.KeyProperty(x => x.CounterId)
 				.KeyProperty(x => x.Time)
-				.Mapped();
+				.Mapped();*/
+			Id(x => x.Id);
 			Map(x => x.CounterId).Index("CounterValues_IdIndex");
 			Map(x => x.Time);
 			Map(x => x.Value);
