@@ -324,6 +324,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\PerfCounter.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\PerfCounter.h"
+			>
+		</File>
+		<File
 			RelativePath=".\RingBuffer.cpp"
 			>
 		</File>
