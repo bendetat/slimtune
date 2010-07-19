@@ -29,11 +29,11 @@
 		private void InitializeComponent()
 		{
 			this.Splitter = new System.Windows.Forms.SplitContainer();
+			this.SqlRadioButton = new System.Windows.Forms.RadioButton();
+			this.HqlRadioButton = new System.Windows.Forms.RadioButton();
+			this.QueryButton = new System.Windows.Forms.Button();
 			this.QueryEditor = new ScintillaNet.Scintilla();
 			this.DataViewer = new System.Windows.Forms.DataGridView();
-			this.QueryButton = new System.Windows.Forms.Button();
-			this.HqlRadioButton = new System.Windows.Forms.RadioButton();
-			this.SqlRadioButton = new System.Windows.Forms.RadioButton();
 			this.Splitter.Panel1.SuspendLayout();
 			this.Splitter.Panel2.SuspendLayout();
 			this.Splitter.SuspendLayout();
@@ -44,6 +44,7 @@
 			// Splitter
 			// 
 			this.Splitter.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.Splitter.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
 			this.Splitter.Location = new System.Drawing.Point(0, 0);
 			this.Splitter.Name = "Splitter";
 			// 
@@ -58,9 +59,44 @@
 			// 
 			this.Splitter.Panel2.Controls.Add(this.DataViewer);
 			this.Splitter.Size = new System.Drawing.Size(801, 485);
-			this.Splitter.SplitterDistance = 400;
+			this.Splitter.SplitterDistance = 300;
 			this.Splitter.SplitterWidth = 3;
 			this.Splitter.TabIndex = 0;
+			// 
+			// SqlRadioButton
+			// 
+			this.SqlRadioButton.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.SqlRadioButton.AutoSize = true;
+			this.SqlRadioButton.Checked = true;
+			this.SqlRadioButton.Location = new System.Drawing.Point(84, 442);
+			this.SqlRadioButton.Name = "SqlRadioButton";
+			this.SqlRadioButton.Size = new System.Drawing.Size(126, 17);
+			this.SqlRadioButton.TabIndex = 3;
+			this.SqlRadioButton.TabStop = true;
+			this.SqlRadioButton.Text = "SQL (Raw Database)";
+			this.SqlRadioButton.UseVisualStyleBackColor = true;
+			// 
+			// HqlRadioButton
+			// 
+			this.HqlRadioButton.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.HqlRadioButton.AutoSize = true;
+			this.HqlRadioButton.Location = new System.Drawing.Point(84, 465);
+			this.HqlRadioButton.Name = "HqlRadioButton";
+			this.HqlRadioButton.Size = new System.Drawing.Size(110, 17);
+			this.HqlRadioButton.TabIndex = 2;
+			this.HqlRadioButton.Text = "HQL (NHibernate)";
+			this.HqlRadioButton.UseVisualStyleBackColor = true;
+			// 
+			// QueryButton
+			// 
+			this.QueryButton.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.QueryButton.Location = new System.Drawing.Point(3, 451);
+			this.QueryButton.Name = "QueryButton";
+			this.QueryButton.Size = new System.Drawing.Size(75, 23);
+			this.QueryButton.TabIndex = 1;
+			this.QueryButton.Text = "Query";
+			this.QueryButton.UseVisualStyleBackColor = true;
+			this.QueryButton.Click += new System.EventHandler(this.QueryButton_Click);
 			// 
 			// QueryEditor
 			// 
@@ -69,7 +105,7 @@
 						| System.Windows.Forms.AnchorStyles.Right)));
 			this.QueryEditor.Location = new System.Drawing.Point(0, 0);
 			this.QueryEditor.Name = "QueryEditor";
-			this.QueryEditor.Size = new System.Drawing.Size(397, 436);
+			this.QueryEditor.Size = new System.Drawing.Size(297, 436);
 			this.QueryEditor.Styles.BraceBad.FontName = "Verdana";
 			this.QueryEditor.Styles.BraceLight.FontName = "Verdana";
 			this.QueryEditor.Styles.ControlChar.FontName = "Verdana";
@@ -89,43 +125,8 @@
 			this.DataViewer.Location = new System.Drawing.Point(0, 0);
 			this.DataViewer.Name = "DataViewer";
 			this.DataViewer.ReadOnly = true;
-			this.DataViewer.Size = new System.Drawing.Size(398, 485);
+			this.DataViewer.Size = new System.Drawing.Size(498, 485);
 			this.DataViewer.TabIndex = 0;
-			// 
-			// QueryButton
-			// 
-			this.QueryButton.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.QueryButton.Location = new System.Drawing.Point(3, 451);
-			this.QueryButton.Name = "QueryButton";
-			this.QueryButton.Size = new System.Drawing.Size(75, 23);
-			this.QueryButton.TabIndex = 1;
-			this.QueryButton.Text = "Query";
-			this.QueryButton.UseVisualStyleBackColor = true;
-			this.QueryButton.Click += new System.EventHandler(this.QueryButton_Click);
-			// 
-			// HqlRadioButton
-			// 
-			this.HqlRadioButton.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.HqlRadioButton.AutoSize = true;
-			this.HqlRadioButton.Location = new System.Drawing.Point(84, 465);
-			this.HqlRadioButton.Name = "HqlRadioButton";
-			this.HqlRadioButton.Size = new System.Drawing.Size(110, 17);
-			this.HqlRadioButton.TabIndex = 2;
-			this.HqlRadioButton.Text = "HQL (NHibernate)";
-			this.HqlRadioButton.UseVisualStyleBackColor = true;
-			// 
-			// SqlRadioButton
-			// 
-			this.SqlRadioButton.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.SqlRadioButton.AutoSize = true;
-			this.SqlRadioButton.Checked = true;
-			this.SqlRadioButton.Location = new System.Drawing.Point(84, 442);
-			this.SqlRadioButton.Name = "SqlRadioButton";
-			this.SqlRadioButton.Size = new System.Drawing.Size(126, 17);
-			this.SqlRadioButton.TabIndex = 3;
-			this.SqlRadioButton.TabStop = true;
-			this.SqlRadioButton.Text = "SQL (Raw Database)";
-			this.SqlRadioButton.UseVisualStyleBackColor = true;
 			// 
 			// QueryDebugger
 			// 

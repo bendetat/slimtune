@@ -186,13 +186,13 @@ WHERE ParentId = {0} AND ThreadId = {1}
 ";
 
 		const string kTopLevelQuery = @"
-SELECT Samples.ThreadId, Id, HitCount, Name AS ""Function"", Signature, CASE TotalHits
+SELECT Samples.ThreadId, F.Id, HitCount, Name AS ""Function"", Signature, CASE TotalHits
 	WHEN 0 THEN 0
 	ELSE (1.0 * HitCount / TotalHits)
 	END AS ""Percent""
 FROM Samples
-JOIN Functions
-	ON Id = FunctionId
+JOIN Functions F
+	ON F.Id = FunctionId
 JOIN (SELECT ThreadId, MAX(HitCount) AS ""TotalHits"" FROM Samples GROUP BY ThreadId) AS ""Totals""
 	ON Samples.ThreadId = Totals.ThreadId
 ORDER BY HitCount DESC
@@ -204,8 +204,8 @@ SELECT C1.ChildId, HitCount, Name AS ""Function"", Signature, CASE TotalCalls
 	ELSE (1.0 * C1.HitCount / TotalCalls)
 	END AS ""% Calls""
 FROM Calls AS ""C1""
-JOIN Functions
-	ON C1.ChildId = Id
+JOIN Functions F
+	ON C1.ChildId = F.Id
 JOIN (
 	SELECT ChildId, SUM(HitCount) AS ""TotalCalls""
 	FROM Calls
@@ -291,13 +291,13 @@ ORDER BY HitCount DESC
 	class CallersModel : ITreeModel
 	{
 		const string kTopLevelQuery = @"
-SELECT Calls.ThreadId, Id, Name AS ""Function"", Signature, HitCount, CASE TotalHits
+SELECT Calls.ThreadId, F.Id, Name AS ""Function"", Signature, HitCount, CASE TotalHits
 	WHEN 0 THEN 0
 	ELSE (1.0 * HitCount / TotalHits)
 	END AS ""Percent""
 FROM Calls
-JOIN Functions
-	ON Id = ParentId
+JOIN Functions F
+	ON F.Id = ParentId
 JOIN (SELECT ThreadId, SUM(HitCount) AS ""TotalHits"" FROM Calls WHERE ChildId = 0 GROUP BY ThreadId) AS ""Totals""
 	ON Calls.ThreadId = Totals.ThreadId
 WHERE ChildId = 0
@@ -305,13 +305,13 @@ ORDER BY HitCount DESC
 ";
 
 		const string kChildQuery = @"
-SELECT Id, HitCount, Name AS ""Function"", Signature, CASE TotalCalls
+SELECT F.Id, HitCount, Name AS ""Function"", Signature, CASE TotalCalls
 	WHEN 0 THEN 0
 	ELSE (1.0 * HitCount / TotalCalls)
 	END AS ""Percent""
 FROM Calls
-JOIN Functions
-	ON Id = ParentId
+JOIN Functions F
+	ON F.Id = ParentId
 JOIN (
 	SELECT ChildId, SUM(HitCount) AS ""TotalCalls""
 	FROM Calls
