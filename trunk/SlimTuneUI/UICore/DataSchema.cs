@@ -144,6 +144,7 @@ namespace UICore
 	{
 		public virtual int Id { get; set; }
 		public virtual int Generation { get; set; }
+		public virtual int FunctionId { get; set; }
 		public virtual long Time { get; set; }
 	}
 
@@ -151,7 +152,8 @@ namespace UICore
 	{
 		public virtual int Id { get; set; }
 		public virtual int ClassId { get; set; }
-		public virtual long Size { get; set; }
-		public virtual long Count { get; set; }
+		public virtual int FunctionId { get; set; }
+		public virtual int Count { get; set; }
+		public virtual int Size { get; set; }
 	}
 }

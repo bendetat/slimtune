@@ -4,6 +4,8 @@ namespace SlimTuneUI
 {
 	public class DummyDataEngine : UICore.IDataEngine
 	{
+		#region IDataEngine Members
+
 		public string Name
 		{
 			get { return "Dummy Engine"; }
@@ -118,10 +120,17 @@ namespace SlimTuneUI
 			throw new NotImplementedException();
 		}
 
-		public void GarbageCollection(int generation, long time)
+		public void GarbageCollection(int generation, int function, long time)
 		{
 			throw new NotImplementedException();
 		}
+
+		public void ObjectAllocated(int classId, long size, int functionId, long time)
+		{
+			throw new NotImplementedException();
+		}
+
+		#endregion
 
 		#region IDisposable Members
 

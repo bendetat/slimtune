@@ -191,7 +191,7 @@ namespace UICore
 
 					case MessageId.MID_ObjectAllocated:
 						var objectAllocated = Messages.ObjectAllocated.Read(m_reader);
-						//Console.WriteLine("Allocated class #{0} of size {1} in function {2}.", objectAllocated.ClassId, objectAllocated.Size, objectAllocated.FunctionId);
+						ObjectedAllocated(objectAllocated);
 						break;
 
 					case MessageId.MID_GarbageCollected:
@@ -392,9 +392,14 @@ namespace UICore
 			request.Write(m_writer);
 		}
 
+		private void ObjectedAllocated(Messages.ObjectAllocated oa)
+		{
+			m_data.ObjectAllocated(oa.ClassId, oa.Size, oa.FunctionId, oa.TimeStamp);
+		}
+
 		private void GarbageCollection(Messages.GarbageCollected gc)
 		{
-			m_data.GarbageCollection(gc.Generation, gc.TimeStamp);
+			m_data.GarbageCollection(gc.Generation, gc.FunctionId, gc.TimeStamp);
 		}
 
 		#region IDisposable Members

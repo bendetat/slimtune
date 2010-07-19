@@ -44,6 +44,18 @@ namespace UICore
 		}
 	}
 
+	public struct AllocData
+	{
+		public long Size;
+		public int Count;
+
+		public void Add(long size)
+		{
+			++Count;
+			Size += size;
+		}
+	}
+
 	public abstract class DataEngineBase : IDataEngine
 	{
 		protected const string kCallsSchema = "(ThreadId INT NOT NULL, ParentId INT NOT NULL, ChildId INT NOT NULL, HitCount INT NOT NULL)";
@@ -59,6 +71,9 @@ namespace UICore
 		protected CallGraph<int> m_calls = CallGraph<int>.Create();
 		//this is: FunctionId, ThreadId, HitCount
 		protected SortedDictionary<int, SortedList<int, int>> m_samples = new SortedDictionary<int, SortedList<int, int>>();
+
+		//this is: ClassId, FunctionId, AllocData
+		protected SortedDictionary<int, SortedDictionary<int, AllocData>> m_allocs = new SortedDictionary<int, SortedDictionary<int, AllocData>>();
 
 		private volatile bool m_allowFlush = true;
 		private DateTime m_lastFlush = DateTime.Now;
@@ -393,18 +408,40 @@ namespace UICore
 			}
 		}
 
-		public virtual void GarbageCollection(int generation, long time)
+		public virtual void ObjectAllocated(int classId, long size, int functionId, long time)
+		{
+			SortedDictionary<int, AllocData> byFunc;
+			if(m_allocs.ContainsKey(classId))
+			{
+				byFunc = m_allocs[classId];
+			}
+			else
+			{
+				byFunc = new SortedDictionary<int, AllocData>();
+				m_allocs.Add(classId, byFunc);
+			}
+
+			if(byFunc.ContainsKey(functionId))
+				byFunc[functionId].Add(size);
+			else
+				byFunc.Add(functionId, new AllocData() { Count = 1, Size = size });
+		}
+
+		public virtual void GarbageCollection(int generation, int function, long time)
 		{
 			using(var tx = m_statelessSession.BeginTransaction())
 			{
 				var gc = new GarbageCollection()
 				{
 					Generation = generation,
+					FunctionId = function,
 					Time = time
 				};
 				m_statelessSession.Insert(gc);
 				tx.Commit();
 			}
+
+			Flush();
 		}
 
 		#region IDisposable Members

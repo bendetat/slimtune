@@ -254,7 +254,7 @@ namespace SlimTuneUI
 			}
 		}
 
-		/*private void SuspendButton_Click(object sender, EventArgs e)
+		private void SuspendButton_Click(object sender, EventArgs e)
 		{
 			if(Connection.Client != null)
 				Connection.Client.SuspendTarget();
@@ -264,6 +264,16 @@ namespace SlimTuneUI
 		{
 			if(Connection.Client != null)
 				Connection.Client.ResumeTarget();
-		}*/
+		}
+
+		private void PauseButton_Click(object sender, EventArgs e)
+		{
+			Connection.Client.SetSamplerActive(false);
+		}
+
+		private void ResumeButton_Click_1(object sender, EventArgs e)
+		{
+			Connection.Client.SetSamplerActive(true);
+		}
 	}
 }

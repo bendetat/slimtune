@@ -95,9 +95,8 @@ namespace SlimTuneUI
 			{
 				try
 				{
-					//storage = new SqlServerCompactEngine(dbFile, true);
+					this.Cursor = Cursors.WaitCursor;
 					if(m_sqliteRadio.Checked)
-						//data = new SQLiteEngine(dbFile, true);
 						data = new SQLiteEngine(dbFile, true);
 					else if(m_sqliteMemoryRadio.Checked)
 						data = new SQLiteMemoryEngine();
@@ -108,6 +107,10 @@ namespace SlimTuneUI
 				{
 					MessageBox.Show(ex.Message, "Launch Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 					return false;
+				}
+				finally
+				{
+					this.Cursor = Cursors.Default;
 				}
 			}
 

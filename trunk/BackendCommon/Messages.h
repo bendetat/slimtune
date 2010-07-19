@@ -140,6 +140,7 @@ namespace Messages
 	struct GarbageCollection
 	{
 		unsigned int Generation;
+		unsigned int FunctionId;
 		unsigned __int64 TimeStamp;
 
 		void Write(IProfilerServer& server);

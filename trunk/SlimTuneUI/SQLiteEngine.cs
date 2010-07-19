@@ -46,6 +46,9 @@ namespace SlimTuneUI
 		SQLiteCommand m_insertSampleCmd;
 		SQLiteCommand m_updateSampleCmd;
 
+		SQLiteCommand m_insertAllocCmd;
+		SQLiteCommand m_updateAllocCmd;
+
 		public override string Extension
 		{
 			get { return "sqlite"; }
@@ -110,6 +113,7 @@ namespace SlimTuneUI
 			{
 				queryCount += FlushCalls();
 				queryCount += FlushSamples();
+				queryCount += FlushAllocations();
 				transact.Commit();
 			}
 
@@ -255,6 +259,9 @@ namespace SlimTuneUI
 
 			m_insertSampleCmd = CreateCommand("INSERT INTO Samples (ThreadId, FunctionId, HitCount) VALUES (?, ?, ?)", 3);
 			m_updateSampleCmd = CreateCommand("UPDATE Samples SET HitCount = HitCount + ? WHERE ThreadId=? AND FunctionId=?", 3);
+
+			m_insertAllocCmd = CreateCommand("INSERT INTO Allocations (Count, Size, ClassId, FunctionId) VALUES (?, ?, ?, ?)", 4);
+			m_updateAllocCmd = CreateCommand("UPDATE Allocations SET Count = Count + ?, Size = Size + ? WHERE ClassId=? AND FunctionId=?", 4);
 		}
 
 		private int FlushCalls()
@@ -308,7 +315,7 @@ namespace SlimTuneUI
 					m_updateSampleCmd.Parameters[0].Value = threadKvp.Value;
 					m_updateSampleCmd.Parameters[1].Value = threadKvp.Key;
 					m_updateSampleCmd.Parameters[2].Value = sampleKvp.Key;
-					int count = Convert.ToInt32(m_updateSampleCmd.ExecuteNonQuery());
+					int count = m_updateSampleCmd.ExecuteNonQuery();
 					++queryCount;
 
 					if(count == 0)
@@ -326,14 +333,49 @@ namespace SlimTuneUI
 			return queryCount;
 		}
 
+		private int FlushAllocations()
+		{
+			int queryCount = 0;
+
+			foreach(KeyValuePair<int, SortedDictionary<int, AllocData>> classKvp in m_allocs)
+			{
+				foreach(KeyValuePair<int, AllocData> funcKvp in classKvp.Value)
+				{
+					m_updateAllocCmd.Parameters[0].Value = funcKvp.Value.Count;
+					m_updateAllocCmd.Parameters[1].Value = funcKvp.Value.Size;
+					m_updateAllocCmd.Parameters[2].Value = classKvp.Key;
+					m_updateAllocCmd.Parameters[3].Value = funcKvp.Key;
+					int count = m_updateAllocCmd.ExecuteNonQuery();
+					++queryCount;
+
+					if(count == 0)
+					{
+						m_insertAllocCmd.Parameters[0].Value = funcKvp.Value.Count;
+						m_insertAllocCmd.Parameters[1].Value = funcKvp.Value.Size;
+						m_insertAllocCmd.Parameters[2].Value = classKvp.Key;
+						m_insertAllocCmd.Parameters[3].Value = funcKvp.Key;
+						m_insertAllocCmd.ExecuteNonQuery();
+						++queryCount;
+					}
+				}
+			}
+
+			m_allocs.Clear();
+
+			return queryCount;
+		}
+
 		public override void Dispose()
 		{
 			base.Dispose();
+
 			//and this is why C# could really use some RAII constructs
-			m_insertCallerCmd.Dispose();
-			m_updateCallerCmd.Dispose();
-			m_insertSampleCmd.Dispose();
-			m_updateSampleCmd.Dispose();
+			Utilities.Dispose(m_insertCallerCmd);
+			Utilities.Dispose(m_updateCallerCmd);
+			Utilities.Dispose(m_insertSampleCmd);
+			Utilities.Dispose(m_updateSampleCmd);
+			Utilities.Dispose(m_insertAllocCmd);
+			Utilities.Dispose(m_updateAllocCmd);
 
 			m_database.Dispose();
 			GC.SuppressFinalize(this);

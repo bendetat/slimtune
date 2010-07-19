@@ -24,6 +24,24 @@
 #include "NativeHooks.h"
 #include "Timer.h"
 
+unsigned int ClrProfiler::GetParentFunction()
+{
+	unsigned int parentId = 0;
+
+	std::vector<unsigned int, UIntPoolAlloc> functions;
+	functions.reserve(1);
+	WalkData data = { this, &functions, 0, 0 };
+	HRESULT snapshotResult = m_ProfilerInfo2->DoStackSnapshot(NULL, StackWalkGlobal_OneShot, COR_PRF_SNAPSHOT_DEFAULT,
+		&data, NULL, 0);
+	if(SUCCEEDED(snapshotResult) || snapshotResult == CORPROF_E_STACKSNAPSHOT_ABORTED)
+	{
+		if(functions.size() > 0)
+			parentId = functions[0];
+	}
+
+	return parentId;
+}
+
 HRESULT ClrProfiler::GenerationBounds()
 {
 	assert(m_server->Connected());
@@ -62,6 +80,7 @@ HRESULT ClrProfiler::GarbageCollectionStarted(int cGenerations, BOOL generationC
 
 	Messages::GarbageCollection gcMsg;
 	gcMsg.Generation = maxGen;
+	gcMsg.FunctionId = GetParentFunction();
 	QueryTimer(gcMsg.TimeStamp);
 
 	gcMsg.Write(*m_server);
@@ -105,20 +124,8 @@ HRESULT ClrProfiler::ObjectAllocated(ObjectID objectId, ClassID classId)
 		m_ProfilerInfo->GetObjectSize(objectId, &size);
 		CHECK_HR(hr);
 
-		unsigned int parentId = -1;
-		std::vector<unsigned int, UIntPoolAlloc> functions;
-		functions.reserve(1);
-		WalkData data = { this, &functions, 0, 0 };
-		HRESULT snapshotResult = m_ProfilerInfo2->DoStackSnapshot(NULL, StackWalkGlobal_OneShot, COR_PRF_SNAPSHOT_DEFAULT,
-			&data, NULL, 0);
-		if(SUCCEEDED(snapshotResult) || snapshotResult == CORPROF_E_STACKSNAPSHOT_ABORTED)
-		{
-			if(functions.size() > 0)
-				parentId = functions[0];
-		}
-
 		m_allocMsg.Size = size;
-		m_allocMsg.FunctionId = parentId;
+		m_allocMsg.FunctionId = GetParentFunction();
 		QueryTimer(m_allocMsg.TimeStamp);
 
 		if(nativeId == 0)
@@ -143,5 +150,15 @@ HRESULT ClrProfiler::ObjectAllocated(ObjectID objectId, ClassID classId)
 	m_allocMsg.Write(*m_server);
 	m_allocatedPending = false;
 
+	return S_OK;
+}
+
+HRESULT ClrProfiler::ObjectsAllocatedByClass(ULONG classCount, ClassID* classIds, ULONG* cObjects)
+{
+	return S_OK;
+}
+
+HRESULT ClrProfiler::ObjectReferences(ObjectID objectId, ClassID classId, ULONG cObjectRefs, ObjectID* objectRefIds)
+{
 	return S_OK;
 }

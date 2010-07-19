@@ -56,6 +56,12 @@ namespace UICore
 
 	public static class Utilities
 	{
+		public static void Dispose(IDisposable dispose)
+		{
+			if(dispose != null)
+				dispose.Dispose();
+		}
+
 		public static int Read7BitEncodedInt(BinaryReader reader)
 		{
 			int value = 0;

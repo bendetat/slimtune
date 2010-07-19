@@ -161,8 +161,22 @@ namespace UICore.Mappings
 		{
 			Id(x => x.Id);
 			Map(x => x.Generation);
+			Map(x => x.FunctionId);
 			Map(x => x.Time);
 			Table("GarbageCollections");
+		}
+	}
+
+	public class AllocationMap : ClassMap<Allocation>
+	{
+		public AllocationMap()
+		{
+			Id(x => x.Id);
+			Map(x => x.ClassId);
+			Map(x => x.FunctionId);
+			Map(x => x.Count);
+			Map(x => x.Size);
+			Table("Allocations");
 		}
 	}
 }

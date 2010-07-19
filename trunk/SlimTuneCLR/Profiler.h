@@ -145,6 +145,7 @@ private:
 
 	void LeaveImpl(FunctionID functionId, FunctionInfo* info, MessageId message);
 
+	unsigned int GetParentFunction();
 	HRESULT GenerationBounds();
 	boost::array<COR_PRF_GC_GENERATION_RANGE, 5> m_genRanges;
 

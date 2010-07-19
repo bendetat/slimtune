@@ -87,7 +87,8 @@ namespace UICore
 		void CounterName(int counterId, string name);
 		void PerfCounter(int counterId, long time, double value);
 
-		void GarbageCollection(int generation, long time);
+		void GarbageCollection(int generation, int function, long time);
+		void ObjectAllocated(int classId, long size, int functionId, long time);
 
 		bool AllowFlush { get; set; }
 		void Flush();

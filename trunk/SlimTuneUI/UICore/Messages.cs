@@ -265,12 +265,14 @@ namespace UICore
 		public struct GarbageCollected
 		{
 			public int Generation;
+			public int FunctionId;
 			public long TimeStamp;
 
 			public static GarbageCollected Read(BinaryReader reader)
 			{
 				var result = new GarbageCollected();
 				result.Generation = Utilities.Read7BitEncodedInt(reader);
+				result.FunctionId = Utilities.Read7BitEncodedInt(reader);
 				result.TimeStamp = Utilities.Read7BitEncodedInt64(reader);
 				return result;
 			}
