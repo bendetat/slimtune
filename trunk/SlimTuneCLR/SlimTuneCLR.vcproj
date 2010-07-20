@@ -685,14 +685,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Memory.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Memory.h"
-				>
-			</File>
-			<File
 				RelativePath=".\NativeHooks.cpp"
 				>
 			</File>

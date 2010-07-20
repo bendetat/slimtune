@@ -177,7 +177,7 @@ namespace Messages
 	{
 		unsigned int ThreadId;
 
-		std::vector<unsigned int, UIntPoolAlloc> Functions;
+		PooledUIntVector Functions;
 
 		void Write(IProfilerServer& server);
 	};

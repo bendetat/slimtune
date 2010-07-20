@@ -56,6 +56,7 @@
 
 #pragma warning(disable:4100)
 
+#include "Memory.h"
 #include <windows.h>
 #include <mmsystem.h>
 #include <dbghelp.h>
@@ -93,4 +94,5 @@
 #include <unordered_map>
 
 typedef boost::pool_allocator<unsigned int> UIntPoolAlloc;
+typedef std::vector<unsigned int/*, UIntPoolAlloc*/> PooledUIntVector;
 typedef boost::recursive_mutex Mutex;

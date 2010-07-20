@@ -28,7 +28,7 @@ unsigned int ClrProfiler::GetParentFunction()
 {
 	unsigned int parentId = 0;
 
-	std::vector<unsigned int, UIntPoolAlloc> functions;
+	PooledUIntVector functions;
 	functions.reserve(1);
 	WalkData data = { this, &functions, 0, 0 };
 	HRESULT snapshotResult = m_ProfilerInfo2->DoStackSnapshot(NULL, StackWalkGlobal_OneShot, COR_PRF_SNAPSHOT_DEFAULT,

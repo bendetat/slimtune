@@ -52,6 +52,7 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="4"
+				DisableSpecificWarnings="4996"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -313,6 +314,14 @@
 		</File>
 		<File
 			RelativePath=".\lockfree_list.h"
+			>
+		</File>
+		<File
+			RelativePath=".\Memory.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Memory.h"
 			>
 		</File>
 		<File

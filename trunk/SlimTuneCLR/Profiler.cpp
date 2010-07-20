@@ -1110,7 +1110,7 @@ void ClrProfiler::OnSampleTimer()
 		context.ContextFlags = CONTEXT_FULL;
 		GetThreadContext(hThread, &context);
 
-		std::vector<unsigned int, UIntPoolAlloc>* functions = &sample.Functions;
+		PooledUIntVector* functions = &sample.Functions;
 		functions->reserve(32);
 
 		//Attempt an initial stackwalk with what we've got
