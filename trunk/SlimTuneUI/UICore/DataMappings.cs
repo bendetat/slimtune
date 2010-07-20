@@ -92,18 +92,20 @@ namespace UICore.Mappings
 			ReadOnly();
 			Id(x => x.Id);
 
-			Map(x => x.ThreadId).Index("Calls_ThreadIndex, Calls_Composite")
-				.UniqueKey("Calls_Unique");
-			Map(x => x.ParentId).Index("Calls_ParentIndex, Calls_Composite")
-				.UniqueKey("Calls_Unique");
-			Map(x => x.ChildId).Index("Calls_ChildIndex, Calls_Composite")
-				.UniqueKey("Calls_Unique");
+			Map(x => x.ThreadId).Index("Calls_ThreadIndex, Calls_Composite");
+			Map(x => x.ParentId).Index("Calls_ParentIndex, Calls_Composite");
+			Map(x => x.ChildId).Index("Calls_ChildIndex, Calls_Composite");
 			Map(x => x.HitCount)
 				.Not.Nullable();
+			Map(x => x.SnapshotId)
+				.Not.Nullable()
+				.Default("0");
 
 			References(x => x.Thread, "ThreadId");
 			References(x => x.Parent, "ParentId");
 			References(x => x.Child, "ChildId");
+
+			ApplyFilter("SnapshotFilter", "SnapshotId = :snapshot");
 
 			Table("Calls");
 		}
@@ -117,9 +119,16 @@ namespace UICore.Mappings
 			Id(x => x.Id);
 			Map(x => x.ThreadId).Index("Samples_ThreadIndex, Samples_Composite");
 			Map(x => x.FunctionId).Index("Samples_FunctionIndex, Samples_Composite");
-			Map(x => x.HitCount).Not.Nullable();
+			Map(x => x.HitCount)
+				.Not.Nullable();
+			Map(x => x.SnapshotId, "SnapshotId")
+				.Not.Nullable()
+				.Default("0");
 			References(x => x.Thread, "ThreadId");
 			//References(x => x.Function, "FunctionId");
+
+			ApplyFilter("SnapshotFilter", "SnapshotId = :snapshot");
+			
 			Table("Samples");
 		}
 	}
@@ -141,10 +150,6 @@ namespace UICore.Mappings
 	{
 		public CounterValueMap()
 		{
-			/*CompositeId()
-				.KeyProperty(x => x.CounterId)
-				.KeyProperty(x => x.Time)
-				.Mapped();*/
 			Id(x => x.Id);
 			Map(x => x.CounterId).Index("CounterValues_IdIndex");
 			Map(x => x.Time);

@@ -89,7 +89,7 @@ namespace SlimTuneUI.CoreVis
 			pane.Title.Text = "Function Breakdown (samples)";
 
 			using(var transact = new TransactionHandle(m_connection.DataEngine))
-			using(var session = m_connection.DataEngine.OpenSession())
+			using(var session = m_connection.DataEngine.OpenSession(0))
 			{
 				double totalHits = session.CreateQuery("select sum(c.HitCount) from Call c where c.ParentId = :parentId")
 					.SetInt32("parentId", entry.Id)

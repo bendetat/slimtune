@@ -182,7 +182,7 @@ namespace SlimTuneUI.CoreVis
 		const string kParentHits = @"
 SELECT SUM(HitCount)
 FROM Calls
-WHERE ParentId = {0} AND ThreadId = {1}
+WHERE ParentId = {0} AND ThreadId = {1} AND SnapshotId = 0
 ";
 
 		const string kTopLevelQuery = @"
@@ -195,6 +195,7 @@ JOIN Functions F
 	ON F.Id = FunctionId
 JOIN (SELECT ThreadId, MAX(HitCount) AS ""TotalHits"" FROM Samples GROUP BY ThreadId) AS ""Totals""
 	ON Samples.ThreadId = Totals.ThreadId
+WHERE Samples.SnapshotId = 0
 ORDER BY HitCount DESC
 ";
 
@@ -209,10 +210,11 @@ JOIN Functions F
 JOIN (
 	SELECT ChildId, SUM(HitCount) AS ""TotalCalls""
 	FROM Calls
+	WHERE SnapshotId = 0
 	GROUP BY ChildId
 ) AS ""C2""
 	ON C1.ChildId = C2.ChildId
-WHERE C1.ParentId = {0} AND ThreadId = {1}
+WHERE C1.ParentId = {0} AND C1.SnapshotId = 0 AND ThreadId = {1}
 ORDER BY HitCount DESC
 ";
 
@@ -298,9 +300,9 @@ SELECT Calls.ThreadId, F.Id, Name AS ""Function"", Signature, HitCount, CASE Tot
 FROM Calls
 JOIN Functions F
 	ON F.Id = ParentId
-JOIN (SELECT ThreadId, SUM(HitCount) AS ""TotalHits"" FROM Calls WHERE ChildId = 0 GROUP BY ThreadId) AS ""Totals""
+JOIN (SELECT ThreadId, SUM(HitCount) AS ""TotalHits"" FROM Calls WHERE ChildId = 0 AND SnapshotId = 0 GROUP BY ThreadId) AS ""Totals""
 	ON Calls.ThreadId = Totals.ThreadId
-WHERE ChildId = 0
+WHERE ChildId = 0 AND SnapshotId = 0
 ORDER BY HitCount DESC
 ";
 
@@ -309,16 +311,16 @@ SELECT F.Id, HitCount, Name AS ""Function"", Signature, CASE TotalCalls
 	WHEN 0 THEN 0
 	ELSE (1.0 * HitCount / TotalCalls)
 	END AS ""Percent""
-FROM Calls
+FROM Calls C
 JOIN Functions F
 	ON F.Id = ParentId
 JOIN (
 	SELECT ChildId, SUM(HitCount) AS ""TotalCalls""
-	FROM Calls
-	WHERE ChildId = {0} AND ThreadId = {1}
+	FROM Calls C2
+	WHERE C2.ChildId = {0} AND C2.ThreadId = {1} AND C2.SnapshotId = 0
 ) AS ""Totals""
-	ON Calls.ChildId = Totals.ChildId
-WHERE Calls.ThreadId = {1}
+	ON C.ChildId = Totals.ChildId
+WHERE C.ThreadId = {1} AND C.SnapshotId = 0
 ORDER BY HitCount DESC
 ";
 

@@ -144,12 +144,25 @@ namespace UICore
 		protected void FinishConstruct(bool createNew, IPersistenceConfigurer configurer)
 		{
 			m_configurer = configurer;
-			CreateSessionFactory(configurer);
+			var fluentConfig = Fluently.Configure().Database(configurer)
+				.Mappings(m => m.FluentMappings.AddFromAssemblyOf<DataEngineBase>());
+			m_config = fluentConfig.BuildConfiguration();
+			m_sessionFactory = m_config.BuildSessionFactory();
+			m_statelessSession = OpenStatelessSession();
+
 			if(createNew)
 			{
 				PreCreateSchema();
 				var export = new SchemaExport(m_config);
 				export.Execute(true, true, false, Connection, Console.Out);
+
+				WriteCoreProperties();
+				//create an entry for the first snapshot in the db
+				var firstSnapshot = m_statelessSession.CreateSQLQuery("INSERT INTO Snapshots (Id, Name, DateTime) VALUES (:id, :name, :datetime)")
+					.SetInt32("id", 0)
+					.SetString("name", "Current")
+					.SetInt64("datetime", long.MaxValue);
+				firstSnapshot.ExecuteUpdate();
 			}
 			else
 			{
@@ -164,18 +177,7 @@ namespace UICore
 				}
 			}
 
-			m_statelessSession = OpenStatelessSession();
 			PrepareCommands();
-			WriteCoreProperties();
-		}
-
-		private void CreateSessionFactory(IPersistenceConfigurer configurer)
-		{
-			var baseConfig = new Configuration();
-			var config = Fluently.Configure(baseConfig).Database(configurer);
-			var fluentConfig = config.Mappings(m => m.FluentMappings.AddFromAssemblyOf<DataEngineBase>());
-			m_config = fluentConfig.BuildConfiguration();
-			m_sessionFactory = config.BuildSessionFactory();
 		}
 
 		public virtual NHibernate.ISession OpenSession()
@@ -183,26 +185,16 @@ namespace UICore
 			return m_sessionFactory.OpenSession(Connection);
 		}
 
+		public virtual NHibernate.ISession OpenSession(int snapshot)
+		{
+			var session = OpenSession();
+			session.EnableFilter("SnapshotFilter").SetParameter("snapshot", snapshot);
+			return session;
+		}
+
 		public virtual NHibernate.IStatelessSession OpenStatelessSession()
 		{
 			return m_sessionFactory.OpenStatelessSession(Connection);
-		}
-
-		public virtual NHibernate.ISession OpenSnapshot(int snapshot)
-		{
-			ISessionFactory factory = null;
-			if(!m_snapshotFactories.TryGetValue(snapshot, out factory))
-			{
-				var baseConfig = new Configuration().SetNamingStrategy(new SnapshotNamingStrategy(snapshot));
-				var fluentConfig = Fluently.Configure(baseConfig).Database(m_configurer);
-				var config = fluentConfig.BuildConfiguration();
-				factory = config.BuildSessionFactory();
-				m_snapshotFactories.Add(snapshot, factory);
-			}
-
-			var session = factory.OpenSession(Connection);
-			session.FlushMode = FlushMode.Never;
-			return session;
 		}
 
 		public void Flush()
@@ -315,7 +307,7 @@ namespace UICore
 
 		public virtual void WriteProperty(string name, string value)
 		{
-			using(var session = OpenSession())
+			using(var session = OpenSession(0))
 			using(var tx = session.BeginTransaction())
 			{
 				var prop = new Property() { Name = name, Value = value };
@@ -374,7 +366,7 @@ namespace UICore
 		public virtual void UpdateThread(int threadId, bool alive, string name)
 		{
 			var ti = new ThreadInfo() { Id = threadId, IsAlive = alive, Name = name };
-			using(var session = OpenSession())
+			using(var session = OpenSession(0))
 			using(var tx = session.BeginTransaction())
 			{
 				session.SaveOrUpdateCopy(ti, ti.Id);
@@ -384,7 +376,7 @@ namespace UICore
 
 		public virtual void CounterName(int counterId, string name)
 		{
-			using(var session = OpenSession())
+			using(var session = OpenSession(0))
 			using(var tx = session.BeginTransaction())
 			{
 				var counter = new Counter() { Id = counterId, Name = name };

@@ -37,7 +37,7 @@ namespace SlimTuneUI.CoreVis
 		const string kParentHits = @"
 SELECT SUM(HitCount)
 FROM Calls
-WHERE ParentId = {0} AND ThreadId = {1}
+WHERE ParentId = {0} AND ThreadId = {1} AND SnapshotId = 0
 ";
 
 		const string kTopLevelQuery = @"
@@ -47,7 +47,7 @@ JOIN Functions F
 	ON C.ChildId = F.Id
 LEFT OUTER JOIN Threads T
 	ON T.Id = C.ThreadId
-WHERE C.ParentId = 0
+WHERE C.ParentId = 0 AND C.SnapshotId = 0
 ORDER BY C.HitCount DESC
 ";
 
@@ -59,9 +59,9 @@ SELECT C1.ChildId AS ""Id"", HitCount, Name AS ""Function"", Signature, CASE Tot
 FROM Calls C1
 JOIN Functions F
 	ON C1.ChildId = F.Id
-JOIN (SELECT ParentId, SUM(HitCount) AS ""TotalCalls"" FROM Calls WHERE ThreadId = {1} GROUP BY ParentId) C2
+JOIN (SELECT ParentId, SUM(HitCount) AS ""TotalCalls"" FROM Calls WHERE ThreadId = {1} AND SnapshotId = 0 GROUP BY ParentId) C2
 	ON C1.ParentId = C2.ParentId
-WHERE C1.ParentId = {0} AND ThreadId = {1}
+WHERE C1.ParentId = {0} AND ThreadId = {1} AND C1.SnapshotId = 0
 ORDER BY HitCount DESC
 ";
 
@@ -74,11 +74,11 @@ FROM Calls C1
 JOIN (
 	SELECT ParentId, SUM(HitCount) AS ""TotalCalls""
 	FROM Calls
-	WHERE ThreadId = {1}
+	WHERE ThreadId = {1} AND SnapshotId = 0
 	GROUP BY ParentId
 ) C2
 	ON C1.ParentId = C2.ParentId
-WHERE C1.ParentId = {0} AND C1.ChildId = 0 AND C1.ThreadId = {1}
+WHERE C1.ParentId = {0} AND C1.ChildId = 0 AND C1.ThreadId = {1} AND C1.SnapshotId = 0
 ";
 
 		class NodeData

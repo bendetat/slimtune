@@ -97,8 +97,8 @@ namespace UICore
 		void Save(string file);
 
 		ISession OpenSession();
+		ISession OpenSession(int snapshot);
 		IStatelessSession OpenStatelessSession();
-		ISession OpenSnapshot(int snapshot);
 
 		DataSet RawQuery(string query);
 		DataSet RawQuery(string query, int limit);

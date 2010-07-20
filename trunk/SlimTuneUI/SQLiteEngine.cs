@@ -72,6 +72,7 @@ namespace SlimTuneUI
 			m_database.Open();
 
 			var dbconfig = SQLiteConfiguration.Standard.ConnectionString(connStr);
+			dbconfig.ShowSql();
 			FinishConstruct(true, dbconfig);
 		}
 
@@ -144,12 +145,8 @@ namespace SlimTuneUI
 				cmd.ExecuteNonQuery();
 
 				int id = Convert.ToInt32(RawQueryScalar("SELECT MAX(Id) FROM Snapshots"));
-				/*Command(string.Format("CREATE TABLE Calls_{0} {1}", id, kCallsSchema));
-				Command(string.Format("INSERT INTO Calls_{0} SELECT * FROM Callers", id));
-				Command(string.Format("CREATE TABLE Samples_{0} {1}", id, kSamplesSchema));
-				Command(string.Format("INSERT INTO Samples_{0} SELECT * FROM Samples", id));*/
-				Command(string.Format("CREATE TABLE Calls_{0} AS SELECT * FROM Calls", id));
-				Command(string.Format("CREATE TABLE Samples_{0} AS SELECT * FROM Samples", id));
+				Command(string.Format("INSERT INTO Samples (ThreadId, FunctionId, HitCount, SnapshotId) SELECT ThreadId, FunctionId, HitCount, {0} FROM Samples WHERE SnapshotId=0", id));
+				Command(string.Format("INSERT INTO Calls (ThreadId, ParentId, ChildId, HitCount, SnapshotId) SELECT ThreadId, ParentId, ChildId, HitCount, {0} FROM Calls WHERE SnapshotId=0", id));
 			}
 		}
 
@@ -255,10 +252,10 @@ namespace SlimTuneUI
 		protected override void PrepareCommands()
 		{
 			m_insertCallerCmd = CreateCommand("INSERT INTO Calls (ThreadId, ParentId, ChildId, HitCount) VALUES (?, ?, ?, ?)", 4);
-			m_updateCallerCmd = CreateCommand("UPDATE Calls SET HitCount = HitCount + ? WHERE ThreadId=? AND ParentId=? AND ChildId=?", 4);
+			m_updateCallerCmd = CreateCommand("UPDATE Calls SET HitCount = HitCount + ? WHERE ThreadId=? AND ParentId=? AND ChildId=? AND SnapshotId=0", 4);
 
 			m_insertSampleCmd = CreateCommand("INSERT INTO Samples (ThreadId, FunctionId, HitCount) VALUES (?, ?, ?)", 3);
-			m_updateSampleCmd = CreateCommand("UPDATE Samples SET HitCount = HitCount + ? WHERE ThreadId=? AND FunctionId=?", 3);
+			m_updateSampleCmd = CreateCommand("UPDATE Samples SET HitCount = HitCount + ? WHERE ThreadId=? AND FunctionId=? AND SnapshotId=0", 3);
 
 			m_insertAllocCmd = CreateCommand("INSERT INTO Allocations (Count, Size, ClassId, FunctionId) VALUES (?, ?, ?, ?)", 4);
 			m_updateAllocCmd = CreateCommand("UPDATE Allocations SET Count = Count + ?, Size = Size + ? WHERE ClassId=? AND FunctionId=?", 4);

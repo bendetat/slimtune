@@ -95,12 +95,12 @@ namespace SlimTuneUI
 			throw new NotImplementedException();
 		}
 
-		public NHibernate.IStatelessSession OpenStatelessSession()
+		public NHibernate.ISession OpenSession(int snapshot)
 		{
 			throw new NotImplementedException();
 		}
 
-		public NHibernate.ISession OpenSnapshot(int index)
+		public NHibernate.IStatelessSession OpenStatelessSession()
 		{
 			throw new NotImplementedException();
 		}
