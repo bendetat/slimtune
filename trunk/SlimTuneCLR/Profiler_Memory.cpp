@@ -66,8 +66,10 @@ HRESULT ClrProfiler::GenerationBounds()
 
 HRESULT ClrProfiler::GarbageCollectionStarted(int cGenerations, BOOL generationCollected[], COR_PRF_GC_REASON reason)
 {
-	if(!m_server->Connected())
+	if(!IsConnected())
 		return S_OK;
+
+	Mutex::scoped_lock EnterLock(m_lock);
 
 	GenerationBounds();
 
@@ -90,8 +92,10 @@ HRESULT ClrProfiler::GarbageCollectionStarted(int cGenerations, BOOL generationC
 
 HRESULT ClrProfiler::GarbageCollectionFinished()
 {
-	if(!m_server->Connected())
+	if(!IsConnected())
 		return S_OK;
+
+	Mutex::scoped_lock EnterLock(m_lock);
 
 	GenerationBounds();
 	return S_OK;
@@ -99,7 +103,7 @@ HRESULT ClrProfiler::GarbageCollectionFinished()
 
 HRESULT ClrProfiler::ObjectAllocated(ObjectID objectId, ClassID classId)
 {
-	if(!m_server->Connected())
+	if(!IsConnected())
 		return S_OK;
 
 	Mutex::scoped_lock EnterLock(m_lock);

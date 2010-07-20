@@ -102,5 +102,5 @@
 #include "ProfilerBase.h"
 
 typedef boost::pool_allocator<unsigned int> UIntPoolAlloc;
-typedef std::vector<unsigned int/*, UIntPoolAlloc*/> PooledUIntVector;
+typedef std::vector<unsigned int, UIntPoolAlloc> PooledUIntVector;
 typedef boost::recursive_mutex Mutex;
