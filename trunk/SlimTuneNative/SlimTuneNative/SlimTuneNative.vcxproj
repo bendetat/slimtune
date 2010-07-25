@@ -41,8 +41,8 @@
     <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>C:\Users\Albert Wang\Documents\Engine\Slimtune\BackendCommon;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\Albert Wang\Documents\Engine\Slimtune\SlimTuneNative\SlimTuneNative;$(LibraryPath)</LibraryPath>
+    <IncludePath>..\..\BackendCommon;$(IncludePath)</IncludePath>
+    <LibraryPath>..\..\BackendCommon;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

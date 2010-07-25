@@ -49,7 +49,7 @@ void ParseCounter(ProfilerConfiguration& config, wchar_t* counter)
 	if(counter[0] == L'@')
 	{
 		PerformanceCounterDescriptor desc;
-		desc.ObjectName = "";
+		desc.ObjectName = L"";
 		desc.CounterName = counter;
 
 		config.Counters.push_back(desc);

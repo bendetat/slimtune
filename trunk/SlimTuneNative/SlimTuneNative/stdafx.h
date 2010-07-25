@@ -97,4 +97,5 @@
 #include <unordered_map>
 
 typedef boost::pool_allocator<unsigned int> UIntPoolAlloc;
+typedef std::vector<unsigned int, UIntPoolAlloc> PooledUIntVector;
 typedef boost::recursive_mutex Mutex;
