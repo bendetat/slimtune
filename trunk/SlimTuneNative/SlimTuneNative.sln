@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SlimTuneNative", "SlimTuneNative\SlimTuneNative.vcxproj", "{D25A0A44-1015-4582-B991-92A6BAE8AC3A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D25A0A44-1015-4582-B991-92A6BAE8AC3A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D25A0A44-1015-4582-B991-92A6BAE8AC3A}.Debug|Win32.Build.0 = Debug|Win32
+		{D25A0A44-1015-4582-B991-92A6BAE8AC3A}.Release|Win32.ActiveCfg = Release|Win32
+		{D25A0A44-1015-4582-B991-92A6BAE8AC3A}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
