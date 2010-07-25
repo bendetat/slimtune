@@ -4,15 +4,25 @@
 #include "Profiler.h"
 #include "PerformanceCounters.h"
 
-int main(int argc, char * argv[])
+int wmain(int argc, wchar_t * argv[])
 {
-	CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+	CoInitializeEx(NULL, COINIT_MULTITHREADED);
 
+	//Arguments are passed unaltered to the profiling target.
+	std::wstringstream argumentStream;
+	for(int i = 1; i < argc; ++i)
+	{
+		if (i != 1)
+		{
+			argumentStream << L' '; 
+		}
+		argumentStream << argv[i];
+	}
+	
 	//Setup the argument buffer.
 	//The buffer must be non-const due to weird issues with CreateProcessW, which can apparently modify the argument buffer.
-	std::wstring command(L"TestProject.exe 10 0 3");
-	std::vector<wchar_t> buffer;
-	std::copy( command.begin(), command.end(), std::back_inserter( buffer ) );
+	std::wstring command = argumentStream.str();
+	std::vector<wchar_t> buffer(command.begin(), command.end());
 
 	STARTUPINFO startupInfo;
 	ZeroMemory(&startupInfo, sizeof(startupInfo));

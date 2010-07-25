@@ -98,9 +98,20 @@ Profiler::Profiler(HANDLE process)
 	//Setup the timers for timestamps
 	InitializeTimer(false);
 
-	//TODO: Setup counters here.
-	unsigned int id = m_counters.AddProcessCounter(L"Elapsed Time");
-	SetCounterName(id, L"Elapsed Time");
+	for (size_t i = 0; i < m_configuration.Counters.size(); ++i)
+	{
+		PerformanceCounterDescriptor desc = m_configuration.Counters[i];
+
+		if (desc.ObjectName.size() == 0)
+		{
+			unsigned int id = m_counters.AddRawCounter(desc.CounterName);
+			SetCounterName(id, desc.CounterName);
+		} else 
+		{
+			unsigned int id = m_counters.AddInstanceCounter(desc.ObjectName, desc.CounterName);
+			SetCounterName(id, str(boost::wformat(L"%1%: %2%") % desc.ObjectName % desc.CounterName));
+		}
+	}
 
 	if (m_configuration.CounterInterval < 50)
 	{
