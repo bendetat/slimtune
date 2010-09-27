@@ -117,13 +117,11 @@ struct ThreadInfo
 	ThreadInfo()
 		: Id(0), NativeId(0), SystemId(0), Destroyed(false), Context(NULL), EntryPoint(0)
 	{
-		Name[0] = 0;
 	}
 
 	ThreadInfo(unsigned int id, size_t nativeId, ThreadContext* context)
 		: Id(id), NativeId(nativeId), SystemId(0), Destroyed(false), Context(context)
 	{
-		Name[0] = 0;
 	}
 
 private:
