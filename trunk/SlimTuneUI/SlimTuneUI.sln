@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlimTuneUI", "SlimTuneUI.csproj", "{B18BAFF4-A8F9-489E-85A9-C5A37E4F90FB}"
 	ProjectSection(ProjectDependencies) = postProject
 		{FB113109-23C5-4234-849D-2E71D077B4FB} = {FB113109-23C5-4234-849D-2E71D077B4FB}

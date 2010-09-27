@@ -88,6 +88,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\SlimTuneUI\Properties\AssemblyInfoCommon.cs">
+      <Link>Properties\AssemblyInfoCommon.cs</Link>
+    </Compile>
     <Compile Include="ColorRotator.cs" />
     <Compile Include="CounterGraph.cs">
       <SubType>UserControl</SubType>

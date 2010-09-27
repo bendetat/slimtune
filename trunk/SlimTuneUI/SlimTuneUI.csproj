@@ -87,6 +87,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AspNetLauncher.cs" />
+    <Compile Include="Properties\AssemblyInfoCommon.cs" />
     <Compile Include="ClrLauncher.cs" />
     <Compile Include="ClrLauncherBase.cs" />
     <Compile Include="ClrServiceLauncher.cs" />

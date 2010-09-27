@@ -85,6 +85,9 @@
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Properties\AssemblyInfoCommon.cs">
+      <Link>Properties\AssemblyInfoCommon.cs</Link>
+    </Compile>
     <Compile Include="Connection.cs" />
     <Compile Include="DataEngineBase.cs" />
     <Compile Include="DataFilters.cs" />
