@@ -28,12 +28,10 @@ using System.Text;
 
 namespace UICore
 {
-	public delegate ProfilerClient ConnectDelegate(string host, int port, IDataEngine data, int attempts);
-
 	public interface ILauncher
 	{
 		bool CheckParams();
-		bool Launch(ConnectDelegate connect);
+		bool Launch();
 
 		string Name { get; }
 		ushort ListenPort { get; set; }

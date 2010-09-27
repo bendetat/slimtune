@@ -60,20 +60,15 @@ namespace SlimTuneUI
 				LoadLauncherConfig();
 			}
 
+			//add the handler AFTER setting the correct selected index
+			m_appTypeCombo.SelectedIndexChanged += new EventHandler(m_appTypeCombo_SelectedIndexChanged);
+
 			//run the index changed handler if we didn't get a launcher from file
 			if(m_launcher == null)
 			{
 				m_launcherIndex = -1;
-				m_appTypeCombo_SelectedIndexChanged(this, EventArgs.Empty);
-				while(m_launcherIndex == -1)
-				{
-					++m_appTypeCombo.SelectedIndex;
-					m_appTypeCombo_SelectedIndexChanged(this, EventArgs.Empty);
-				}
+				m_appTypeCombo_SelectedIndexChanged(m_appTypeCombo, EventArgs.Empty);
 			}
-
-			//add the handler AFTER setting the correct selected index
-			m_appTypeCombo.SelectedIndexChanged += new EventHandler(m_appTypeCombo_SelectedIndexChanged);
 
 			m_launchPropGrid.SelectedObject = m_launcher;
 
@@ -85,14 +80,6 @@ namespace SlimTuneUI
 			m_visualizerCombo.SelectedIndex = m_visIndex;
 			m_connectCheckBox.Checked = m_connect;
 			m_resultsFileTextBox.Text = m_resultsFile;
-		}
-
-		private ProfilerClient DoConnect(string host, int port, IDataEngine data, int attempts)
-		{
-			ConnectProgress progress = new ConnectProgress(host, port, data, attempts);
-			progress.ShowDialog(this);
-
-			return progress.Client;
 		}
 
 		private bool LaunchLocal()
@@ -127,7 +114,7 @@ namespace SlimTuneUI
 				}
 			}
 
-			if(!m_launcher.Launch(new ConnectDelegate(DoConnect)))
+			if(!m_launcher.Launch())
 			{
 				if(data != null)
 					data.Dispose();
@@ -137,13 +124,14 @@ namespace SlimTuneUI
 			//connect, if we're asked to
 			if(m_connectCheckBox.Checked)
 			{
-				var client = DoConnect("localhost", m_launcher.ListenPort, data, 10);
+				ConnectProgress progress = new ConnectProgress("localhost", m_launcher.ListenPort, data, 10);
+				progress.ShowDialog(this);
 
-				if(client != null)
+				if(progress.Client != null)
 				{
 					Connection conn = new Connection(data);
 					conn.Executable = m_launcher.Name;
-					conn.RunClient(client);
+					conn.RunClient(progress.Client);
 					//TODO: set options like auto snapshot frequency
 					conn.SetAutoSnapshots(10000, false);
 
@@ -255,11 +243,8 @@ namespace SlimTuneUI
 			//Don't allow the user to select a launcher that will just fail due to admin privileges required
 			if(launcher.RequiresAdmin && !LauncherCommon.UserIsAdmin())
 			{
-				if(sender != this)
-				{
-					MessageBox.Show("You must run SlimTune as an administrator to profile the selected application type.");
-					m_appTypeCombo.SelectedIndex = m_launcherIndex;
-				}
+				MessageBox.Show("You must run SlimTune as an administrator to profile the selected application type.");
+				m_appTypeCombo.SelectedIndex = m_launcherIndex;
 				return;
 			}
 

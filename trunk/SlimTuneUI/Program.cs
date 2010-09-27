@@ -62,9 +62,30 @@ namespace SlimTuneUI
 		[STAThread]
 		static void Main()
 		{
-			//Forcibly load dependent assemblies
-			new ClrLauncher();
-			new DummyDataEngine();
+#if FALSE
+			var factory = CreateSessionFactory();
+			using(var session = factory.OpenSession())
+			{
+				//using(var transact = session.BeginTransaction())
+				{
+					var functions = session.CreateCriteria<FunctionInfo>().List<FunctionInfo>();
+					/*var classes = session.CreateCriteria(typeof(ClassInfo)).List<ClassInfo>();
+					foreach(var c in classes)
+					{
+						Console.WriteLine(c.Name);
+						foreach(var f in c.Functions)
+						{
+							Console.WriteLine("\t" + f.Name);
+						}
+					}
+					var threads = session.CreateCriteria<ThreadInfo>().List<ThreadInfo>();
+					foreach(var t in threads)
+					{
+						Console.WriteLine("Thread #{0} has {1} samples.", t.Id, t.Samples.Count);
+					}*/
+				}
+			}
+#endif
 
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
