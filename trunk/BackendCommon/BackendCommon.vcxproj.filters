@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Plumbing">
+      <UniqueIdentifier>{3fe69c5c-4364-4f80-ae27-f90c98973a2f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Plumbing</Filter>
+    </ClCompile>
+    <ClCompile Include="IProfilerServer.cpp" />
+    <ClCompile Include="Memory.cpp" />
+    <ClCompile Include="Messages.cpp" />
+    <ClCompile Include="PerfCounter.cpp" />
+    <ClCompile Include="RingBuffer.cpp" />
+    <ClCompile Include="SocketServer.cpp" />
+    <ClCompile Include="Timer.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>Plumbing</Filter>
+    </ClInclude>
+    <ClInclude Include="IdRemapper.h" />
+    <ClInclude Include="IProfilerData.h" />
+    <ClInclude Include="IProfilerServer.h" />
+    <ClInclude Include="lockfree_list.h" />
+    <ClInclude Include="Memory.h" />
+    <ClInclude Include="Messages.h" />
+    <ClInclude Include="PerfCounter.h" />
+    <ClInclude Include="RingBuffer.h" />
+    <ClInclude Include="SocketServer.h" />
+    <ClInclude Include="Timer.h" />
+  </ItemGroup>
+</Project>

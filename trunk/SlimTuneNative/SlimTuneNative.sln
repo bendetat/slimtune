@@ -3,16 +3,30 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SlimTuneNative", "SlimTuneNative\SlimTuneNative.vcxproj", "{D25A0A44-1015-4582-B991-92A6BAE8AC3A}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BackendCommon", "..\BackendCommon\BackendCommon.vcxproj", "{EE90430E-2704-4098-8DAA-BBB27758F283}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
+		Debug|x64 = Debug|x64
 		Release|Win32 = Release|Win32
+		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{D25A0A44-1015-4582-B991-92A6BAE8AC3A}.Debug|Win32.ActiveCfg = Debug|Win32
 		{D25A0A44-1015-4582-B991-92A6BAE8AC3A}.Debug|Win32.Build.0 = Debug|Win32
+		{D25A0A44-1015-4582-B991-92A6BAE8AC3A}.Debug|x64.ActiveCfg = Debug|Win32
 		{D25A0A44-1015-4582-B991-92A6BAE8AC3A}.Release|Win32.ActiveCfg = Release|Win32
 		{D25A0A44-1015-4582-B991-92A6BAE8AC3A}.Release|Win32.Build.0 = Release|Win32
+		{D25A0A44-1015-4582-B991-92A6BAE8AC3A}.Release|x64.ActiveCfg = Release|Win32
+		{EE90430E-2704-4098-8DAA-BBB27758F283}.Debug|Win32.ActiveCfg = Debug|Win32
+		{EE90430E-2704-4098-8DAA-BBB27758F283}.Debug|Win32.Build.0 = Debug|Win32
+		{EE90430E-2704-4098-8DAA-BBB27758F283}.Debug|x64.ActiveCfg = Debug|x64
+		{EE90430E-2704-4098-8DAA-BBB27758F283}.Debug|x64.Build.0 = Debug|x64
+		{EE90430E-2704-4098-8DAA-BBB27758F283}.Release|Win32.ActiveCfg = Release|Win32
+		{EE90430E-2704-4098-8DAA-BBB27758F283}.Release|Win32.Build.0 = Release|Win32
+		{EE90430E-2704-4098-8DAA-BBB27758F283}.Release|x64.ActiveCfg = Release|x64
+		{EE90430E-2704-4098-8DAA-BBB27758F283}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

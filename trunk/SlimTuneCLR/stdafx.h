@@ -77,6 +77,7 @@
 #pragma warning(push)
 #pragma warning(disable:4100)
 #pragma warning(disable:4244)
+#pragma warning(disable:4251)
 #pragma warning(disable:4267)
 #include <boost/scoped_ptr.hpp>
 #include <boost/scoped_array.hpp>
@@ -98,7 +99,6 @@
 #include <unordered_map>
 
 #include "SlimComPtr.h"
-#include "SlimTuneProfiler.h"
 #include "ProfilerBase.h"
 
 typedef boost::pool_allocator<unsigned int> UIntPoolAlloc;

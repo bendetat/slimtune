@@ -1,0 +1,142 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+    <Filter Include="Generated Files">
+      <UniqueIdentifier>{8dfbe668-e022-4ffd-b205-fa38b0dbd813}</UniqueIdentifier>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+    <Filter Include="Plumbing">
+      <UniqueIdentifier>{ba661005-19e4-48fa-9d41-aeef930eeee4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="x86">
+      <UniqueIdentifier>{929e1c48-8c4d-4b0c-b7af-ee204ca46368}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="x64">
+      <UniqueIdentifier>{35038e42-7894-43f0-b9a6-369ac844e10a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Profiler">
+      <UniqueIdentifier>{74a5b77a-356f-44a2-8c7f-6bdda52c6126}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Profiler.rgs">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="SlimTuneProfiler.rgs">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="SlimTune.def">
+      <Filter>Plumbing</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="SlimTune.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="winres.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SlimTuneProfiler.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>Plumbing</Filter>
+    </ClInclude>
+    <ClInclude Include="SlimTuneProfilerModule.h">
+      <Filter>Plumbing</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>Plumbing</Filter>
+    </ClInclude>
+    <ClInclude Include="Config.h">
+      <Filter>Profiler</Filter>
+    </ClInclude>
+    <ClInclude Include="dbghelp.h">
+      <Filter>Profiler</Filter>
+    </ClInclude>
+    <ClInclude Include="NativeHooks.h">
+      <Filter>Profiler</Filter>
+    </ClInclude>
+    <ClInclude Include="Profiler.h">
+      <Filter>Profiler</Filter>
+    </ClInclude>
+    <ClInclude Include="ProfilerBase.h">
+      <Filter>Profiler</Filter>
+    </ClInclude>
+    <ClInclude Include="ProfilerClassFactory.h">
+      <Filter>Profiler</Filter>
+    </ClInclude>
+    <ClInclude Include="PublicInterface.h">
+      <Filter>Profiler</Filter>
+    </ClInclude>
+    <ClInclude Include="SigFormat.h">
+      <Filter>Profiler</Filter>
+    </ClInclude>
+    <ClInclude Include="SigParse.h">
+      <Filter>Profiler</Filter>
+    </ClInclude>
+    <ClInclude Include="SlimComPtr.h">
+      <Filter>Profiler</Filter>
+    </ClInclude>
+    <ClInclude Include="Version.h">
+      <Filter>Profiler</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="SlimTuneProfiler_i.c">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SlimTuneProfiler.cpp">
+      <Filter>Plumbing</Filter>
+    </ClCompile>
+    <ClCompile Include="SlimTuneProfilerModule.cpp">
+      <Filter>Plumbing</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Plumbing</Filter>
+    </ClCompile>
+    <ClCompile Include="Config.cpp">
+      <Filter>Profiler</Filter>
+    </ClCompile>
+    <ClCompile Include="dbghelp.cpp">
+      <Filter>Profiler</Filter>
+    </ClCompile>
+    <ClCompile Include="NativeHooks.cpp">
+      <Filter>Profiler</Filter>
+    </ClCompile>
+    <ClCompile Include="Profiler.cpp">
+      <Filter>Profiler</Filter>
+    </ClCompile>
+    <ClCompile Include="Profiler_Memory.cpp">
+      <Filter>Profiler</Filter>
+    </ClCompile>
+    <ClCompile Include="ProfilerClassFactory.cpp">
+      <Filter>Profiler</Filter>
+    </ClCompile>
+    <ClCompile Include="PublicInterface.cpp">
+      <Filter>Profiler</Filter>
+    </ClCompile>
+    <ClCompile Include="SigParse.cpp">
+      <Filter>Profiler</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Midl Include="SlimTune.idl">
+      <Filter>Plumbing</Filter>
+    </Midl>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="x86\dbghelp.dll">
+      <Filter>x86</Filter>
+    </CustomBuild>
+    <CustomBuild Include="x64\dbghelp.dll">
+      <Filter>x64</Filter>
+    </CustomBuild>
+  </ItemGroup>
+</Project>

@@ -1,9 +1,9 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SlimTuneCLR", "SlimTuneCLR.vcproj", "{5827871E-4FFC-4EBE-81C2-069BD99E18AB}"
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SlimTuneCLR", "SlimTuneCLR.vcxproj", "{5827871E-4FFC-4EBE-81C2-069BD99E18AB}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BackendCommon", "..\BackendCommon\BackendCommon.vcproj", "{EE90430E-2704-4098-8DAA-BBB27758F283}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BackendCommon", "..\BackendCommon\BackendCommon.vcxproj", "{EE90430E-2704-4098-8DAA-BBB27758F283}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
