@@ -95,6 +95,9 @@ bool ProfilerConfiguration::LoadConfiguration()
 {
 	//Use as much of the options from SLIMTUNE_CONFIG as applicable.
 	size_t length = GetEnvironmentVariable(L"SLIMTUNE_CONFIG", NULL, 0);
+	if(length == 0)
+		return false;
+
 	std::vector<wchar_t> buffer(length);
 	size_t obtainedLength = GetEnvironmentVariable(L"SLIMTUNE_CONFIG", &buffer[0], buffer.size());
 	if (obtainedLength == 0 || obtainedLength > buffer.size())
