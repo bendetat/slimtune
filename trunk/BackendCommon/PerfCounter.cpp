@@ -9,7 +9,7 @@ PerfCounter::PerfCounter()
 	wchar_t fileNameBuf[MAX_PATH];
 	GetModuleFileName((HMODULE) hProcess, fileNameBuf, MAX_PATH);
 	wchar_t baseNameBuf[MAX_PATH];
-	_wsplitpath(fileNameBuf, NULL, NULL, baseNameBuf, NULL);
+	_wsplitpath_s(fileNameBuf, NULL, 0, NULL, 0, baseNameBuf, MAX_PATH, NULL, 0);
 	m_processName = baseNameBuf;
 	DWORD processId = GetProcessId(GetCurrentProcess());
 
