@@ -119,11 +119,13 @@ HRESULT SlimTuneProfilerModule::RegisterComServer(const CLSID& serverCLSID, cons
 		goto ErrorExit;
 
 	//Set the path
-	if(RegSetValueEx(hKey, NULL, 0, REG_SZ, (const BYTE *)szModuleName, (wcslen(szModuleName) + 1) * sizeof(WCHAR)) != ERROR_SUCCESS)
+	DWORD length = static_cast<DWORD>(wcslen(szModuleName) + 1) * sizeof(WCHAR);
+	if(RegSetValueEx(hKey, NULL, 0, REG_SZ, (const BYTE *) szModuleName, length) != ERROR_SUCCESS)
 		goto ErrorExit;
 
 	//Set the threading model, although it is probably not useful...
-	if(RegSetValueEx(hKey, TEXT("ThreadingModel"), 0, REG_SZ, (const BYTE *)szThreadingModel, (wcslen(szThreadingModel) + 1) * sizeof(WCHAR)) != ERROR_SUCCESS)
+	length = static_cast<DWORD>(wcslen(szThreadingModel) + 1) * sizeof(WCHAR);
+	if(RegSetValueEx(hKey, TEXT("ThreadingModel"), 0, REG_SZ, (const BYTE *)szThreadingModel, length) != ERROR_SUCCESS)
 		goto ErrorExit;
 
 	RegCloseKey(hKey);

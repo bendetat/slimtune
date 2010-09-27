@@ -411,7 +411,7 @@ const ClassInfo* ClrProfiler::GetClass(unsigned int id)
 	ClassInfo* info = m_classes[id];
 	if(info->Name.size() == 0 && !m_suspended)
 	{
-		MapClass(info->NativeId, NULL);
+		MapClass(static_cast<mdTypeDef>(info->NativeId), NULL);
 	}
 
 	return m_classes[id];

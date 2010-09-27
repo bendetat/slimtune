@@ -47,7 +47,7 @@ HRESULT ClrProfiler::GenerationBounds()
 	assert(m_server->Connected());
 
 	ULONG rangeCount = 0;
-	HRESULT hr = m_ProfilerInfo2->GetGenerationBounds(m_genRanges.size(), &rangeCount, &m_genRanges[0]);
+	HRESULT hr = m_ProfilerInfo2->GetGenerationBounds(static_cast<ULONG>(m_genRanges.size()), &rangeCount, &m_genRanges[0]);
 	CHECK_HR(hr);
 	assert(rangeCount <= 5);
 
