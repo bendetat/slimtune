@@ -32,7 +32,7 @@ using UICore;
 namespace SlimTuneUI
 {
 	[Serializable,
-	DisplayName("CLR Application (Microsoft .NET 2.0, 4.0)")]
+	DisplayName("\tCLR Application (Microsoft .NET 2.0, 4.0)")]
 	public class ClrLauncher : ClrLauncherBase
 	{
 		//NOTE: These are all in order for the property grid
@@ -86,7 +86,7 @@ namespace SlimTuneUI
 			return base.CheckParams();
 		}
 
-		public override bool Launch()
+		public override bool Launch(ConnectDelegate connect)
 		{
 			string config = LauncherCommon.CreateConfigString(ProfilingMode, ListenPort, WaitForConnection, IncludeNative, SamplingInterval, CounterInterval, AllowMethodInlining, TrackGC, TrackAllocs);
 			var psi = new ProcessStartInfo(Executable, Arguments);

@@ -102,7 +102,7 @@ namespace SlimTuneUI
 			return base.CheckParams();
 		}
 
-		public override bool Launch()
+		public override bool Launch(ConnectDelegate connect)
 		{
 			StopService(ServiceName, StopCommand);
 
@@ -137,16 +137,11 @@ namespace SlimTuneUI
 			Thread.Sleep(1000);
 			using(var engine = new DummyDataEngine())
 			{
-				var progress = new ConnectProgress("localhost", ListenPort, engine, 10);
-				progress.ShowDialog();
-				if(progress.Client != null)
-				{
-					progress.Client.Dispose();
-				}
+				var client = connect("localhost", ListenPort, engine, 10);
+				if(client != null)
+					client.Dispose();
 				else
-				{
 					returnVal = false;
-				}
 			}
 
 			if(serviceAccountSid != null)

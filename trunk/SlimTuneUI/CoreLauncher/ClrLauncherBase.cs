@@ -167,6 +167,6 @@ namespace SlimTuneUI
 			return true;
 		}
 
-		public abstract bool Launch();
+		public abstract bool Launch(ConnectDelegate connect);
 	}
 }

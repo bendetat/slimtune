@@ -26,9 +26,9 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("SlimTuneUI")]
-[assembly: AssemblyDescription("SlimTune Profiler Frontend.")]
+[assembly: AssemblyTitle("CoreLauncher")]
+[assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("0556632d-2e7d-488a-a72b-941f819de58a")]
+[assembly: Guid("3a302b9c-2231-4f01-bb62-ab2b5d53751a")]

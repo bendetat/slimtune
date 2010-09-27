@@ -433,7 +433,8 @@ namespace UICore
 				tx.Commit();
 			}
 
-			Flush();
+			//Flush();
+			Snapshot("Garbage Collection");
 		}
 
 		#region IDisposable Members

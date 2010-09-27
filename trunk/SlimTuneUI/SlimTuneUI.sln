@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlimTuneUI", "SlimTuneUI.csproj", "{B18BAFF4-A8F9-489E-85A9-C5A37E4F90FB}"
 	ProjectSection(ProjectDependencies) = postProject
 		{FB113109-23C5-4234-849D-2E71D077B4FB} = {FB113109-23C5-4234-849D-2E71D077B4FB}
@@ -14,6 +14,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlimTuneApi", "..\SlimTuneCLR\SlimTuneApi\SlimTuneApi.csproj", "{03AB76C5-F116-4A55-9BA6-3F9B60F98F90}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Universe", "..\Universe\Universe.csproj", "{FB113109-23C5-4234-849D-2E71D077B4FB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreLauncher", "CoreLauncher\CoreLauncher.csproj", "{7A2E61C7-BD4D-4743-89C0-9E40329A4AD8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreData", "CoreData\CoreData.csproj", "{85C7A079-E2DA-46D5-8393-D2A0E5772862}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +43,14 @@ Global
 		{FB113109-23C5-4234-849D-2E71D077B4FB}.Debug|x86.Build.0 = Debug|x86
 		{FB113109-23C5-4234-849D-2E71D077B4FB}.Release|x86.ActiveCfg = Release|x86
 		{FB113109-23C5-4234-849D-2E71D077B4FB}.Release|x86.Build.0 = Release|x86
+		{7A2E61C7-BD4D-4743-89C0-9E40329A4AD8}.Debug|x86.ActiveCfg = Debug|x86
+		{7A2E61C7-BD4D-4743-89C0-9E40329A4AD8}.Debug|x86.Build.0 = Debug|x86
+		{7A2E61C7-BD4D-4743-89C0-9E40329A4AD8}.Release|x86.ActiveCfg = Release|x86
+		{7A2E61C7-BD4D-4743-89C0-9E40329A4AD8}.Release|x86.Build.0 = Release|x86
+		{85C7A079-E2DA-46D5-8393-D2A0E5772862}.Debug|x86.ActiveCfg = Debug|x86
+		{85C7A079-E2DA-46D5-8393-D2A0E5772862}.Debug|x86.Build.0 = Debug|x86
+		{85C7A079-E2DA-46D5-8393-D2A0E5772862}.Release|x86.ActiveCfg = Release|x86
+		{85C7A079-E2DA-46D5-8393-D2A0E5772862}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
