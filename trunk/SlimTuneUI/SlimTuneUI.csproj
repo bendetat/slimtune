@@ -87,6 +87,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AspNetLauncher.cs" />
+    <Compile Include="NativeLauncher.cs" />
     <Compile Include="Properties\AssemblyInfoCommon.cs" />
     <Compile Include="ClrLauncher.cs" />
     <Compile Include="ClrLauncherBase.cs" />
@@ -171,6 +172,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Backends\SlimTuneNative_x86.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <Content Include="Plugins\Placeholder.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

@@ -76,7 +76,7 @@ namespace UICore
 		protected SortedDictionary<int, SortedDictionary<int, AllocData>> m_allocs = new SortedDictionary<int, SortedDictionary<int, AllocData>>();
 
 		private volatile bool m_allowFlush = true;
-		private DateTime m_lastFlush = DateTime.Now;
+		private DateTime m_lastFlush = DateTime.UtcNow;
 		//we use this so we don't have to check DateTime.Now on every single sample
 		protected int m_cachedSamples;
 
@@ -123,6 +123,17 @@ namespace UICore
 				{
 					m_allowFlush = value;
 				}
+			}
+		}
+
+		private bool ShouldFlush
+		{
+			get
+			{
+				var span = DateTime.UtcNow - m_lastFlush;
+				if(span.TotalSeconds > 5.0)
+					return true;
+				return false;
 			}
 		}
 
@@ -219,7 +230,7 @@ namespace UICore
 				}
 
 				DoFlush();
-				m_lastFlush = DateTime.Now;
+				m_lastFlush = DateTime.UtcNow;
 			}
 		}
 
@@ -275,7 +286,7 @@ namespace UICore
 				}
 
 				++m_cachedSamples;
-				if(m_cachedSamples > 2000)
+				if(m_cachedSamples > 2000 || ShouldFlush)
 				{
 					Flush();
 				}
@@ -294,7 +305,7 @@ namespace UICore
 						callerKvp.Value.Clear();
 					}
 				}
-				m_lastFlush = DateTime.Now;
+				m_lastFlush = DateTime.UtcNow;
 				m_samples.Clear();
 				m_cachedSamples = 0;
 
@@ -352,14 +363,14 @@ namespace UICore
 		public virtual void MapFunction(FunctionInfo funcInfo)
 		{
 			m_functionCache.Add(funcInfo);
-			if(m_functionCache.Count >= kFunctionCacheSize)
+			if(m_functionCache.Count >= kFunctionCacheSize || ShouldFlush)
 				Flush();
 		}
 
 		public virtual void MapClass(ClassInfo classInfo)
 		{
 			m_classCache.Add(classInfo);
-			if(m_classCache.Count >= kClassCacheSize)
+			if(m_classCache.Count >= kClassCacheSize || ShouldFlush)
 				Flush();
 		}
 

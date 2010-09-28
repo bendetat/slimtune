@@ -72,7 +72,7 @@ namespace SlimTuneUI
 			m_database.Open();
 
 			var dbconfig = SQLiteConfiguration.Standard.ConnectionString(connStr);
-			dbconfig.ShowSql();
+			//dbconfig.ShowSql();
 			FinishConstruct(true, dbconfig);
 		}
 
