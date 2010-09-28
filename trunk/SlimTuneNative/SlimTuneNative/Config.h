@@ -24,10 +24,10 @@ struct ProfilerConfiguration
 
 	//General properties
 	ProfilerMode Mode;
+	std::wstring WorkingDirectory;
 	unsigned int ListenPort;
 	bool WaitForConnection;
 	bool SuspendOnConnection;
-
 
 	//Intervals specified in milliseconds.
 	unsigned int SampleInterval;

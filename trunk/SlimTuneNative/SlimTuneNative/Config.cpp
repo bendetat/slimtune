@@ -82,7 +82,7 @@ ProfilerConfiguration::ProfilerConfiguration()
 	,ListenPort(3000)
 	,WaitForConnection(false)
 	,SuspendOnConnection(false)
-	,SampleInterval(50)
+	,SampleInterval(40)
 	,CounterInterval(1000)
 {
 	OSVersion.dwOSVersionInfoSize = sizeof(OSVersion);

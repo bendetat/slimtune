@@ -93,6 +93,8 @@ struct FunctionInfo
 	FunctionInfo(void* parentProfiler, unsigned int id, size_t nativeId)
 		: ParentProfiler(parentProfiler),
 		Id(id),
+		ClassId(0),
+		IsNative(0),
 		NativeId(nativeId),
 		TriggerInstrumentation(false),
 		DisableInstrumentation(false)

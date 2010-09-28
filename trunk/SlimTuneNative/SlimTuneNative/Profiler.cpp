@@ -9,12 +9,12 @@
 Profiler::ScopedSuspendLock::ScopedSuspendLock(Profiler * p)
 	:prof(p)
 {
-	InterlockedIncrement(&prof->m_instrutmentationDepth);
+	InterlockedIncrement(&prof->m_instrumentationDepth);
 }
 
 Profiler::ScopedSuspendLock::~ScopedSuspendLock()
 {
-	InterlockedDecrement(&prof->m_instrutmentationDepth);
+	InterlockedDecrement(&prof->m_instrumentationDepth);
 }
 
 namespace 
@@ -52,26 +52,25 @@ namespace
 	}
 }
 
-Profiler::Profiler(HANDLE process)
-	:m_instrutmentationDepth(0)
-	,m_targetProcess(process)
-	,m_samplerActive(false)
-	,m_connected(false)
-	,m_counters(process)
-	,m_suspended(0)
+Profiler::Profiler(HANDLE process, const ProfilerConfiguration& config)
+	:m_instrumentationDepth(0),
+	m_targetProcess(process),
+	m_samplerActive(false),
+	m_connected(false),
+	m_counters(process),
+	m_suspended(0),
+	m_configuration(config)
 {
 	//Public symbols only so we can undecorate for parameter and return types.
 	//This is relevant in case overloads do significantly different tasks.
-	SymSetOptions(SYMOPT_DEBUG | SYMOPT_LOAD_LINES | SYMOPT_PUBLICS_ONLY );
-	SymInitialize(m_targetProcess, NULL, TRUE);
+	SymSetOptions(SYMOPT_DEBUG | SYMOPT_LOAD_LINES | SYMOPT_EXACT_SYMBOLS | SYMOPT_DEFERRED_LOADS);
+	SymInitialize(m_targetProcess, &m_configuration.WorkingDirectory[0], TRUE);
 
 	HRESULT hr = CoCreateGuid(&m_sesssion);
 	if (FAILED(hr))
 	{
 		//Something really weird happened.
 	}
-
-	m_configuration.LoadConfiguration();
 
 	//Create a set of invalid functions as dummy objects
 	const wchar_t * invalidName = L"$INVALID$";
@@ -312,6 +311,8 @@ unsigned int Profiler::MapFunction(DWORD64 address)
 
 	DWORD64 displacement = 0; 
 	BOOL lookupResult = SymFromAddr(m_targetProcess, address, &displacement, symbol);
+	if(!lookupResult)
+		return 0;
 
 	UINT_PTR casted = static_cast<UINT_PTR>(symbol->Index);
 	unsigned int& id = m_functionRemapper[casted];
@@ -323,7 +324,7 @@ unsigned int Profiler::MapFunction(DWORD64 address)
 		
 		if (lookupResult)
 		{
-			UnDecorateSymbolName(symbol->Name, undecorBuffer, MAX_SYM_NAME, UNDNAME_COMPLETE);
+			DWORD undResult = UnDecorateSymbolName(symbol->Name, undecorBuffer, MAX_SYM_NAME, UNDNAME_COMPLETE);
 			
 			FunctionInfo * info = new FunctionInfo(this, id, casted);
 			info->IsNative = true;
@@ -344,7 +345,7 @@ unsigned int Profiler::MapFunction(DWORD64 address)
 				info->Signature = sigStart;
 			} else 
 			{
-				info->Signature = L"";	
+				info->Signature = L"()";	
 				
 			}
 
@@ -371,12 +372,12 @@ unsigned int Profiler::MapFunction(DWORD64 address)
 
 			m_functionInfos.push_back(info);
 
-			std::wcout << L"Mapped function: " << info->Name << info->Signature << L"\n";
-
+			//std::wcout << L"Mapped function: " << info->Name << info->Signature << L"\n";
 
 			Messages::MapFunction msg;
 			msg.FunctionId = id;
 			msg.IsNative = true;
+			msg.ClassId = info->ClassId;
 			wcsncpy_s(msg.Name, Messages::MapFunction::MaxNameSize, info->Name.c_str(), _TRUNCATE);
 			wcsncpy_s(msg.Signature, Messages::MapFunction::MaxSignatureSize, info->Signature.c_str(), _TRUNCATE);
 
@@ -408,7 +409,7 @@ void Profiler::OnSampleTimer()
 		return;
 	}
 
-	if (m_instrutmentationDepth > 0)
+	if (m_instrumentationDepth > 0)
 	{
 		ResetSamplerTimer(USE_CONFIGURATION_WAIT);
 		return;
@@ -460,19 +461,11 @@ void Profiler::OnSampleTimer()
 #endif
 
 		std::vector<DWORD64> frames;
-		do 
+		while(StackWalk64(machineType, m_targetProcess, hThread, &stackFrame, reinterpret_cast<void *>(&context),
+			NULL, SymFunctionTableAccess64, SymGetModuleBase64, NULL))
 		{
 			frames.push_back(stackFrame.AddrPC.Offset);
-		} while(StackWalk64(
-			machineType,
-			m_targetProcess, 
-			hThread,
-			&stackFrame, 
-			reinterpret_cast<void *>(&context),
-			NULL,
-			SymFunctionTableAccess64,
-			SymGetModuleBase64,
-			NULL));
+		}
 
 		Messages::Sample sample;
 		sample.ThreadId = MapThread(hThread);
@@ -482,6 +475,8 @@ void Profiler::OnSampleTimer()
 		for (size_t i = 0; i < frames.size(); ++i)
 		{
 			unsigned int id = MapFunction(frames[i]);
+			if(id == 0)
+				continue;
 			sample.Functions.push_back(id);
 		}
 		
@@ -490,7 +485,7 @@ void Profiler::OnSampleTimer()
 			
 			ScopedSuspendLock lock(this);
 			sample.Write(*m_server);
-			std::cout << "Sample written: " << g_SampleCount << "\n";
+			//std::cout << "Sample written: " << g_SampleCount << "\n";
 			g_SampleCount++;
 		}
 

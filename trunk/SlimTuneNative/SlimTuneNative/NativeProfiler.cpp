@@ -4,26 +4,14 @@
 #include "Profiler.h"
 #include "PerformanceCounters.h"
 
+#define EXT_MAX_PATH 2048
+#define MAX_DRIVE 8
+
 int wmain(int argc, wchar_t * argv[])
 {
 	CoInitializeEx(NULL, COINIT_MULTITHREADED);
 
 	//Arguments are passed unaltered to the profiling target.
-	/*std::wstringstream argumentStream;
-	for(int i = 1; i < argc; ++i)
-	{
-		if (i != 1)
-		{
-			argumentStream << L' '; 
-		}
-		argumentStream << argv[i];
-	}
-	LPTSTR temp = GetCommandLine();
-
-	//Setup the argument buffer.
-	//The buffer must be non-const due to weird issues with CreateProcessW, which can apparently modify the argument buffer.
-	std::wstring command = argumentStream.str();
-	std::vector<wchar_t> buffer(command.begin(), command.end());*/
 	LPTSTR cmdLineRaw = GetCommandLine();
 	const wchar_t* cmdLine = wcsstr(cmdLineRaw + 1, L"\"") + 2;
 	std::wstring cmdLineStr(cmdLine);
@@ -32,7 +20,21 @@ int wmain(int argc, wchar_t * argv[])
 	ZeroMemory(&startupInfo, sizeof(startupInfo));
 	startupInfo.cb = sizeof(startupInfo);
 
-	const wchar_t* curdir = L"D:\\Promit\\Documents\\Projects\\BioReplicant\\trunk\\Demo\\";
+	ProfilerConfiguration config;
+	config.LoadConfiguration();
+
+	if(config.WorkingDirectory.empty())
+	{
+		//figure out the current directory from the exe path
+		wchar_t path[EXT_MAX_PATH];
+		wchar_t drive[MAX_DRIVE];
+		wchar_t dir[EXT_MAX_PATH];
+		_wsplitpath_s(argv[1], drive, MAX_DRIVE, dir, EXT_MAX_PATH, NULL, 0, NULL, 0);
+		//put together the current directory
+		_wmakepath_s(path, EXT_MAX_PATH, drive, dir, NULL, NULL);
+		config.WorkingDirectory = path;
+	}
+	wchar_t* workingDir = &config.WorkingDirectory[0];
 
 	PROCESS_INFORMATION processInformation = {0};
 	BOOL processLaunch = CreateProcess(
@@ -43,7 +45,7 @@ int wmain(int argc, wchar_t * argv[])
 		FALSE,
 		0, 
 		NULL, 
-		curdir, 
+		workingDir, 
 		&startupInfo,
 		&processInformation);
 
@@ -55,7 +57,7 @@ int wmain(int argc, wchar_t * argv[])
 	}
 
 	//Register for debug events.
-	Profiler profiler(processInformation.hProcess);
+	Profiler profiler(processInformation.hProcess, config);
 	BOOL debugAttach = DebugActiveProcess(GetProcessId(processInformation.hProcess));
 
 	if (!debugAttach)

@@ -8,7 +8,7 @@
 #define PROFILER_H
 #pragma once
 
-class Profiler : public IProfilerData
+class Profiler : public IProfilerData, boost::noncopyable
 {
 	class ScopedSuspendLock
 	{
@@ -19,7 +19,7 @@ class Profiler : public IProfilerData
 		Profiler * prof;
 	};
 public:
-	explicit Profiler(HANDLE targetProcess);
+	explicit Profiler(HANDLE targetProcess, const ProfilerConfiguration& config);
 	~Profiler();
 
 	const GUID * GetSessionId();
@@ -52,10 +52,6 @@ public:
 	bool IsSamplerActive() const;
 
 private:
-	//Noncopyable
-	Profiler(const Profiler&);
-	Profiler& operator=(const Profiler&);
-
 	void OnConnect();
 	void OnDisconnect();
 
@@ -80,7 +76,7 @@ private:
 
 	//Synchronization
 	Mutex m_lock;
-	volatile long m_instrutmentationDepth; //Stops program suspension if we're instrutmenting. 
+	volatile long m_instrumentationDepth; //Stops program suspension if we're m_instrumentationDepth. 
 
 	//Session data.
 	GUID m_sesssion;
