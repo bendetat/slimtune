@@ -238,9 +238,9 @@ WHERE C1.ParentId = {0} AND C1.ChildId = 0 AND C1.ThreadId = {1} AND C1.Snapshot
 				{
 					string name = Convert.ToString(row["Function"]) + Convert.ToString(row["Signature"]);
 
-					string rawString = @"{0:P2} Thread {1} - {2}{3}{4}";
-					string tipString = "{0:P2} - Thread {1}\r\nEntry point: {2}{3}{4}";
-					string niceString = @"\1{0:P3} \2Thread {1} \0- {2}\2{3}\0{4}";
+					const string rawString = @"{0:P2} Thread {1} - {2}{3}{4}";
+					const string tipString = "{0:P2} - Thread {1}\r\nEntry point: {2}{3}{4}";
+					const string niceString = @"\1{0:P3} \2Thread {1} \0- {2}\2{3}\0{4}";
 
 					string signature, funcName, classAndFunc, baseName;
 					BreakName(name, out signature, out funcName, out classAndFunc, out baseName);
@@ -275,9 +275,10 @@ WHERE C1.ParentId = {0} AND C1.ChildId = 0 AND C1.ThreadId = {1} AND C1.Snapshot
 					foreach(DataRow row in data.Tables[0].Rows)
 					{
 						string name = Convert.ToString(row["Function"]) + Convert.ToString(row["Signature"]);
-						string rawString = @"{0:P2} {1} - {2:P2} - {3}{4}{5}";
-						string tipString = "[Id {6}] {3}{4}{5}\r\n{0:P3} of thread - {1} samples - {2:P3} of parent\r\n{7:P3} outside children - {8} samples";
-						string niceString = @"\1{0:P2} \2{1} \0- \3{2:P2} \0- {3}\2{4}\0{5}";
+						const string rawString = @"{0:P2} {1} - {2:P2} - {3}{4}{5}";
+						const string tipString = "[Id {6}] {3}{4}{5}\r\n{0:P3} of thread - {1} samples - {2:P3} of parent\r\n{7:P3} outside children - {8} samples";
+						const string niceString = @"\1{0:P2} \2{1} \0- \3{2:P2} \0- {3}\2{4}\0{5}";
+						const string recursiveString = @"\4{0:P2} \2(recursive)";
 
 						string signature, funcName, classAndFunc, baseName;
 						BreakName(name, out signature, out funcName, out classAndFunc, out baseName);
@@ -298,8 +299,11 @@ WHERE C1.ParentId = {0} AND C1.ChildId = 0 AND C1.ThreadId = {1} AND C1.Snapshot
 							baseName, classAndFunc, signature, id, exclPercent, exclHits);
 						string formatText = string.Format(niceString, percent, funcName, percentOfParent,
 							baseName, classAndFunc, signature);
+						if(id == parent.Id)
+							formatText = string.Format(recursiveString, percent);
 
-						TreeNode newNode = new TreeNode(nodeText, new TreeNode[] { new TreeNode() });
+						var childNodes = id == parent.Id ? new TreeNode[] { } : new TreeNode[] { new TreeNode() };
+						TreeNode newNode = new TreeNode(nodeText, childNodes);
 						newNode.Tag = new NodeData(id, (int) parent.ThreadId, name, percent, formatText, tipText);
 						node.Nodes.Add(newNode);
 					}
