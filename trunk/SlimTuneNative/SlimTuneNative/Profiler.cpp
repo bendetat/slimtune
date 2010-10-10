@@ -63,7 +63,7 @@ Profiler::Profiler(HANDLE process, const ProfilerConfiguration& config)
 {
 	//Public symbols only so we can undecorate for parameter and return types.
 	//This is relevant in case overloads do significantly different tasks.
-	SymSetOptions(SYMOPT_DEBUG | SYMOPT_LOAD_LINES | SYMOPT_EXACT_SYMBOLS | SYMOPT_DEFERRED_LOADS);
+	SymSetOptions(SYMOPT_DEBUG | SYMOPT_LOAD_LINES | SYMOPT_EXACT_SYMBOLS | SYMOPT_DEFERRED_LOADS | SYMOPT_PUBLICS_ONLY);
 	SymInitialize(m_targetProcess, &m_configuration.WorkingDirectory[0], TRUE);
 
 	HRESULT hr = CoCreateGuid(&m_sesssion);
@@ -481,8 +481,7 @@ void Profiler::OnSampleTimer()
 		}
 		
 		if (sample.Functions.size() > 0)
-		{
-			
+		{	
 			ScopedSuspendLock lock(this);
 			sample.Write(*m_server);
 			//std::cout << "Sample written: " << g_SampleCount << "\n";
