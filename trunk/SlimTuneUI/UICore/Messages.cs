@@ -205,7 +205,8 @@ namespace UICore
 				for(int i = 0; i < count; ++i)
 				{
 					int id = Utilities.Read7BitEncodedInt(reader);
-					result.Functions.Add(id);
+					if(id > 0)
+						result.Functions.Add(id);
 				}
 
 				return result;

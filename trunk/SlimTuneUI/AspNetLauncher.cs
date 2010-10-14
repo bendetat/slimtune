@@ -70,8 +70,8 @@ namespace SlimTuneUI
 		{
 			StopIIS();
 
-			string config = LauncherCommon.CreateConfigString(ProfilingMode, ListenPort, false, IncludeNative, SamplingInterval, CounterInterval, AllowMethodInlining, TrackGC, TrackAllocs);
-			string[] profilerEnv = LauncherCommon.CreateProfilerEnvironment(config, LauncherCommon.GetCounterString(PerformanceCounters));
+			string config = LauncherCommon.CreateConfigStringCLR(ProfilingMode, ListenPort, false, IncludeNative, SamplingInterval, CounterInterval, AllowMethodInlining, TrackGC, TrackAllocs);
+			string[] profilerEnv = LauncherCommon.CreateProfilerEnvironment(config, LauncherCommon.GetCounterString(PerformanceCounters), true);
 			string[] baseEnv = LauncherCommon.GetServicesEnvironment();
 			baseEnv = LauncherCommon.ReplaceTempDir(baseEnv, Path.GetTempPath());
 			string[] env = LauncherCommon.CombineEnvironments(baseEnv, profilerEnv);

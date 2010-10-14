@@ -135,6 +135,7 @@ namespace UICore
 
 				MessageId messageId = (MessageId) m_reader.ReadByte();
 				//Debug.WriteLine(string.Format("Message: {0}", messageId));
+				//TODO: Refactor candidate?
 				switch(messageId)
 				{
 					case MessageId.MID_MapFunction:

@@ -33,7 +33,7 @@ namespace SlimTuneUI
 {
 	[Serializable,
 	DisplayName("Native code application (Visual C++)")]
-	class NativeLauncher : ILauncher
+	public class NativeLauncher : ILauncher
 	{
 		[Editor(typeof(FileNameEditor), typeof(UITypeEditor)),
 		Category("Application"),
@@ -76,6 +76,16 @@ namespace SlimTuneUI
 			}
 		}
 
+		[Category("Application"),
+		Description("The command line that should be passed to the executable when launched.")]
+		public string Arguments { get; set; }
+
+		[Editor(typeof(FolderNameEditor), typeof(UITypeEditor)),
+		Category("Application"),
+		DisplayName("Working directory"),
+		Description("The working directory to use when launching the executable. If left blank, the executable's directory will be used.")]
+		public string WorkingDir { get; set; }
+
 		public bool RequiresAdmin
 		{
 			get { return false; }
@@ -116,7 +126,24 @@ namespace SlimTuneUI
 
 		public bool Launch()
 		{
-			return false;
+			string config = LauncherCommon.CreateConfigStringNative(ProfilerMode.Sampling, ListenPort, SamplingInterval, 1000);
+			string argStr = Executable + " " + Arguments;
+			var psi = new ProcessStartInfo("Backends\\SlimTuneNative_x86.exe", argStr);
+			LauncherCommon.SetProcessOptions(psi, config, string.Empty, false);
+			psi.WorkingDirectory = string.IsNullOrEmpty(WorkingDir) ?
+				Path.GetDirectoryName(Executable) : WorkingDir;
+
+			try
+			{
+				Process.Start(psi);
+			}
+			catch(Exception ex)
+			{
+				MessageBox.Show(ex.Message, "Launch Error");
+				return false;
+			}
+
+			return true;
 		}
 	}
 }
