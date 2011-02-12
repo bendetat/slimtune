@@ -16,6 +16,7 @@
     <ClCompile Include="RingBuffer.cpp" />
     <ClCompile Include="SocketServer.cpp" />
     <ClCompile Include="Timer.cpp" />
+    <ClCompile Include="Logger.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -31,5 +32,6 @@
     <ClInclude Include="RingBuffer.h" />
     <ClInclude Include="SocketServer.h" />
     <ClInclude Include="Timer.h" />
+    <ClInclude Include="Logger.h" />
   </ItemGroup>
 </Project>

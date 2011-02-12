@@ -126,37 +126,6 @@ namespace SlimTuneApi
 		public static extern void SetCounterName(int counterId, [MarshalAs(UnmanagedType.LPWStr)] string name);
 
 		[DllImport(DllName)]
-		private static extern void WritePerfCounterInt(int counterId, long value);
-
-		[DllImport(DllName)]
-		private static extern void WritePerfCounterFloat(int counterId, double value);
-
-		/// <summary>
-		/// Writes an integer value for a custom performance counter.
-		/// </summary>
-		/// <param name="counterId">The unique integer ID of the counter.</param>
-		/// <param name="value">The value to write for the counter.</param>
-		/// <remarks>
-		/// The value is stored as a fixed point value with three decimal places.
-		/// Large values may be truncated.
-		/// </remarks>
-		public static void WritePerfCounter(int counterId, long value)
-		{
-			WritePerfCounterInt(counterId, value);
-		}
-
-		/// <summary>
-		/// Writes an floating point value for a custom performance counter.
-		/// </summary>
-		/// <param name="counterId">The unique integer ID of the counter.</param>
-		/// <param name="value">The value to write for the counter.</param>
-		/// <remarks>
-		/// The value is stored as a fixed point value with three decimal places.
-		/// Values beyond the first five decimal places will be truncated, and large values may be truncated.
-		/// </remarks>
-		public static void WritePerfCounter(int counterId, double value)
-		{
-			WritePerfCounterFloat(counterId, value);
-		}
+		public static extern void WritePerfCounter(int counterId, double value);
 	}
 }

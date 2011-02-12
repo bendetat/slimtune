@@ -75,6 +75,9 @@ m_instDepth(0)
 	__debugbreak();
 #endif
 
+	m_logger = new Logger();
+	m_logger->WriteEvent(Logger::INFO, "ClrProfiler object created.");
+
 	refCount = 1;
 	InterlockedIncrement((volatile LONG *)&ComServerLocks);
 
@@ -98,6 +101,8 @@ m_instDepth(0)
 
 	m_allocatedPending = false;
 	m_collectionInProgress = 0;
+
+	m_logger->WriteEvent(Logger::INFO, "ClrProfiler constructed.");
 }
 
 ClrProfiler::~ClrProfiler()
@@ -129,6 +134,8 @@ HRESULT ClrProfiler::QueryInterface(REFIID riid, void **ppvObject)
 		return E_NOINTERFACE;
 	}
 
+	m_logger->WriteEvent(Logger::INFO, "Responded to QueryInterface.");
+
 	AddRef();
 	return S_OK;
 }
@@ -155,22 +162,33 @@ ULONG ClrProfiler::Release()
 
 STDMETHODIMP ClrProfiler::Initialize(IUnknown *pICorProfilerInfoUnk)
 {
+	m_logger->WriteEvent(Logger::INFO, "Initialization begun.");
+
 	//Get the COM interfaces
 	HRESULT hr = pICorProfilerInfoUnk->QueryInterface(IID_ICorProfilerInfo, (void**) &m_ProfilerInfo);
 	if (FAILED(hr))
+	{
+		m_logger->WriteEvent(Logger::FAIL, "Unable to retrieve ICorProfilerInfo. No known reasons.");
 		return E_FAIL;
+	}
 
 	hr = pICorProfilerInfoUnk->QueryInterface(IID_ICorProfilerInfo2, (void**) &m_ProfilerInfo2);
 	if (FAILED(hr))
 	{
 		//we've decided not to support .NET before 2.0.
+		m_logger->WriteEvent(Logger::FAIL, ".NET 1.x applications are not supported (ICorProfilerInfo2 not found).");
 		return E_FAIL;
 	}
 
 	//Query for .NET 4.0 (not required)
 	pICorProfilerInfoUnk->QueryInterface(IID_ICorProfilerInfo3, (void**) &m_ProfilerInfo3);
 
+	m_logger->WriteEvent(Logger::INFO, "Got ICorProfilerInfo interfaces.");
+
 	m_config.LoadEnv();
+
+	m_logger->WriteEvent(Logger::INFO, "Loaded configuration.");
+
 	//m_config.SampleUnmanaged = true;
 #ifdef X64
 	//nothing else supported right now
@@ -195,11 +213,15 @@ STDMETHODIMP ClrProfiler::Initialize(IUnknown *pICorProfilerInfoUnk)
 	}
 #endif
 
+	m_logger->WriteEvent(Logger::INFO, "Initialized profiling.");
+
 	//set up dbghelp
 	if(!SymInitializeLocal())
 		return E_FAIL;
 	SymSetOptionsPtr(SYMOPT_UNDNAME);
 	SymInitializePtr(GetCurrentProcess(), NULL, TRUE);
+
+	m_logger->WriteEvent(Logger::INFO, "Symbols are ready.");
 
 	//CONFIG: Server type?
 	m_samplerActive = false;
@@ -207,6 +229,8 @@ STDMETHODIMP ClrProfiler::Initialize(IUnknown *pICorProfilerInfoUnk)
 	m_server.reset(IProfilerServer::CreateSocketServer(*this, static_cast<unsigned short>(m_config.ListenPort), m_lock));
 	m_server->SetCallbacks(boost::bind(&ClrProfiler::OnConnect, this), boost::bind(&ClrProfiler::OnDisconnect, this));
 	m_server->Start();
+
+	m_logger->WriteEvent(Logger::INFO, "Server is up and running.");
 
 	//initialize timing (and use cycle timing if enabled and on Vista+)
 	InitializeTimer(/*m_config.CycleTiming && m_config.Version.dwMajorVersion >= 6*/ false);
@@ -233,17 +257,25 @@ STDMETHODIMP ClrProfiler::Initialize(IUnknown *pICorProfilerInfoUnk)
 	CreateTimerQueueTimer(&m_counterTimer, NULL, &ClrProfiler::OnCounterTimerGlobal, this,
 		m_config.CounterInterval, m_config.CounterInterval, WT_EXECUTEDEFAULT);
 
+	m_logger->WriteEvent(Logger::INFO, "Performance counters are active.");
+
 	// set up our global access pointer
 	g_Profiler = this;
 
 	m_samplerActive = (m_config.Mode & PM_Sampling) != 0;
 	if(m_config.WaitForConnection)
+	{
+		m_logger->WriteEvent(Logger::INFO, "Waiting for connection.");
 		m_server->WaitForConnection();
+	}
 
 	//kick off the IO thread
 	IoThreadFunc threadFunc(*m_server);
 	m_ioThread.reset(new boost::thread(threadFunc));
 
+	m_logger->WriteEvent(Logger::INFO, "IO thread is running.");
+
+	m_logger->WriteEvent(Logger::INFO, "Profiler initialization succeeded.");
 	return S_OK;
 }
 
@@ -349,22 +381,26 @@ HRESULT ClrProfiler::SetInitialEventMask()
 
 	if(m_config.TrackGarbageCollections)
 	{
+		m_logger->WriteEvent(Logger::INFO, "Tracking GC events.");
 		eventMask |= COR_PRF_MONITOR_GC;
 	}
 
 	if(m_config.TrackObjectAllocations)
 	{
+		m_logger->WriteEvent(Logger::INFO, "Tracking object allocations.");
 		eventMask |= COR_PRF_MONITOR_OBJECT_ALLOCATED | COR_PRF_ENABLE_OBJECT_ALLOCATED;
 	}
 
 	//enabling stack snapshots causes instrumentation to switch to slow mode sadly
 	if(m_config.Mode & PM_Sampling)
 	{
+		m_logger->WriteEvent(Logger::INFO, "Sampler and stack snapshots are enabled.");
 		eventMask |= COR_PRF_ENABLE_STACK_SNAPSHOT;
 	}
 
 	if(m_config.Mode & PM_Tracing)
 	{
+		m_logger->WriteEvent(Logger::INFO, "Instrumentation is enabled.");
 		eventMask |= COR_PRF_MONITOR_ENTERLEAVE;
 		eventMask |= COR_PRF_MONITOR_CODE_TRANSITIONS;
 	}
@@ -372,6 +408,7 @@ HRESULT ClrProfiler::SetInitialEventMask()
 	m_eventMask = eventMask;
 	HRESULT hr = m_ProfilerInfo->SetEventMask(m_eventMask);
 	assert(SUCCEEDED(hr));
+	m_logger->WriteEvent(Logger::INFO, "CLR Event mask has been set.");
 	return hr;
 }
 
