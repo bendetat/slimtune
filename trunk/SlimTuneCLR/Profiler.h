@@ -70,6 +70,8 @@ public:
 	ClrProfiler();
 	virtual ~ClrProfiler();
 
+	Logger* GetLogger() { return m_logger; }
+
 	//IUnknown Methods
 	virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppvObject);
 	virtual ULONG  STDMETHODCALLTYPE AddRef();

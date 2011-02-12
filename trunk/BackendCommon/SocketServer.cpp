@@ -64,7 +64,7 @@ public:
 	}
 
 	bool IsOpen() const { return m_socket.is_open(); }
-	void Close() { m_socket.close(); }
+	void Close();
 
 	void BeginRead(unsigned int offset = 0);
 	void Write(const void* data, size_t size);
@@ -108,6 +108,12 @@ void TcpConnection::Write(const void* data, size_t size)
 		shared_from_this(),
 		boost::asio::placeholders::error,
 		boost::asio::placeholders::bytes_transferred));
+}
+
+void TcpConnection::Close()
+{
+	m_server.m_profilerData.GetLogger()->WriteEvent(Logger::INFO, "Closing socket connection to client.");
+	m_socket.close();
 }
 
 void TcpConnection::SendFunction(const Requests::GetFunctionMapping& request)
@@ -240,12 +246,14 @@ bool TcpConnection::ContinueRead(const boost::system::error_code&, size_t bytesR
 
 		case CR_Suspend:
 			{
+				m_server.m_profilerData.GetLogger()->WriteEvent(Logger::INFO, "Received client request to suspend target application.");
 				m_server.ProfilerData().SuspendTarget();
 				break;
 			}
 
 		case CR_Resume:
 			{
+				m_server.m_profilerData.GetLogger()->WriteEvent(Logger::INFO, "Received client request to resume target application.");
 				m_server.ProfilerData().ResumeTarget();
 				break;
 			}
@@ -258,6 +266,11 @@ bool TcpConnection::ContinueRead(const boost::system::error_code&, size_t bytesR
 				++bufPtr;
 				char active = *bufPtr;
 				bytesParsed = 1;
+				if(active)
+					m_server.m_profilerData.GetLogger()->WriteEvent(Logger::INFO, "Activated sampling profiler by client request.");
+				else
+					m_server.m_profilerData.GetLogger()->WriteEvent(Logger::INFO, "Disabled sampling profiler by client request.");
+
 				m_server.ProfilerData().SetSamplerActive(active != 0);
 				break;
 			}
@@ -267,6 +280,7 @@ bool TcpConnection::ContinueRead(const boost::system::error_code&, size_t bytesR
 			__debugbreak();
 #endif
 			//this is considered catastrophic corruption, so terminate the connection
+			m_server.m_profilerData.GetLogger()->WriteEvent(Logger::FAIL, "Corruption in network stream, disconnecting client.");
 			m_socket.close();
 			return true;
 		}
@@ -335,6 +349,7 @@ void SocketServer::Start()
 		boost::bind(&SocketServer::Accept, this, conn, boost::asio::placeholders::error));
 
 	CreateTimerQueueTimer(&m_keepAliveTimer, NULL, OnTimerGlobal, this, 10000, 10000, WT_EXECUTEDEFAULT);
+	m_profilerData.GetLogger()->WriteEvent(Logger::INFO, "Socket server started.");
 }
 
 void SocketServer::Run()
@@ -344,6 +359,8 @@ void SocketServer::Run()
 
 void SocketServer::Stop()
 {
+	m_profilerData.GetLogger()->WriteEvent(Logger::INFO, "Shutting down socket server.");
+
 	DeleteTimerQueueTimer(NULL, m_keepAliveTimer, INVALID_HANDLE_VALUE);
 
 	Mutex::scoped_lock EnterLock(m_lock);
@@ -375,6 +392,7 @@ void SocketServer::Accept(TcpConnectionPtr conn, const boost::system::error_code
 		if(m_connections.size() == 1 && m_onConnect)
 			m_onConnect();
 
+		m_profilerData.GetLogger()->WriteEvent(Logger::INFO, "Received new client connection.");
 		Start();
 	}
 }
@@ -393,6 +411,7 @@ void SocketServer::HandleWrite(TcpConnectionPtr source, const boost::system::err
 		//so we can't be sure the connection exists to erase
 		if(deadConn != m_connections.end())
 		{
+			m_profilerData.GetLogger()->WriteEvent(Logger::INFO, "Lost client connection.");
 			m_connections.erase(deadConn);
 
 			if(m_connections.size() == 0 && m_onDisconnect)

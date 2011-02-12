@@ -306,6 +306,8 @@ STDMETHODIMP ClrProfiler::Shutdown()
 
 void ClrProfiler::OnConnect()
 {
+	m_logger->WriteEvent(Logger::INFO, "Client connected to profiler.");
+
 	//Hybrid will pass this conditional
 	if(m_config.Mode & PM_Sampling)
 	{
@@ -316,11 +318,15 @@ void ClrProfiler::OnConnect()
 	m_connected = true;
 
 	if(m_config.SuspendOnConnection)
+	{
+		m_logger->WriteEvent(Logger::INFO, "Target application has been suspended due to connection event.");
 		SuspendTarget();
+	}
 }
 
 void ClrProfiler::OnDisconnect()
 {
+	m_logger->WriteEvent(Logger::INFO, "All clients have disconnected.");
 	m_connected = false;
 }
 

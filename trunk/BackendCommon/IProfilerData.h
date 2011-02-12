@@ -24,6 +24,7 @@
 #pragma once
 
 #include "Messages.h"
+#include "Logger.h"
 
 struct ModuleInfo
 {
@@ -132,6 +133,8 @@ private:
 
 struct IProfilerData
 {
+	virtual Logger* GetLogger() = 0;
+
 	virtual const GUID* GetSessionId() = 0;
 	virtual const FunctionInfo* GetFunction(unsigned int id) = 0;
 	virtual const ClassInfo* GetClass(unsigned int id) = 0;
