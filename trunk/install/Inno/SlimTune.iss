@@ -33,12 +33,12 @@ DefaultDirName={pf}\SlimTune Profiler
 DefaultGroupName=SlimTune Profiler
 LicenseFile=..\ExtraFiles\License.rtf
 OutputDir=.
-OutputBaseFilename=SlimTune-0.2.1
+OutputBaseFilename=SlimTune-0.3.0
 Compression=lzma
 SolidCompression=yes
 UsePreviousAppDir=yes
 MinVersion=0,5.01
-VersionInfoVersion=0.2.1.0
+VersionInfoVersion=0.3.0.0
 VersionInfoCompany=SlimDX Group
 VersionInfoCopyright=Copyright © SlimDX Group 2010
 VersionInfoProductName=SlimTune Profiler v0.3.0
@@ -58,7 +58,7 @@ Source: "..\publish\Backends\*"; DestDir: "{app}\Backends"; Flags: ignoreversion
 Source: "..\publish\Plugins\*"; DestDir: "{app}\Plugins"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\publish\Api\*"; DestDir: "{app}\Api"; Flags: ignoreversion recursesubdirs createallsubdirs
 
-Source: "..\ExtraFiles\x86\SSCERuntime-ENU-x86.msi"; DestDir: "{tmp}"; Flags: ignoreversion
+; Source: "..\ExtraFiles\x86\SSCERuntime-ENU-x86.msi"; DestDir: "{tmp}"; Flags: ignoreversion
 
 [Registry]
 Root: HKLM; Subkey: "Software\SlimDX Group"; Flags: uninsdeletekeyifempty
@@ -75,7 +75,7 @@ Name: "{group}\{cm:UninstallProgram,SlimTune Profiler}"; Filename: "{uninstallex
 Name: Firewall; Description: "Open TCP subnet ports 3000 - 3001 in Windows Firewall"; GroupDescription: "Firewall:"; MinVersion: 0,5.01.2600sp2;
 
 [Run]
-Filename: "msiexec.exe"; Parameters: "/passive /i ""{tmp}\SSCERuntime-ENU-x86.msi"""; StatusMsg: "Installing SQL Server Compact Edition"
+; Filename: "msiexec.exe"; Parameters: "/passive /i ""{tmp}\SSCERuntime-ENU-x86.msi"""; StatusMsg: "Installing SQL Server Compact Edition"
 Filename: "{sys}\netsh.exe"; Parameters: "firewall add portopening TCP 3000 ""SlimTune Profiler (3000)"" ENABLE SUBNET"; Flags: runhidden; Tasks: Firewall;
 Filename: "{sys}\netsh.exe"; Parameters: "firewall add portopening TCP 3001 ""SlimTune Profiler (3001)"" ENABLE SUBNET"; Flags: runhidden; Tasks: Firewall;
 
@@ -116,5 +116,5 @@ begin
   TempDir := ExpandConstant('{tmp}');
   RedistPath := TempDir + '\vcredist_' + arch + '.exe';
 
-  Exec(RedistPath, '/qb!', TempDir, SW_SHOW, ewWaitUntilTerminated, ReturnCode)
+  Exec(RedistPath, '/passive /norestart', TempDir, SW_SHOW, ewWaitUntilTerminated, ReturnCode)
 end;

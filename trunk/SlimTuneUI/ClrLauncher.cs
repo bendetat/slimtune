@@ -90,7 +90,7 @@ namespace SlimTuneUI
 		{
 			string config = LauncherCommon.CreateConfigStringCLR(ProfilingMode, ListenPort, WaitForConnection, IncludeNative, SamplingInterval, CounterInterval, AllowMethodInlining, TrackGC, TrackAllocs);
 			var psi = new ProcessStartInfo(Executable, Arguments);
-			LauncherCommon.SetProcessOptions(psi, config, LauncherCommon.GetCounterString(PerformanceCounters), false);
+			LauncherCommon.SetProcessOptions(psi, config, LauncherCommon.GetCounterString(PerformanceCounters), true);
 			psi.WorkingDirectory = string.IsNullOrEmpty(WorkingDir) ?
 				Path.GetDirectoryName(Executable) : WorkingDir;
 

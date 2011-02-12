@@ -34,6 +34,7 @@ using FluentNHibernate.Cfg;
 using FluentNHibernate.Cfg.Db;
 using NHibernate.Tool.hbm2ddl;
 
+#if NOT_DEFINED
 namespace SlimTuneUI
 {
 	[Obsolete,
@@ -442,3 +443,4 @@ namespace SlimTuneUI
 		}
 	}
 }
+#endif

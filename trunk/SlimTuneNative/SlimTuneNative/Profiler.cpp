@@ -339,6 +339,9 @@ unsigned int Profiler::MapFunction(DWORD64 address)
 			*/
 			//Attempt to find the signature.
 			const wchar_t * sigStart = wcschr(undecorBuffer, L'(');
+			//if(wcschr(undecorBuffer, L'>'))
+			//	std::cout << undecorBuffer << std::endl;
+
 			if (sigStart)
 			{
 				//The rest of the string should be a valid signature.
@@ -425,6 +428,7 @@ void Profiler::OnSampleTimer()
 	//We can now attempt to iterate the call stack.
 
 	//TODO: Fail gracefully on things less than XP
+	//TODO: OSes before XP suck
 	ThreadIterator it(m_targetProcess);
 	ThreadIterator end;
 
@@ -475,13 +479,15 @@ void Profiler::OnSampleTimer()
 		for (size_t i = 0; i < frames.size(); ++i)
 		{
 			unsigned int id = MapFunction(frames[i]);
-			if(id == 0)
-				continue;
-			sample.Functions.push_back(id);
+			if(id > 0)
+				sample.Functions.push_back(id);
 		}
 		
+		static unsigned int marker = 0;
+
 		if (sample.Functions.size() > 0)
-		{	
+		{
+			assert(marker == 0 || marker == sample.Functions.back());
 			ScopedSuspendLock lock(this);
 			sample.Write(*m_server);
 			//std::cout << "Sample written: " << g_SampleCount << "\n";
