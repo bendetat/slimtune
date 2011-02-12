@@ -31,7 +31,7 @@ using UICore;
 
 namespace SlimTuneUI.CoreVis
 {
-	[DisplayName("Per-Thread Call Trees")]
+	[DisplayName("Per-Thread Call Trees (recommended)")]
 	public partial class DotTraceStyle : UserControl, IVisualizer
 	{
 		const string kParentHits = @"

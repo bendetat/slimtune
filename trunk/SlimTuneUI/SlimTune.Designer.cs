@@ -88,7 +88,7 @@ namespace SlimTuneUI
 			ConnectLabel.Size = new System.Drawing.Size(328, 43);
 			ConnectLabel.TabIndex = 3;
 			ConnectLabel.Text = "Connect to a running application that was launched with profiling enabled. The ta" +
-				"rget can be local or remote, with a configured firewall.";
+				"rget can be local or remote (with a configured firewall).";
 			// 
 			// OpenLabel
 			// 
@@ -213,10 +213,10 @@ namespace SlimTuneUI
 			this.MaximizeBox = false;
 			this.Name = "SlimTune";
 			this.Text = "SlimTune Profiler";
-			this.DragDrop += new System.Windows.Forms.DragEventHandler(this.SlimTune_DragDrop);
-			this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.SlimTune_FormClosed);
-			this.DragEnter += new System.Windows.Forms.DragEventHandler(this.SlimTune_DragEnter);
 			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.SlimTune_FormClosing);
+			this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.SlimTune_FormClosed);
+			this.DragDrop += new System.Windows.Forms.DragEventHandler(this.SlimTune_DragDrop);
+			this.DragEnter += new System.Windows.Forms.DragEventHandler(this.SlimTune_DragEnter);
 			this.OpenFilePanel.ResumeLayout(false);
 			this.panel1.ResumeLayout(false);
 			this.panel2.ResumeLayout(false);

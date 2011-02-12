@@ -54,6 +54,8 @@ namespace SlimTuneUI
 			this.m_openVisualizerButton = new System.Windows.Forms.Button();
 			this.m_visualizerCombo = new System.Windows.Forms.ComboBox();
 			this.MainSplitter = new System.Windows.Forms.SplitContainer();
+			this.ResumeButton = new System.Windows.Forms.Button();
+			this.PauseButton = new System.Windows.Forms.Button();
 			this.TasksGroupBox = new System.Windows.Forms.GroupBox();
 			this.ClearDataButton = new System.Windows.Forms.Button();
 			this.SnapshotButton = new System.Windows.Forms.Button();
@@ -66,8 +68,6 @@ namespace SlimTuneUI
 			this.HostLabel = new System.Windows.Forms.Label();
 			this.m_closeVisualizerButton = new System.Windows.Forms.Button();
 			this.VisualizerHost = new System.Windows.Forms.TabControl();
-			this.PauseButton = new System.Windows.Forms.Button();
-			this.ResumeButton = new System.Windows.Forms.Button();
 			VisualizersGroupBox = new System.Windows.Forms.GroupBox();
 			VisualizersGroupBox.SuspendLayout();
 			this.MainSplitter.Panel1.SuspendLayout();
@@ -147,6 +147,28 @@ namespace SlimTuneUI
 			this.MainSplitter.SplitterDistance = 200;
 			this.MainSplitter.TabIndex = 1;
 			// 
+			// ResumeButton
+			// 
+			this.ResumeButton.Location = new System.Drawing.Point(90, 313);
+			this.ResumeButton.Name = "ResumeButton";
+			this.ResumeButton.Size = new System.Drawing.Size(75, 23);
+			this.ResumeButton.TabIndex = 8;
+			this.ResumeButton.Text = "Resume";
+			this.ResumeButton.UseVisualStyleBackColor = true;
+			this.ResumeButton.Visible = false;
+			this.ResumeButton.Click += new System.EventHandler(this.ResumeButton_Click_1);
+			// 
+			// PauseButton
+			// 
+			this.PauseButton.Location = new System.Drawing.Point(9, 314);
+			this.PauseButton.Name = "PauseButton";
+			this.PauseButton.Size = new System.Drawing.Size(75, 23);
+			this.PauseButton.TabIndex = 7;
+			this.PauseButton.Text = "Pause ";
+			this.PauseButton.UseVisualStyleBackColor = true;
+			this.PauseButton.Visible = false;
+			this.PauseButton.Click += new System.EventHandler(this.PauseButton_Click);
+			// 
 			// TasksGroupBox
 			// 
 			this.TasksGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
@@ -172,6 +194,7 @@ namespace SlimTuneUI
 			// 
 			// SnapshotButton
 			// 
+			this.SnapshotButton.Enabled = false;
 			this.SnapshotButton.Location = new System.Drawing.Point(10, 38);
 			this.SnapshotButton.Name = "SnapshotButton";
 			this.SnapshotButton.Size = new System.Drawing.Size(75, 23);
@@ -279,26 +302,6 @@ namespace SlimTuneUI
 			this.VisualizerHost.TabIndex = 1;
 			this.VisualizerHost.MouseClick += new System.Windows.Forms.MouseEventHandler(this.VisualizerHost_MouseClick);
 			// 
-			// PauseButton
-			// 
-			this.PauseButton.Location = new System.Drawing.Point(9, 314);
-			this.PauseButton.Name = "PauseButton";
-			this.PauseButton.Size = new System.Drawing.Size(75, 23);
-			this.PauseButton.TabIndex = 7;
-			this.PauseButton.Text = "Pause ";
-			this.PauseButton.UseVisualStyleBackColor = true;
-			this.PauseButton.Click += new System.EventHandler(this.PauseButton_Click);
-			// 
-			// ResumeButton
-			// 
-			this.ResumeButton.Location = new System.Drawing.Point(90, 313);
-			this.ResumeButton.Name = "ResumeButton";
-			this.ResumeButton.Size = new System.Drawing.Size(75, 23);
-			this.ResumeButton.TabIndex = 8;
-			this.ResumeButton.Text = "Resume";
-			this.ResumeButton.UseVisualStyleBackColor = true;
-			this.ResumeButton.Click += new System.EventHandler(this.ResumeButton_Click_1);
-			// 
 			// ProfilerWindow
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -307,8 +310,8 @@ namespace SlimTuneUI
 			this.Controls.Add(this.MainSplitter);
 			this.Name = "ProfilerWindow";
 			this.Text = "ProfilerWindow";
-			this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ProfilerWindow_FormClosed);
 			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ProfilerWindow_FormClosing);
+			this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ProfilerWindow_FormClosed);
 			VisualizersGroupBox.ResumeLayout(false);
 			VisualizersGroupBox.PerformLayout();
 			this.MainSplitter.Panel1.ResumeLayout(false);

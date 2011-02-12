@@ -9,7 +9,8 @@ const char* Logger::FAIL = "FAIL";
 Logger::Logger()
 {
 	SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, m_path);
-	wcscat(m_path, L"\\SlimTune-CLR-log.txt");
+	wchar_t buffer[128];
+	wcscat(m_path, L"\\SlimTuneCLR-log.txt");
 	m_file = _wfopen(m_path, L"wt");
 }
 
