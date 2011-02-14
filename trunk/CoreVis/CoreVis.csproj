@@ -110,6 +110,12 @@
     <Compile Include="FunctionDetails.Designer.cs">
       <DependentUpon>FunctionDetails.cs</DependentUpon>
     </Compile>
+    <Compile Include="HotSpots.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="HotSpots.Designer.cs">
+      <DependentUpon>HotSpots.cs</DependentUpon>
+    </Compile>
     <Compile Include="NProfStyleVisualizer.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -134,6 +140,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="FunctionDetails.resx">
       <DependentUpon>FunctionDetails.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="HotSpots.resx">
+      <DependentUpon>HotSpots.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="NProfStyleVisualizer.resx">
       <DependentUpon>NProfStyleVisualizer.cs</DependentUpon>

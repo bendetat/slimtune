@@ -39,6 +39,12 @@ namespace UICore
 			protected set;
 		}
 
+		public Snapshot ActiveSnapshot
+		{
+			get;
+			protected set;
+		}
+
 		public ProfilerWindowBase()
 		{
 			//Designer really wants this ctor to be here
@@ -48,6 +54,11 @@ namespace UICore
 		{
 			Visualizers = new List<IVisualizer>();
 			Connection = conn;
+		}
+
+		public NHibernate.ISession OpenActiveSnapshot()
+		{
+			return Connection.DataEngine.OpenSession(ActiveSnapshot.Id);
 		}
 	}
 }

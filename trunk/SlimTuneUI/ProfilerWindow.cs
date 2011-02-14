@@ -72,11 +72,6 @@ namespace SlimTuneUI
 			RefreshSnapshots();
 		}
 
-		public Snapshot ActiveSnapshot
-		{
-			get { return SnapshotsListBox.CheckedItems[0] as Snapshot; }
-		}
-
 		void Connection_Disconnected(object sender, EventArgs e)
 		{
 			try
@@ -228,6 +223,7 @@ namespace SlimTuneUI
 			}
 
 			SnapshotsListBox.SetItemChecked(selIndex, true);
+			ActiveSnapshot = SnapshotsListBox.CheckedItems[0] as Snapshot;
 		}
 
 		private void CloseTab(int index)
@@ -314,6 +310,7 @@ namespace SlimTuneUI
 			}
 
 			SnapshotsListBox.SetItemChecked(SnapshotsListBox.SelectedIndex, true);
+			ActiveSnapshot = SnapshotsListBox.SelectedItem as Snapshot;
 		}
 	}
 }
