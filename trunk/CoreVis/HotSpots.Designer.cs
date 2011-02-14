@@ -56,9 +56,9 @@
 			this.HotspotsList.ItemHeight = 40;
 			this.HotspotsList.Location = new System.Drawing.Point(4, 4);
 			this.HotspotsList.Name = "HotspotsList";
-			this.HotspotsList.Size = new System.Drawing.Size(251, 446);
+			this.HotspotsList.Size = new System.Drawing.Size(279, 446);
 			this.HotspotsList.TabIndex = 0;
-			this.HotspotsList.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.HotspotsList_DrawItem);
+			this.HotspotsList.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.CallList_DrawItem);
 			this.HotspotsList.SelectedIndexChanged += new System.EventHandler(this.CallList_SelectedIndexChanged);
 			this.HotspotsList.Format += new System.Windows.Forms.ListControlConvertEventHandler(this.CallList_Format);
 			// 

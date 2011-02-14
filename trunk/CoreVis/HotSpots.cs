@@ -17,17 +17,20 @@ namespace SlimTuneUI.CoreVis
 		ProfilerWindowBase m_mainWindow;
 		Connection m_connection;
 
-		ListBox m_rightMost;
-
 		//drawing stuff
 		Font m_functionFont = new Font(SystemFonts.DefaultFont.FontFamily, 12, FontStyle.Bold);
 		Font m_objectFont = new Font(SystemFonts.DefaultFont.FontFamily, 9, FontStyle.Regular);
-		double m_totalHotspotsTime = 0;
+
+		class ListTag
+		{
+			public ListBox Right;
+			public double TotalTime;
+		}
 
 		public HotSpots()
 		{
 			InitializeComponent();
-			m_rightMost = HotspotsList;
+			HotspotsList.Tag = new ListTag();
 		}
 
 		public string DisplayName
@@ -64,8 +67,16 @@ namespace SlimTuneUI.CoreVis
 			HotspotsList.Items.Clear();
 			using(var session = m_mainWindow.OpenActiveSnapshot())
 			{
+				//find the total time consumed
+				var totalQuery = session.CreateQuery("select sum(call.Time) from Call call where call.ChildId = 0");
+				double totalTime = totalQuery.UniqueResult<double>();
+				(HotspotsList.Tag as ListTag).TotalTime = totalTime;
+				//require hotspots to occupy at least 1/10th of one percent
+				double minimumTime = totalTime / 1000.0;
+
 				//find the functions that consumed the most time-exclusive. These are hotspots.
-				var query = session.CreateQuery("from Call c where c.ChildId = 0 order by c.Time desc inner join fetch c.Parent");
+				var query = session.CreateQuery("from Call c where c.ChildId = 0 and c.Time >= :minTime order by c.Time desc inner join fetch c.Parent");
+				query.SetDouble("minTime", minimumTime);
 				query.SetMaxResults(20);
 				var hotspots = query.List<Call>();
 				foreach(var call in hotspots)
@@ -74,9 +85,6 @@ namespace SlimTuneUI.CoreVis
 					var parentName = func.Name;
 					HotspotsList.Items.Add(call);
 				}
-
-				var totalQuery = session.CreateQuery("select sum(call.Time) from Call call where call.ChildId = 0");
-				m_totalHotspotsTime = totalQuery.UniqueResult<double>();
 			}
 		}
 
@@ -85,7 +93,10 @@ namespace SlimTuneUI.CoreVis
 			using(var session = m_mainWindow.OpenActiveSnapshot())
 			{
 				session.Lock(child.Parent, NHibernate.LockMode.None);
-				var parents = child.Parent.CallsAsChild;
+				var parents = from Call c in child.Parent.CallsAsChild
+							  orderby c.Time descending
+							  select c;
+				double totalTime = 0;
 				foreach(var call in parents)
 				{
 					if(call.ParentId == 0)
@@ -93,8 +104,10 @@ namespace SlimTuneUI.CoreVis
 
 					var func = call.Parent;
 					var parentName = func.Name;
+					totalTime += call.Time;
 					box.Items.Add(call);
 				}
+				(box.Tag as ListTag).TotalTime = totalTime;
 			}
 
 			return true;
@@ -107,17 +120,17 @@ namespace SlimTuneUI.CoreVis
 
 		private void RemoveList(ListBox list)
 		{
-			if(list.Tag != null)
-				RemoveList(list.Tag as ListBox);
+			if(list == null)
+				return;
 
+			RemoveList((list.Tag as ListTag).Right);
 			ScrollPanel.Controls.Remove(list);
 		}
 
 		private void CallList_SelectedIndexChanged(object sender, EventArgs e)
 		{
 			ListBox list = sender as ListBox;
-			if(list.Tag != null)
-				RemoveList(list.Tag as ListBox);
+			RemoveList((list.Tag as ListTag).Right);
 
 			//create a new listbox to the right
 			ListBox lb = new ListBox();
@@ -126,15 +139,18 @@ namespace SlimTuneUI.CoreVis
 			lb.IntegralHeight = false;
 			lb.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
 			lb.FormattingEnabled = true;
+			lb.DrawMode = DrawMode.OwnerDrawFixed;
+			lb.ItemHeight = HotspotsList.ItemHeight;
+			lb.Tag = new ListTag();
 			lb.Format += new ListControlConvertEventHandler(CallList_Format);
 			lb.SelectedIndexChanged += new EventHandler(CallList_SelectedIndexChanged);
+			lb.DrawItem += new DrawItemEventHandler(CallList_DrawItem);
 
 			if(UpdateParents(list.SelectedItem as Call, lb))
 			{
 				ScrollPanel.Controls.Add(lb);
 				ScrollPanel.ScrollControlIntoView(lb);
-				m_rightMost.Tag = lb;
-				m_rightMost = lb;
+				(list.Tag as ListTag).Right = lb;
 			}
 		}
 
@@ -144,7 +160,7 @@ namespace SlimTuneUI.CoreVis
 			e.Value = call.Parent.Name;
 		}
 
-		private void HotspotsList_DrawItem(object sender, DrawItemEventArgs e)
+		private void CallList_DrawItem(object sender, DrawItemEventArgs e)
 		{
 			ListBox list = sender as ListBox;
 			Call item = list.Items[e.Index] as Call;
@@ -152,7 +168,7 @@ namespace SlimTuneUI.CoreVis
 			int splitIndex = item.Parent.Name.LastIndexOf('.');
 			string functionName = item.Parent.Name.Substring(splitIndex + 1);
 			string objectName = "- " + item.Parent.Name.Substring(0, splitIndex);
-			double percent = 100 * item.Time / m_totalHotspotsTime;
+			double percent = 100 * item.Time / (list.Tag as ListTag).TotalTime;
 			string functionString = string.Format("{0:0.##}%: {1}", percent, functionName);
 
 			Brush brush = Brushes.Black;
