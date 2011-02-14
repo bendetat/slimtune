@@ -54,9 +54,12 @@ namespace SlimTuneUI
 			this.m_openVisualizerButton = new System.Windows.Forms.Button();
 			this.m_visualizerCombo = new System.Windows.Forms.ComboBox();
 			this.MainSplitter = new System.Windows.Forms.SplitContainer();
+			this.SnapshotsGroupBox = new System.Windows.Forms.GroupBox();
+			this.SnapshotsListBox = new System.Windows.Forms.CheckedListBox();
+			this.label2 = new System.Windows.Forms.Label();
+			this.TasksGroupBox = new System.Windows.Forms.GroupBox();
 			this.ResumeButton = new System.Windows.Forms.Button();
 			this.PauseButton = new System.Windows.Forms.Button();
-			this.TasksGroupBox = new System.Windows.Forms.GroupBox();
 			this.ClearDataButton = new System.Windows.Forms.Button();
 			this.SnapshotButton = new System.Windows.Forms.Button();
 			this.TasksLabel = new System.Windows.Forms.Label();
@@ -73,6 +76,7 @@ namespace SlimTuneUI
 			this.MainSplitter.Panel1.SuspendLayout();
 			this.MainSplitter.Panel2.SuspendLayout();
 			this.MainSplitter.SuspendLayout();
+			this.SnapshotsGroupBox.SuspendLayout();
 			this.TasksGroupBox.SuspendLayout();
 			this.InfoGroupBox.SuspendLayout();
 			this.SuspendLayout();
@@ -133,8 +137,7 @@ namespace SlimTuneUI
 			// 
 			// MainSplitter.Panel1
 			// 
-			this.MainSplitter.Panel1.Controls.Add(this.ResumeButton);
-			this.MainSplitter.Panel1.Controls.Add(this.PauseButton);
+			this.MainSplitter.Panel1.Controls.Add(this.SnapshotsGroupBox);
 			this.MainSplitter.Panel1.Controls.Add(this.TasksGroupBox);
 			this.MainSplitter.Panel1.Controls.Add(this.InfoGroupBox);
 			this.MainSplitter.Panel1.Controls.Add(VisualizersGroupBox);
@@ -143,44 +146,77 @@ namespace SlimTuneUI
 			// 
 			this.MainSplitter.Panel2.Controls.Add(this.m_closeVisualizerButton);
 			this.MainSplitter.Panel2.Controls.Add(this.VisualizerHost);
-			this.MainSplitter.Size = new System.Drawing.Size(968, 501);
+			this.MainSplitter.Size = new System.Drawing.Size(968, 594);
 			this.MainSplitter.SplitterDistance = 200;
 			this.MainSplitter.TabIndex = 1;
 			// 
-			// ResumeButton
+			// SnapshotsGroupBox
 			// 
-			this.ResumeButton.Location = new System.Drawing.Point(90, 313);
-			this.ResumeButton.Name = "ResumeButton";
-			this.ResumeButton.Size = new System.Drawing.Size(75, 23);
-			this.ResumeButton.TabIndex = 8;
-			this.ResumeButton.Text = "Resume";
-			this.ResumeButton.UseVisualStyleBackColor = true;
-			this.ResumeButton.Visible = false;
-			this.ResumeButton.Click += new System.EventHandler(this.ResumeButton_Click_1);
+			this.SnapshotsGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+						| System.Windows.Forms.AnchorStyles.Right)));
+			this.SnapshotsGroupBox.Controls.Add(this.SnapshotsListBox);
+			this.SnapshotsGroupBox.Controls.Add(this.label2);
+			this.SnapshotsGroupBox.Location = new System.Drawing.Point(4, 349);
+			this.SnapshotsGroupBox.Name = "SnapshotsGroupBox";
+			this.SnapshotsGroupBox.Size = new System.Drawing.Size(194, 140);
+			this.SnapshotsGroupBox.TabIndex = 11;
+			this.SnapshotsGroupBox.TabStop = false;
 			// 
-			// PauseButton
+			// SnapshotsListBox
 			// 
-			this.PauseButton.Location = new System.Drawing.Point(9, 314);
-			this.PauseButton.Name = "PauseButton";
-			this.PauseButton.Size = new System.Drawing.Size(75, 23);
-			this.PauseButton.TabIndex = 7;
-			this.PauseButton.Text = "Pause ";
-			this.PauseButton.UseVisualStyleBackColor = true;
-			this.PauseButton.Visible = false;
-			this.PauseButton.Click += new System.EventHandler(this.PauseButton_Click);
+			this.SnapshotsListBox.FormatString = "({0}) {1} - {2}";
+			this.SnapshotsListBox.FormattingEnabled = true;
+			this.SnapshotsListBox.Location = new System.Drawing.Point(9, 38);
+			this.SnapshotsListBox.Name = "SnapshotsListBox";
+			this.SnapshotsListBox.Size = new System.Drawing.Size(179, 94);
+			this.SnapshotsListBox.TabIndex = 1;
+			this.SnapshotsListBox.SelectedIndexChanged += new System.EventHandler(this.SnapshotsListBox_SelectedIndexChanged);
+			this.SnapshotsListBox.Format += new System.Windows.Forms.ListControlConvertEventHandler(this.SnapshotsListBox_Format);
+			// 
+			// label2
+			// 
+			this.label2.AutoSize = true;
+			this.label2.Font = new System.Drawing.Font("Verdana", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
+			this.label2.Location = new System.Drawing.Point(7, 20);
+			this.label2.Name = "label2";
+			this.label2.Size = new System.Drawing.Size(79, 14);
+			this.label2.TabIndex = 0;
+			this.label2.Text = "Snapshots:";
 			// 
 			// TasksGroupBox
 			// 
 			this.TasksGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
 						| System.Windows.Forms.AnchorStyles.Right)));
+			this.TasksGroupBox.Controls.Add(this.ResumeButton);
+			this.TasksGroupBox.Controls.Add(this.PauseButton);
 			this.TasksGroupBox.Controls.Add(this.ClearDataButton);
 			this.TasksGroupBox.Controls.Add(this.SnapshotButton);
 			this.TasksGroupBox.Controls.Add(this.TasksLabel);
 			this.TasksGroupBox.Location = new System.Drawing.Point(3, 240);
 			this.TasksGroupBox.Name = "TasksGroupBox";
-			this.TasksGroupBox.Size = new System.Drawing.Size(194, 67);
+			this.TasksGroupBox.Size = new System.Drawing.Size(194, 103);
 			this.TasksGroupBox.TabIndex = 6;
 			this.TasksGroupBox.TabStop = false;
+			// 
+			// ResumeButton
+			// 
+			this.ResumeButton.Location = new System.Drawing.Point(92, 67);
+			this.ResumeButton.Name = "ResumeButton";
+			this.ResumeButton.Size = new System.Drawing.Size(75, 23);
+			this.ResumeButton.TabIndex = 10;
+			this.ResumeButton.Text = "Resume";
+			this.ResumeButton.UseVisualStyleBackColor = true;
+			this.ResumeButton.Visible = false;
+			// 
+			// PauseButton
+			// 
+			this.PauseButton.Location = new System.Drawing.Point(11, 68);
+			this.PauseButton.Name = "PauseButton";
+			this.PauseButton.Size = new System.Drawing.Size(75, 23);
+			this.PauseButton.TabIndex = 9;
+			this.PauseButton.Text = "Pause ";
+			this.PauseButton.UseVisualStyleBackColor = true;
+			this.PauseButton.Visible = false;
 			// 
 			// ClearDataButton
 			// 
@@ -194,7 +230,6 @@ namespace SlimTuneUI
 			// 
 			// SnapshotButton
 			// 
-			this.SnapshotButton.Enabled = false;
 			this.SnapshotButton.Location = new System.Drawing.Point(10, 38);
 			this.SnapshotButton.Name = "SnapshotButton";
 			this.SnapshotButton.Size = new System.Drawing.Size(75, 23);
@@ -298,7 +333,7 @@ namespace SlimTuneUI
 			this.VisualizerHost.Location = new System.Drawing.Point(0, 0);
 			this.VisualizerHost.Name = "VisualizerHost";
 			this.VisualizerHost.SelectedIndex = 0;
-			this.VisualizerHost.Size = new System.Drawing.Size(764, 501);
+			this.VisualizerHost.Size = new System.Drawing.Size(764, 594);
 			this.VisualizerHost.TabIndex = 1;
 			this.VisualizerHost.MouseClick += new System.Windows.Forms.MouseEventHandler(this.VisualizerHost_MouseClick);
 			// 
@@ -306,7 +341,7 @@ namespace SlimTuneUI
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(968, 501);
+			this.ClientSize = new System.Drawing.Size(968, 594);
 			this.Controls.Add(this.MainSplitter);
 			this.Name = "ProfilerWindow";
 			this.Text = "ProfilerWindow";
@@ -317,6 +352,8 @@ namespace SlimTuneUI
 			this.MainSplitter.Panel1.ResumeLayout(false);
 			this.MainSplitter.Panel2.ResumeLayout(false);
 			this.MainSplitter.ResumeLayout(false);
+			this.SnapshotsGroupBox.ResumeLayout(false);
+			this.SnapshotsGroupBox.PerformLayout();
 			this.TasksGroupBox.ResumeLayout(false);
 			this.TasksGroupBox.PerformLayout();
 			this.InfoGroupBox.ResumeLayout(false);
@@ -343,6 +380,9 @@ namespace SlimTuneUI
 		private System.Windows.Forms.Button ClearDataButton;
 		private System.Windows.Forms.Button SnapshotButton;
 		private System.Windows.Forms.Button m_closeVisualizerButton;
+		private System.Windows.Forms.GroupBox SnapshotsGroupBox;
+		private System.Windows.Forms.CheckedListBox SnapshotsListBox;
+		private System.Windows.Forms.Label label2;
 		private System.Windows.Forms.Button ResumeButton;
 		private System.Windows.Forms.Button PauseButton;
 

@@ -68,9 +68,9 @@ namespace UICore
 		private List<ClassInfo> m_classCache = new List<ClassInfo>(kClassCacheSize);
 
 		//Everything is stored sorted so that we can sprint through the database quickly
-		protected CallGraph<int> m_calls = CallGraph<int>.Create();
+		protected CallGraph<double> m_calls = CallGraph<double>.Create();
 		//this is: FunctionId, ThreadId, HitCount
-		protected SortedDictionary<int, SortedList<int, int>> m_samples = new SortedDictionary<int, SortedList<int, int>>();
+		protected SortedDictionary<int, SortedList<int, double>> m_samples = new SortedDictionary<int, SortedList<int, double>>();
 
 		//this is: ClassId, FunctionId, AllocData
 		protected SortedDictionary<int, SortedDictionary<int, AllocData>> m_allocs = new SortedDictionary<int, SortedDictionary<int, AllocData>>();
@@ -239,20 +239,20 @@ namespace UICore
 			lock(m_lock)
 			{
 				//Update calls
-				SortedDictionary<int, SortedList<int, int>> perThread;
+				SortedDictionary<int, SortedList<int, double>> perThread;
 				bool foundThread = m_calls.Graph.TryGetValue(sample.ThreadId, out perThread);
 				if(!foundThread)
 				{
-					perThread = new SortedDictionary<int, SortedList<int, int>>();
+					perThread = new SortedDictionary<int, SortedList<int, double>>();
 					m_calls.Graph.Add(sample.ThreadId, perThread);
 				}
 
-				Increment(sample.Functions[0], 0, perThread);
+				Increment(sample.Functions[0], 0, perThread, sample.Time);
 				for(int f = 1; f < sample.Functions.Count; ++f)
 				{
-					Increment(sample.Functions[f], sample.Functions[f - 1], perThread);
+					Increment(sample.Functions[f], sample.Functions[f - 1], perThread, sample.Time);
 				}
-				Increment(0, sample.Functions[sample.Functions.Count - 1], perThread);
+				Increment(0, sample.Functions[sample.Functions.Count - 1], perThread, sample.Time);
 
 				//Update overall samples count
 				for(int s = 0; s < sample.Functions.Count; ++s)
@@ -275,13 +275,13 @@ namespace UICore
 					{
 						//add the function if we don't have it yet
 						if(!m_samples.ContainsKey(functionId))
-							m_samples.Add(functionId, new SortedList<int, int>());
+							m_samples.Add(functionId, new SortedList<int, double>());
 
 						//add this thread if we don't have it, else just increment
 						if(!m_samples[functionId].ContainsKey(sample.ThreadId))
-							m_samples[functionId].Add(sample.ThreadId, 1);
+							m_samples[functionId].Add(sample.ThreadId, sample.Time);
 						else
-							++m_samples[sample.Functions[s]][sample.ThreadId];
+							m_samples[sample.Functions[s]][sample.ThreadId] += sample.Time;
 					}
 				}
 
@@ -297,10 +297,10 @@ namespace UICore
 		{
 			lock(m_lock)
 			{
-				foreach(KeyValuePair<int, SortedDictionary<int, SortedList<int, int>>> threadKvp in m_calls.Graph)
+				foreach(KeyValuePair<int, SortedDictionary<int, SortedList<int, double>>> threadKvp in m_calls.Graph)
 				{
 					int threadId = threadKvp.Key;
-					foreach(KeyValuePair<int, SortedList<int, int>> callerKvp in threadKvp.Value)
+					foreach(KeyValuePair<int, SortedList<int, double>> callerKvp in threadKvp.Value)
 					{
 						callerKvp.Value.Clear();
 					}
@@ -340,23 +340,23 @@ namespace UICore
 			throw new NotImplementedException();
 		}
 
-		protected static void Increment(int key1, int key2, SortedDictionary<int, SortedList<int, int>> container)
+		protected static void Increment(int key1, int key2, SortedDictionary<int, SortedList<int, double>> container, double time)
 		{
-			SortedList<int, int> key1Table;
+			SortedList<int, double> key1Table;
 			bool foundKey1Table = container.TryGetValue(key1, out key1Table);
 			if(!foundKey1Table)
 			{
-				key1Table = new SortedList<int, int>();
+				key1Table = new SortedList<int, double>();
 				container.Add(key1, key1Table);
 			}
 
 			if(!key1Table.ContainsKey(key2))
 			{
-				key1Table.Add(key2, 1);
+				key1Table.Add(key2, time);
 			}
 			else
 			{
-				++key1Table[key2];
+				key1Table[key2] += time;
 			}
 		}
 

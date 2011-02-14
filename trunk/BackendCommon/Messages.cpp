@@ -112,6 +112,7 @@ namespace Messages
 
 		*bufPtr++ = MID_Sample;
 		bufPtr = Write7BitEncodedInt(bufPtr, ThreadId);
+		bufPtr = WriteFloat(bufPtr, Time);
 		bufPtr = Write7BitEncodedInt(bufPtr, (unsigned int) Functions.size());
 		for(size_t i = 0; i < Functions.size(); ++i)
 		{

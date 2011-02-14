@@ -14,6 +14,12 @@ namespace UICore
 		public virtual int Id { get; set; }
 		public virtual string Name { get; set; }
 		public virtual long DateTime { get; set; }
+
+		public virtual string ToString(string format)
+		{
+			DateTime dt = DateTime != long.MaxValue ? System.DateTime.FromFileTime(DateTime) : System.DateTime.Now;
+			return string.Format(format, Id, Name, dt);
+		}
 	}
 
 	public class ThreadInfo
@@ -54,7 +60,7 @@ namespace UICore
 		public virtual int ThreadId { get; set; }
 		public virtual int ParentId { get; set; }
 		public virtual int ChildId { get; set; }
-		public virtual int HitCount { get; set; }
+		public virtual double Time { get; set; }
 		public virtual int SnapshotId { get; set; }
 
 		public virtual ThreadInfo Thread { get; set; }
@@ -86,7 +92,7 @@ namespace UICore
 		public virtual int Id { get; set; }
 		public virtual int ThreadId { get; set; }
 		public virtual int FunctionId { get; set; }
-		public virtual int HitCount { get; set; }
+		public virtual double Time { get; set; }
 		public virtual int SnapshotId { get; set; }
 
 		public virtual ThreadInfo Thread { get; set; }

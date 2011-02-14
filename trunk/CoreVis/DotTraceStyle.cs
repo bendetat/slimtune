@@ -34,45 +34,45 @@ namespace SlimTuneUI.CoreVis
 	[DisplayName("Per-Thread Call Trees (recommended)")]
 	public partial class DotTraceStyle : UserControl, IVisualizer
 	{
-		const string kParentHits = @"
-SELECT SUM(HitCount)
+		const string kParentTime = @"
+SELECT SUM(Time)
 FROM Calls
 WHERE ParentId = {0} AND ThreadId = {1} AND SnapshotId = 0
 ";
 
 		const string kTopLevelQuery = @"
-SELECT F.Id, C.ThreadId, C.HitCount, T.Name AS ""ThreadName"", F.Name AS ""Function"", F.Signature AS ""Signature""
+SELECT F.Id, C.ThreadId, C.Time, T.Name AS ""ThreadName"", F.Name AS ""Function"", F.Signature AS ""Signature""
 FROM Calls C
 JOIN Functions F
 	ON C.ChildId = F.Id
 LEFT OUTER JOIN Threads T
 	ON T.Id = C.ThreadId
 WHERE C.ParentId = 0 AND C.SnapshotId = 0
-ORDER BY C.HitCount DESC
+ORDER BY C.Time DESC
 ";
 
 		const string kChildQuery = @"
-SELECT C1.ChildId AS ""Id"", HitCount, Name AS ""Function"", Signature, CASE TotalCalls
+SELECT C1.ChildId AS ""Id"", Time, Name AS ""Function"", Signature, CASE TotalCalls
 	WHEN 0 THEN 0
-	ELSE (1.0 * C1.HitCount / TotalCalls)
+	ELSE (1.0 * C1.Time / TotalCalls)
 	END AS ""Percent""
 FROM Calls C1
 JOIN Functions F
 	ON C1.ChildId = F.Id
-JOIN (SELECT ParentId, SUM(HitCount) AS ""TotalCalls"" FROM Calls WHERE ThreadId = {1} AND SnapshotId = 0 GROUP BY ParentId) C2
+JOIN (SELECT ParentId, SUM(Time) AS ""TotalCalls"" FROM Calls WHERE ThreadId = {1} AND SnapshotId = 0 GROUP BY ParentId) C2
 	ON C1.ParentId = C2.ParentId
 WHERE C1.ParentId = {0} AND ThreadId = {1} AND C1.SnapshotId = 0
-ORDER BY HitCount DESC
+ORDER BY Time DESC
 ";
 
 		const string kExclusiveQuery = @"
-SELECT HitCount, CASE TotalCalls
+SELECT Time, CASE TotalCalls
 	WHEN 0 THEN 0
-	ELSE (1.0 * C1.HitCount / TotalCalls)
+	ELSE (1.0 * C1.Time / TotalCalls)
 	END AS ""Percent""
 FROM Calls C1
 JOIN (
-	SELECT ParentId, SUM(HitCount) AS ""TotalCalls""
+	SELECT ParentId, SUM(Time) AS ""TotalCalls""
 	FROM Calls
 	WHERE ThreadId = {1} AND SnapshotId = 0
 	GROUP BY ParentId
@@ -228,10 +228,10 @@ WHERE C1.ParentId = {0} AND C1.ChildId = 0 AND C1.ThreadId = {1} AND C1.Snapshot
 			{
 				var data = m_connection.DataEngine.RawQuery(kTopLevelQuery);
 
-				int totalHits = 0;
+				double totalTime = 0;
 				foreach(DataRow row in data.Tables[0].Rows)
 				{
-					totalHits += Convert.ToInt32(row["HitCount"]);
+					totalTime += Convert.ToInt32(row["Time"]);
 				}
 
 				foreach(DataRow row in data.Tables[0].Rows)
@@ -244,7 +244,7 @@ WHERE C1.ParentId = {0} AND C1.ChildId = 0 AND C1.ThreadId = {1} AND C1.Snapshot
 
 					string signature, funcName, classAndFunc, baseName;
 					BreakName(name, out signature, out funcName, out classAndFunc, out baseName);
-					decimal percent = totalHits == 0 ? 0 : Convert.ToInt32(row["HitCount"]) / (decimal) totalHits;
+					decimal percent = totalTime == 0 ? 0 : Convert.ToInt32(row["Time"]) / (decimal) totalTime;
 					int threadId = Convert.ToInt32(row["ThreadId"]);
 					string threadName = Convert.ToString(row["ThreadName"]);
 					if(string.IsNullOrEmpty(threadName))
@@ -276,7 +276,7 @@ WHERE C1.ParentId = {0} AND C1.ChildId = 0 AND C1.ThreadId = {1} AND C1.Snapshot
 					{
 						string name = Convert.ToString(row["Function"]) + Convert.ToString(row["Signature"]);
 						const string rawString = @"{0:P2} {1} - {2:P2} - {3}{4}{5}";
-						const string tipString = "[Id {6}] {3}{4}{5}\r\n{0:P3} of thread - {1} samples - {2:P3} of parent\r\n{7:P3} outside children - {8} samples";
+						const string tipString = "[Id {6}] {3}{4}{5}\r\n{0:P3} of thread - {1} weighted samples - {2:P3} of parent\r\n{7:P3} outside children - {8} weighted samples";
 						const string niceString = @"\1{0:P2} \2{1} \0- \3{2:P2} \0- {3}\2{4}\0{5}";
 						const string recursiveString = @"\4{0:P2} \2(recursive)";
 
@@ -292,11 +292,11 @@ WHERE C1.ParentId = {0} AND C1.ChildId = 0 AND C1.ThreadId = {1} AND C1.Snapshot
 						var hasExcl = excl.Tables[0].Rows.Count > 0;
 						var exclRow = hasExcl ? excl.Tables[0].Rows[0] : null;
 						double exclPercent = exclRow != null ? Convert.ToDouble(exclRow["Percent"]) : 0.0;
-						int exclHits = exclRow != null ? Convert.ToInt32(exclRow["HitCount"]) : 0;
+						double exclTime = exclRow != null ? Convert.ToSingle(exclRow["Time"]) : 0;
 
 						string nodeText = string.Format(rawString, percent, funcName, percentOfParent, baseName, classAndFunc, signature);
-						string tipText = string.Format(tipString, percent, Convert.ToInt32(row["HitCount"]), percentOfParent,
-							baseName, classAndFunc, signature, id, exclPercent, exclHits);
+						string tipText = string.Format(tipString, percent, Convert.ToSingle(row["Time"]), percentOfParent,
+							baseName, classAndFunc, signature, id, exclPercent, exclTime);
 						string formatText = string.Format(niceString, percent, funcName, percentOfParent,
 							baseName, classAndFunc, signature);
 						if(id == parent.Id)
@@ -435,26 +435,6 @@ WHERE C1.ParentId = {0} AND C1.ChildId = 0 AND C1.ThreadId = {1} AND C1.Snapshot
 		private void FilterMenu_Click(object sender, EventArgs e)
 		{
 			m_treeView.Invalidate();
-		}
-
-		private void SnapshotCombo_Click(object sender, EventArgs e)
-		{
-			SnapshotCombo.Items.Clear();
-			SnapshotCombo.Items.Add("Current");
-			//get a list of snapshots from the data engine -- this can fail on 0.1.x files
-			try
-			{
-				var snapshots = m_connection.DataEngine.RawQuery("SELECT * FROM Snapshots");
-				foreach(DataRow row in snapshots.Tables[0].Rows)
-				{
-					string text = string.Format("{0} - {1}", row[1], row[2]);
-					SnapshotCombo.Items.Add(text);
-				}
-			}
-			catch
-			{
-				//no need to do anything
-			}
 		}
 	}
 }

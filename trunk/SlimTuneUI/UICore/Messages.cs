@@ -193,6 +193,7 @@ namespace UICore
 		public struct Sample
 		{
 			public int ThreadId;
+			public float Time;
 			public List<int> Functions;
 
 			public static Sample Read(BinaryReader reader, Dictionary<int, FunctionInfo> funcDict)
@@ -200,6 +201,7 @@ namespace UICore
 				Sample result = new Sample();
 
 				result.ThreadId = Utilities.Read7BitEncodedInt(reader);
+				result.Time = reader.ReadSingle();
 				int count = Utilities.Read7BitEncodedInt(reader);
 				result.Functions = new List<int>(count);
 				for(int i = 0; i < count; ++i)

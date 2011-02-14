@@ -71,10 +71,6 @@ ClrProfiler::ClrProfiler()
 m_suspended(0),
 m_instDepth(0)
 {
-#ifdef _DEBUG
-	__debugbreak();
-#endif
-
 	m_logger = new Logger();
 	m_logger->WriteEvent(Logger::INFO, "ClrProfiler object created.");
 
@@ -162,6 +158,10 @@ ULONG ClrProfiler::Release()
 
 STDMETHODIMP ClrProfiler::Initialize(IUnknown *pICorProfilerInfoUnk)
 {
+#ifdef _DEBUG
+	__debugbreak();
+#endif
+
 	m_logger->WriteEvent(Logger::INFO, "Initialization begun.");
 
 	//Get the COM interfaces
@@ -1131,13 +1131,10 @@ void ClrProfiler::OnSampleTimer()
 			continue;
 		DWORD threadId = threadInfo->SystemId;
 
-		ContextList::iterator contextIt = m_threadContexts.find(threadId);
-		if(contextIt != m_threadContexts.end())
-		{
-			//if this thread is suspended and we're not supposed to sample suspended threads, move on
-			if(!m_config.SampleSuspended && contextIt->second.Suspended)
-				continue;
-		}
+		//if this thread is suspended and we're not supposed to sample suspended threads, move on
+		assert(threadInfo->Context != NULL);
+		if(!m_config.SampleSuspended && threadInfo->Context->Suspended)
+			continue;
 
 		Messages::Sample sample;
 		sample.ThreadId = it->first;
@@ -1148,6 +1145,15 @@ void ClrProfiler::OnSampleTimer()
 			//Couldn't access the thread for whatever reason
 			continue;
 		}
+
+		//Find out how many cycles the thread has actually run, and weight the sample
+		unsigned __int64 threadTime = 0;
+		QueryThreadCycleTime(hThread, &threadTime);
+		unsigned __int64 cycles = threadTime - threadInfo->Context->ThreadTime;
+		//the cycle time is divided by a fixed 1 MHz (arbitrary) scaling factor to produce "weighted samples"
+		//weighted samples have no absolute meaning
+		sample.Time = (float) cycles / (float) 1e6;
+		threadInfo->Context->ThreadTime = threadTime;
 
 		CONTEXT context;
 		context.ContextFlags = CONTEXT_FULL;

@@ -91,13 +91,13 @@ namespace SlimTuneUI.CoreVis
 			using(var transact = new TransactionHandle(m_connection.DataEngine))
 			using(var session = m_connection.DataEngine.OpenSession(0))
 			{
-				double totalHits = session.CreateQuery("select sum(c.HitCount) from Call c where c.ParentId = :parentId")
+				double totalTime = session.CreateQuery("select sum(c.Time) from Call c where c.ParentId = :parentId")
 					.SetInt32("parentId", entry.Id)
 					.UniqueResult<long>();
-				double inFunc = session.CreateQuery("select sum(c.HitCount) from Call c where c.ParentId = :parentId and c.ChildId = 0")
+				double inFunc = session.CreateQuery("select sum(c.Time) from Call c where c.ParentId = :parentId and c.ChildId = 0")
 					.SetInt32("parentId", entry.Id)
 					.UniqueResult<long>();
-				var children = session.CreateQuery("select c from Call c inner join fetch c.Child where c.ParentId = :parentId order by c.HitCount desc")
+				var children = session.CreateQuery("select c from Call c inner join fetch c.Child where c.ParentId = :parentId order by c.Time desc")
 					.SetInt32("parentId", entry.Id)
 					.List<Call>();
 
@@ -107,7 +107,7 @@ namespace SlimTuneUI.CoreVis
 				string otherName = null;
 
 				const double Significant = 0.01;
-				var inFuncFraction = inFunc / totalHits;
+				var inFuncFraction = inFunc / totalTime;
 				if(inFunc > 0 && inFuncFraction >= Significant)
 				{
 					//add a slice for self if it is significant
@@ -123,11 +123,11 @@ namespace SlimTuneUI.CoreVis
 
 				foreach(var call in children)
 				{
-					double fraction = call.HitCount / totalHits;
+					double fraction = call.Time / totalTime;
 					if(index < 8 && fraction > 0.02)
 					{
-						var slice = pane.AddPieSlice(call.HitCount, m_colors.ColorForIndex(1 + index++), 0.0, call.Child.Name);
-						pieTotal += call.HitCount;
+						var slice = pane.AddPieSlice(call.Time, m_colors.ColorForIndex(1 + index++), 0.0, call.Child.Name);
+						pieTotal += call.Time;
 						if(fraction < 0.03)
 							slice.LabelType = PieLabelType.None;
 					}
@@ -139,7 +139,7 @@ namespace SlimTuneUI.CoreVis
 				}
 
 				//If we only found one "other" function, no sense marking it as other
-				double otherTotal = totalHits - pieTotal;
+				double otherTotal = totalTime - pieTotal;
 				if(otherCount == 1)
 				{
 					var slice = pane.AddPieSlice(otherTotal, m_colors.ColorForIndex(index + 1), 0.0, otherName);

@@ -68,9 +68,10 @@ struct ThreadContext
 	LONG DisableCount;
 	std::vector<unsigned int> ShadowStack;
 	bool Suspended;
+	unsigned __int64 ThreadTime;
 
 	ThreadContext()
-		: Id(0), InstCount(0), DisableCount(0), Suspended(false)
+		: Id(0), InstCount(0), DisableCount(0), Suspended(false), ThreadTime(0)
 	{
 		ShadowStack.reserve(32);
 	}

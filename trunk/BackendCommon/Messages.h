@@ -176,6 +176,7 @@ namespace Messages
 	struct Sample
 	{
 		unsigned int ThreadId;
+		float Time;
 
 		PooledUIntVector Functions;
 

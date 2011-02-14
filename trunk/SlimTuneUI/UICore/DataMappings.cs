@@ -95,7 +95,7 @@ namespace UICore.Mappings
 			Map(x => x.ThreadId).Index("Calls_ThreadIndex, Calls_Composite");
 			Map(x => x.ParentId).Index("Calls_ParentIndex, Calls_Composite");
 			Map(x => x.ChildId).Index("Calls_ChildIndex, Calls_Composite");
-			Map(x => x.HitCount)
+			Map(x => x.Time)
 				.Not.Nullable();
 			Map(x => x.SnapshotId)
 				.Not.Nullable()
@@ -119,7 +119,7 @@ namespace UICore.Mappings
 			Id(x => x.Id);
 			Map(x => x.ThreadId).Index("Samples_ThreadIndex, Samples_Composite");
 			Map(x => x.FunctionId).Index("Samples_FunctionIndex, Samples_Composite");
-			Map(x => x.HitCount)
+			Map(x => x.Time)
 				.Not.Nullable();
 			Map(x => x.SnapshotId, "SnapshotId")
 				.Not.Nullable()

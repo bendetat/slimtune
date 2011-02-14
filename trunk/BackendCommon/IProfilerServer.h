@@ -46,6 +46,7 @@ public:
 char* Write7BitEncodedInt(char* buffer, unsigned int value);
 char* Write7BitEncodedInt64(char* buffer, unsigned __int64 value);
 char* WriteString(char* buffer, const wchar_t* string, size_t count);
+char* WriteFloat(char* buffer, float value);
 
 char* Read7BitEncodedInt(char* buffer, unsigned int& value);
 

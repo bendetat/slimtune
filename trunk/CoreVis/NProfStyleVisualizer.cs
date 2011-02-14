@@ -172,50 +172,50 @@ namespace SlimTuneUI.CoreVis
 		public int Id { get; set; }
 		public int Thread { get; set; }
 		public string Name { get; set; }
-		public int HitCount { get; set; }
+		public double Time { get; set; }
 		public decimal? PercentTime { get; set; }
 		public decimal? PercentCalls { get; set; }
 	}
 
 	class CalleesModel : ITreeModel
 	{
-		const string kParentHits = @"
-SELECT SUM(HitCount)
+		const string kParentTime = @"
+SELECT SUM(Time)
 FROM Calls
 WHERE ParentId = {0} AND ThreadId = {1} AND SnapshotId = 0
 ";
 
 		const string kTopLevelQuery = @"
-SELECT Samples.ThreadId, F.Id, HitCount, Name AS ""Function"", Signature, CASE TotalHits
+SELECT Samples.ThreadId, F.Id, Time, Name AS ""Function"", Signature, CASE TotalTime
 	WHEN 0 THEN 0
-	ELSE (1.0 * HitCount / TotalHits)
+	ELSE (1.0 * Time / TotalTime)
 	END AS ""Percent""
 FROM Samples
 JOIN Functions F
 	ON F.Id = FunctionId
-JOIN (SELECT ThreadId, MAX(HitCount) AS ""TotalHits"" FROM Samples GROUP BY ThreadId) AS ""Totals""
+JOIN (SELECT ThreadId, MAX(Time) AS ""TotalTime"" FROM Samples GROUP BY ThreadId) AS ""Totals""
 	ON Samples.ThreadId = Totals.ThreadId
 WHERE Samples.SnapshotId = 0
-ORDER BY HitCount DESC
+ORDER BY Time DESC
 ";
 
 		const string kChildQuery = @"
-SELECT C1.ChildId, HitCount, Name AS ""Function"", Signature, CASE TotalCalls
+SELECT C1.ChildId, Time, Name AS ""Function"", Signature, CASE TotalTime
 	WHEN 0 THEN 0
-	ELSE (1.0 * C1.HitCount / TotalCalls)
+	ELSE (1.0 * C1.Time / TotalTime)
 	END AS ""% Calls""
 FROM Calls AS ""C1""
 JOIN Functions F
 	ON C1.ChildId = F.Id
 JOIN (
-	SELECT ChildId, SUM(HitCount) AS ""TotalCalls""
+	SELECT ChildId, SUM(Time) AS ""TotalTime""
 	FROM Calls
 	WHERE SnapshotId = 0
 	GROUP BY ChildId
 ) AS ""C2""
 	ON C1.ChildId = C2.ChildId
 WHERE C1.ParentId = {0} AND C1.SnapshotId = 0 AND ThreadId = {1}
-ORDER BY HitCount DESC
+ORDER BY Time DESC
 ";
 
 		IDataEngine m_data;
@@ -240,7 +240,7 @@ ORDER BY HitCount DESC
 						item.Id = Convert.ToInt32(row["Id"]);
 						item.Thread = Convert.ToInt32(row["ThreadId"]);
 						item.Name = Convert.ToString(row["Function"]) + Convert.ToString(row["Signature"]);
-						item.HitCount = Convert.ToInt32(row["HitCount"]);
+						item.Time = Convert.ToInt32(row["Time"]);
 						item.PercentTime = Math.Round(100 * Convert.ToDecimal(row["Percent"]), 3);
 						yield return item;
 					}
@@ -251,18 +251,18 @@ ORDER BY HitCount DESC
 					var data = m_data.RawQuery(string.Format(kChildQuery, parent.Id, parent.Thread));
 
 					//find out what the current number of calls by the parent is
-					var parentHits = Convert.ToInt32(m_data.RawQueryScalar(string.Format(kParentHits, parent.Id, parent.Thread)));
+					var parentTime = Convert.ToInt32(m_data.RawQueryScalar(string.Format(kParentTime, parent.Id, parent.Thread)));
 					foreach(DataRow row in data.Tables[0].Rows)
 					{
 						var item = new FunctionItem();
 						item.Thread = Convert.ToInt32(parent.Thread);
 						item.Id = Convert.ToInt32(row["ChildId"]);
 						item.Name = Convert.ToString(row["Function"]) + Convert.ToString(row["Signature"]);
-						item.HitCount = Convert.ToInt32(row["HitCount"]);
-						if(parentHits == 0)
+						item.Time = Convert.ToInt32(row["Time"]);
+						if(parentTime == 0)
 							item.PercentTime = 0;
 						else
-							item.PercentTime = Math.Round(100 * (decimal) item.HitCount / (decimal) parentHits, 3);
+							item.PercentTime = Math.Round(100 * (decimal) item.Time / (decimal) parentTime, 3);
 						item.PercentCalls = Math.Round(100 * Convert.ToDecimal(row["% Calls"]), 3);
 						yield return item;
 					}
@@ -293,35 +293,35 @@ ORDER BY HitCount DESC
 	class CallersModel : ITreeModel
 	{
 		const string kTopLevelQuery = @"
-SELECT Calls.ThreadId, F.Id, Name AS ""Function"", Signature, HitCount, CASE TotalHits
+SELECT Calls.ThreadId, F.Id, Name AS ""Function"", Signature, Time, CASE TotalTime
 	WHEN 0 THEN 0
-	ELSE (1.0 * HitCount / TotalHits)
+	ELSE (1.0 * Time / TotalTime)
 	END AS ""Percent""
 FROM Calls
 JOIN Functions F
 	ON F.Id = ParentId
-JOIN (SELECT ThreadId, SUM(HitCount) AS ""TotalHits"" FROM Calls WHERE ChildId = 0 AND SnapshotId = 0 GROUP BY ThreadId) AS ""Totals""
+JOIN (SELECT ThreadId, SUM(Time) AS ""TotalTime"" FROM Calls WHERE ChildId = 0 AND SnapshotId = 0 GROUP BY ThreadId) AS ""Totals""
 	ON Calls.ThreadId = Totals.ThreadId
 WHERE ChildId = 0 AND SnapshotId = 0
-ORDER BY HitCount DESC
+ORDER BY Time DESC
 ";
 
 		const string kChildQuery = @"
-SELECT F.Id, HitCount, Name AS ""Function"", Signature, CASE TotalCalls
+SELECT F.Id, Time, Name AS ""Function"", Signature, CASE TotalTime
 	WHEN 0 THEN 0
-	ELSE (1.0 * HitCount / TotalCalls)
+	ELSE (1.0 * Time / TotalTime)
 	END AS ""Percent""
 FROM Calls C
 JOIN Functions F
 	ON F.Id = ParentId
 JOIN (
-	SELECT ChildId, SUM(HitCount) AS ""TotalCalls""
+	SELECT ChildId, SUM(Time) AS ""TotalTime""
 	FROM Calls C2
 	WHERE C2.ChildId = {0} AND C2.ThreadId = {1} AND C2.SnapshotId = 0
 ) AS ""Totals""
 	ON C.ChildId = Totals.ChildId
 WHERE C.ThreadId = {1} AND C.SnapshotId = 0
-ORDER BY HitCount DESC
+ORDER BY Time DESC
 ";
 
 		IDataEngine m_data;
@@ -346,7 +346,7 @@ ORDER BY HitCount DESC
 						item.Id = Convert.ToInt32(row["Id"]);
 						item.Thread = Convert.ToInt32(row["ThreadId"]);
 						item.Name = Convert.ToString(row["Function"]) + Convert.ToString(row["Signature"]);
-						item.HitCount = Convert.ToInt32(row["HitCount"]);
+						item.Time = Convert.ToInt32(row["Time"]);
 						item.PercentTime = Math.Round(100 * Convert.ToDecimal(row["Percent"]), 3);
 						yield return item;
 					}
@@ -362,7 +362,7 @@ ORDER BY HitCount DESC
 						item.Thread = Convert.ToInt32(parent.Thread);
 						item.Id = Convert.ToInt32(row["Id"]);
 						item.Name = Convert.ToString(row["Function"]) + Convert.ToString(row["Signature"]);
-						item.HitCount = Convert.ToInt32(row["HitCount"]);
+						item.Time = Convert.ToInt32(row["Time"]);
 						item.PercentCalls = Math.Round(100 * Convert.ToDecimal(row["Percent"]), 3);
 						yield return item;
 					}

@@ -68,6 +68,13 @@ namespace SlimTuneUI
 				m_visualizerCombo.Items.Add(vis);
 			}
 			m_visualizerCombo.SelectedIndex = 0;
+
+			RefreshSnapshots();
+		}
+
+		public Snapshot ActiveSnapshot
+		{
+			get { return SnapshotsListBox.CheckedItems[0] as Snapshot; }
 		}
 
 		void Connection_Disconnected(object sender, EventArgs e)
@@ -198,7 +205,29 @@ namespace SlimTuneUI
 			}
 
 			Connection.DataEngine.Snapshot("User snapshot");
+			RefreshSnapshots();
 			MessageBox.Show("Snapshot saved", "Take Snapshot");
+		}
+
+		private void RefreshSnapshots()
+		{
+			int selId = 0, selIndex = 0;
+			if(SnapshotsListBox.CheckedItems.Count > 0)
+				selId = (SnapshotsListBox.CheckedItems[0] as Snapshot).Id;
+
+			SnapshotsListBox.Items.Clear();
+			using(var session = Connection.DataEngine.OpenSession())
+			{
+				var snapshots = session.CreateCriteria<Snapshot>().List<Snapshot>();
+				foreach(var snap in snapshots)
+				{
+					if(snap.Id == selId)
+						selIndex = SnapshotsListBox.Items.Count;
+					SnapshotsListBox.Items.Add(snap);
+				}
+			}
+
+			SnapshotsListBox.SetItemChecked(selIndex, true);
 		}
 
 		private void CloseTab(int index)
@@ -271,9 +300,20 @@ namespace SlimTuneUI
 			Connection.Client.SetSamplerActive(false);
 		}
 
-		private void ResumeButton_Click_1(object sender, EventArgs e)
+		private void SnapshotsListBox_Format(object sender, ListControlConvertEventArgs e)
 		{
-			Connection.Client.SetSamplerActive(true);
+			var item = e.ListItem as Snapshot;
+			e.Value = item.ToString(SnapshotsListBox.FormatString);
+		}
+
+		private void SnapshotsListBox_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			for(int i = 0; i < SnapshotsListBox.Items.Count; ++i)
+			{
+				SnapshotsListBox.SetItemChecked(i, false);
+			}
+
+			SnapshotsListBox.SetItemChecked(SnapshotsListBox.SelectedIndex, true);
 		}
 	}
 }

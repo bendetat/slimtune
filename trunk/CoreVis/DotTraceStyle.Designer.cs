@@ -57,7 +57,6 @@ namespace SlimTuneUI.CoreVis
 			this.m_filterButton = new System.Windows.Forms.ToolStripSplitButton();
 			this.m_filterSystemMenu = new System.Windows.Forms.ToolStripMenuItem();
 			this.m_filterMicrosoftMenu = new System.Windows.Forms.ToolStripMenuItem();
-			this.SnapshotCombo = new System.Windows.Forms.ToolStripComboBox();
 			this.m_functionsToolTip = new System.Windows.Forms.ToolTip(this.components);
 			this.m_extraInfoTextBox = new System.Windows.Forms.TextBox();
 			this.m_toolStrip.SuspendLayout();
@@ -86,8 +85,7 @@ namespace SlimTuneUI.CoreVis
 			// 
 			this.m_toolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.m_refreshButton,
-            this.m_filterButton,
-            this.SnapshotCombo});
+            this.m_filterButton});
 			this.m_toolStrip.Location = new System.Drawing.Point(0, 0);
 			this.m_toolStrip.Name = "m_toolStrip";
 			this.m_toolStrip.Size = new System.Drawing.Size(722, 25);
@@ -138,15 +136,6 @@ namespace SlimTuneUI.CoreVis
 			this.m_filterMicrosoftMenu.ToolTipText = "Check this option to gray out Microsoft functions.";
 			this.m_filterMicrosoftMenu.Click += new System.EventHandler(this.FilterMenu_Click);
 			// 
-			// SnapshotCombo
-			// 
-			this.SnapshotCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.SnapshotCombo.Items.AddRange(new object[] {
-            "Current"});
-			this.SnapshotCombo.Name = "SnapshotCombo";
-			this.SnapshotCombo.Size = new System.Drawing.Size(121, 25);
-			this.SnapshotCombo.Click += new System.EventHandler(this.SnapshotCombo_Click);
-			// 
 			// m_functionsToolTip
 			// 
 			this.m_functionsToolTip.AutoPopDelay = 5000;
@@ -194,6 +183,5 @@ namespace SlimTuneUI.CoreVis
 		private System.Windows.Forms.ToolStripMenuItem m_filterMicrosoftMenu;
 		private System.Windows.Forms.ToolTip m_functionsToolTip;
 		private System.Windows.Forms.TextBox m_extraInfoTextBox;
-		private System.Windows.Forms.ToolStripComboBox SnapshotCombo;
 	}
 }

@@ -161,7 +161,6 @@
     </Compile>
     <Compile Include="SQLiteEngine.cs" />
     <Compile Include="SQLiteMemoryEngine.cs" />
-    <Compile Include="SqlServerCompactEngine.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Backends\dbghelp.dll">

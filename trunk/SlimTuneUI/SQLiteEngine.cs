@@ -145,8 +145,8 @@ namespace SlimTuneUI
 				cmd.ExecuteNonQuery();
 
 				int id = Convert.ToInt32(RawQueryScalar("SELECT MAX(Id) FROM Snapshots"));
-				Command(string.Format("INSERT INTO Samples (ThreadId, FunctionId, HitCount, SnapshotId) SELECT ThreadId, FunctionId, HitCount, {0} FROM Samples WHERE SnapshotId=0", id));
-				Command(string.Format("INSERT INTO Calls (ThreadId, ParentId, ChildId, HitCount, SnapshotId) SELECT ThreadId, ParentId, ChildId, HitCount, {0} FROM Calls WHERE SnapshotId=0", id));
+				Command(string.Format("INSERT INTO Samples (ThreadId, FunctionId, Time, SnapshotId) SELECT ThreadId, FunctionId, Time, {0} FROM Samples WHERE SnapshotId=0", id));
+				Command(string.Format("INSERT INTO Calls (ThreadId, ParentId, ChildId, Time, SnapshotId) SELECT ThreadId, ParentId, ChildId, Time, {0} FROM Calls WHERE SnapshotId=0", id));
 			}
 		}
 
@@ -220,8 +220,8 @@ namespace SlimTuneUI
 
 		protected override void DoClearData()
 		{
-			Command("UPDATE Calls SET HitCount = 0");
-			Command("UPDATE Samples SET HitCount = 0");
+			Command("UPDATE Calls SET Time = 0");
+			Command("UPDATE Samples SET Time = 0");
 			Command("DELETE FROM CounterValues");
 			Command("DELETE FROM Counters");
 		}
@@ -251,11 +251,11 @@ namespace SlimTuneUI
 
 		protected override void PrepareCommands()
 		{
-			m_insertCallerCmd = CreateCommand("INSERT INTO Calls (ThreadId, ParentId, ChildId, HitCount) VALUES (?, ?, ?, ?)", 4);
-			m_updateCallerCmd = CreateCommand("UPDATE Calls SET HitCount = HitCount + ? WHERE ThreadId=? AND ParentId=? AND ChildId=? AND SnapshotId=0", 4);
+			m_insertCallerCmd = CreateCommand("INSERT INTO Calls (ThreadId, ParentId, ChildId, Time) VALUES (?, ?, ?, ?)", 4);
+			m_updateCallerCmd = CreateCommand("UPDATE Calls SET Time = Time + ? WHERE ThreadId=? AND ParentId=? AND ChildId=? AND SnapshotId=0", 4);
 
-			m_insertSampleCmd = CreateCommand("INSERT INTO Samples (ThreadId, FunctionId, HitCount) VALUES (?, ?, ?)", 3);
-			m_updateSampleCmd = CreateCommand("UPDATE Samples SET HitCount = HitCount + ? WHERE ThreadId=? AND FunctionId=? AND SnapshotId=0", 3);
+			m_insertSampleCmd = CreateCommand("INSERT INTO Samples (ThreadId, FunctionId, Time) VALUES (?, ?, ?)", 3);
+			m_updateSampleCmd = CreateCommand("UPDATE Samples SET Time = Time + ? WHERE ThreadId=? AND FunctionId=? AND SnapshotId=0", 3);
 
 			m_insertAllocCmd = CreateCommand("INSERT INTO Allocations (Count, Size, ClassId, FunctionId) VALUES (?, ?, ?, ?)", 4);
 			m_updateAllocCmd = CreateCommand("UPDATE Allocations SET Count = Count + ?, Size = Size + ? WHERE ClassId=? AND FunctionId=?", 4);
@@ -264,18 +264,18 @@ namespace SlimTuneUI
 		private int FlushCalls()
 		{
 			int queryCount = 0;
-			foreach(KeyValuePair<int, SortedDictionary<int, SortedList<int, int>>> threadKvp in m_calls.Graph)
+			foreach(KeyValuePair<int, SortedDictionary<int, SortedList<int, double>>> threadKvp in m_calls.Graph)
 			{
 				int threadId = threadKvp.Key;
-				foreach(KeyValuePair<int, SortedList<int, int>> callerKvp in threadKvp.Value)
+				foreach(KeyValuePair<int, SortedList<int, double>> callerKvp in threadKvp.Value)
 				{
 					int parentId = callerKvp.Key;
-					foreach(KeyValuePair<int, int> hitsKvp in callerKvp.Value)
+					foreach(KeyValuePair<int, double> timeKvp in callerKvp.Value)
 					{
-						int childId = hitsKvp.Key;
-						int hits = hitsKvp.Value;
+						int childId = timeKvp.Key;
+						double time = timeKvp.Value;
 
-						m_updateCallerCmd.Parameters[0].Value = hits;
+						m_updateCallerCmd.Parameters[0].Value = time;
 						m_updateCallerCmd.Parameters[1].Value = threadId;
 						m_updateCallerCmd.Parameters[2].Value = parentId;
 						m_updateCallerCmd.Parameters[3].Value = childId;
@@ -287,7 +287,7 @@ namespace SlimTuneUI
 							m_insertCallerCmd.Parameters[0].Value = threadId;
 							m_insertCallerCmd.Parameters[1].Value = parentId;
 							m_insertCallerCmd.Parameters[2].Value = childId;
-							m_insertCallerCmd.Parameters[3].Value = hits;
+							m_insertCallerCmd.Parameters[3].Value = time;
 							m_insertCallerCmd.ExecuteNonQuery();
 							++queryCount;
 						}
@@ -302,12 +302,12 @@ namespace SlimTuneUI
 		{
 			int queryCount = 0;
 			//now to update the samples table
-			foreach(KeyValuePair<int, SortedList<int, int>> sampleKvp in m_samples)
+			foreach(KeyValuePair<int, SortedList<int, double>> sampleKvp in m_samples)
 			{
 				if(sampleKvp.Value.Count == 0)
 					continue;
 
-				foreach(KeyValuePair<int, int> threadKvp in sampleKvp.Value)
+				foreach(KeyValuePair<int, double> threadKvp in sampleKvp.Value)
 				{
 					m_updateSampleCmd.Parameters[0].Value = threadKvp.Value;
 					m_updateSampleCmd.Parameters[1].Value = threadKvp.Key;

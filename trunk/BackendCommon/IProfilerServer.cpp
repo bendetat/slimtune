@@ -29,6 +29,13 @@ IProfilerServer* IProfilerServer::CreateSocketServer(IProfilerData& profiler, un
 	return new SocketServer(profiler, port, lock);
 }
 
+char* WriteFloat(char* buffer, float value)
+{
+	memcpy(buffer, &value, sizeof(float));
+	buffer += 4;
+	return buffer;
+}
+
 char* Write7BitEncodedInt(char* buffer, unsigned int value)
 {
 	while(value >= 128)
