@@ -19,6 +19,11 @@ namespace SlimTuneUI.CoreVis
 
 		ListBox m_rightMost;
 
+		//drawing stuff
+		Font m_functionFont = new Font(SystemFonts.DefaultFont.FontFamily, 12, FontStyle.Bold);
+		Font m_objectFont = new Font(SystemFonts.DefaultFont.FontFamily, 9, FontStyle.Regular);
+		double m_totalHotspotsTime = 0;
+
 		public HotSpots()
 		{
 			InitializeComponent();
@@ -60,7 +65,7 @@ namespace SlimTuneUI.CoreVis
 			using(var session = m_mainWindow.OpenActiveSnapshot())
 			{
 				//find the functions that consumed the most time-exclusive. These are hotspots.
-				var query = session.CreateQuery("from Call as call where call.ChildId = 0 inner join fetch call.Parent order by Time desc");
+				var query = session.CreateQuery("from Call c where c.ChildId = 0 order by c.Time desc inner join fetch c.Parent");
 				query.SetMaxResults(20);
 				var hotspots = query.List<Call>();
 				foreach(var call in hotspots)
@@ -69,6 +74,9 @@ namespace SlimTuneUI.CoreVis
 					var parentName = func.Name;
 					HotspotsList.Items.Add(call);
 				}
+
+				var totalQuery = session.CreateQuery("select sum(call.Time) from Call call where call.ChildId = 0");
+				m_totalHotspotsTime = totalQuery.UniqueResult<double>();
 			}
 		}
 
@@ -110,19 +118,18 @@ namespace SlimTuneUI.CoreVis
 			ListBox list = sender as ListBox;
 			if(list.Tag != null)
 				RemoveList(list.Tag as ListBox);
-			m_rightMost = list;
 
 			//create a new listbox to the right
 			ListBox lb = new ListBox();
-			lb.Size = m_rightMost.Size;
-			lb.Location = new Point(m_rightMost.Right + 4, 4);
+			lb.Size = list.Size;
+			lb.Location = new Point(list.Right + 4, 4);
 			lb.IntegralHeight = false;
 			lb.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
 			lb.FormattingEnabled = true;
 			lb.Format += new ListControlConvertEventHandler(CallList_Format);
 			lb.SelectedIndexChanged += new EventHandler(CallList_SelectedIndexChanged);
 
-			if(UpdateParents(m_rightMost.SelectedItem as Call, lb))
+			if(UpdateParents(list.SelectedItem as Call, lb))
 			{
 				ScrollPanel.Controls.Add(lb);
 				ScrollPanel.ScrollControlIntoView(lb);
@@ -135,6 +142,27 @@ namespace SlimTuneUI.CoreVis
 		{
 			Call call = e.ListItem as Call;
 			e.Value = call.Parent.Name;
+		}
+
+		private void HotspotsList_DrawItem(object sender, DrawItemEventArgs e)
+		{
+			ListBox list = sender as ListBox;
+			Call item = list.Items[e.Index] as Call;
+
+			int splitIndex = item.Parent.Name.LastIndexOf('.');
+			string functionName = item.Parent.Name.Substring(splitIndex + 1);
+			string objectName = "- " + item.Parent.Name.Substring(0, splitIndex);
+			double percent = 100 * item.Time / m_totalHotspotsTime;
+			string functionString = string.Format("{0:0.##}%: {1}", percent, functionName);
+
+			Brush brush = Brushes.Black;
+			if((e.State & DrawItemState.Selected) == DrawItemState.Selected)
+				brush = Brushes.White;
+
+			e.DrawBackground();
+			e.Graphics.DrawString(functionString, m_functionFont, brush, new PointF(e.Bounds.X, e.Bounds.Y));
+			e.Graphics.DrawString(objectName, m_objectFont, brush, new PointF(e.Bounds.X + 4, e.Bounds.Y + 18));
+			e.DrawFocusRectangle();
 		}
 	}
 }

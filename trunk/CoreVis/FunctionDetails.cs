@@ -93,10 +93,10 @@ namespace SlimTuneUI.CoreVis
 			{
 				double totalTime = session.CreateQuery("select sum(c.Time) from Call c where c.ParentId = :parentId")
 					.SetInt32("parentId", entry.Id)
-					.UniqueResult<long>();
+					.UniqueResult<double>();
 				double inFunc = session.CreateQuery("select sum(c.Time) from Call c where c.ParentId = :parentId and c.ChildId = 0")
 					.SetInt32("parentId", entry.Id)
-					.UniqueResult<long>();
+					.UniqueResult<double>();
 				var children = session.CreateQuery("select c from Call c inner join fetch c.Child where c.ParentId = :parentId order by c.Time desc")
 					.SetInt32("parentId", entry.Id)
 					.List<Call>();

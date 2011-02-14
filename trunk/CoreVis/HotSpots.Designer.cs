@@ -50,12 +50,15 @@
 			// 
 			this.HotspotsList.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
 						| System.Windows.Forms.AnchorStyles.Left)));
+			this.HotspotsList.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
 			this.HotspotsList.FormattingEnabled = true;
 			this.HotspotsList.IntegralHeight = false;
+			this.HotspotsList.ItemHeight = 40;
 			this.HotspotsList.Location = new System.Drawing.Point(4, 4);
 			this.HotspotsList.Name = "HotspotsList";
 			this.HotspotsList.Size = new System.Drawing.Size(251, 446);
 			this.HotspotsList.TabIndex = 0;
+			this.HotspotsList.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.HotspotsList_DrawItem);
 			this.HotspotsList.SelectedIndexChanged += new System.EventHandler(this.CallList_SelectedIndexChanged);
 			this.HotspotsList.Format += new System.Windows.Forms.ListControlConvertEventHandler(this.CallList_Format);
 			// 
