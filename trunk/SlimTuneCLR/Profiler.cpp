@@ -1153,6 +1153,13 @@ void ClrProfiler::OnSampleTimer()
 		//the cycle time is divided by a fixed 1 MHz (arbitrary) scaling factor to produce "weighted samples"
 		//weighted samples have no absolute meaning
 		sample.Time = (float) cycles / (float) 1e6;
+		if(sample.Time > 20 * m_config.SampleInterval)
+		{
+			//avoid assigning a huge amount of time to one event and just drop the sample
+			//this is assuming a max "clock rate" of 20 GHz (the 20 in the if)
+			//that gives us lots of leeway for inconsistent sampling, while rejecting big jumps
+			sample.Time = 0;
+		}
 		threadInfo->Context->ThreadTime = threadTime;
 
 		CONTEXT context;
