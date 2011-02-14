@@ -92,10 +92,9 @@ namespace SlimTuneUI.CoreVis
 		{
 			using(var session = m_mainWindow.OpenActiveSnapshot())
 			{
-				session.Lock(child.Parent, NHibernate.LockMode.None);
-				var parents = from Call c in child.Parent.CallsAsChild
-							  orderby c.Time descending
-							  select c;
+				var query = session.CreateQuery("from Call c where c.ChildId = :funcId order by c.Time desc");
+				query.SetInt32("funcId", child.ParentId);
+				var parents = query.List<Call>();
 				double totalTime = 0;
 				foreach(var call in parents)
 				{
