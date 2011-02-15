@@ -11,7 +11,8 @@ public:
 	Logger();
 	~Logger();
 
-	void WriteEvent(const char* category, const char* message);
+	void WriteEvent(const char* category, const char* message, ...);
+	void WriteEvent(const char* category, const wchar_t* message, ...);
 
 	static const char* INFO;
 	static const char* WARNING;
