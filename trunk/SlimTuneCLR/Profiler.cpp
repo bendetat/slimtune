@@ -40,6 +40,7 @@
 #include "Timer.h"
 #include "SigFormat.h"
 #include "dbghelp.h"
+#include "Version.h"
 
 // global reference to the profiler object (ie this) used by the static functions
 ClrProfiler* g_Profiler = NULL;
@@ -73,7 +74,12 @@ m_instDepth(0)
 {
 	m_logger = new Logger();
 	m_logger->WriteEvent(Logger::INFO, "ClrProfiler object created.");
-
+	m_logger->WriteEvent(Logger::INFO, "Profiler version: %s", VERSION_STRING);
+#ifdef X64
+	m_logger->WriteEvent(Logger::INFO, "CPU type: x64");
+#else
+	m_logger->WriteEvent(Logger::INFO, "CPU type: x86");
+#endif
 	refCount = 1;
 	InterlockedIncrement((volatile LONG *)&ComServerLocks);
 
@@ -159,10 +165,16 @@ ULONG ClrProfiler::Release()
 STDMETHODIMP ClrProfiler::Initialize(IUnknown *pICorProfilerInfoUnk)
 {
 #ifdef _DEBUG
+	m_logger->WriteEvent(Logger::INFO, "DEBUG build, triggering breakpoint.");
 	__debugbreak();
 #endif
 
-	m_logger->WriteEvent(Logger::INFO, "Initialization begun.");
+	m_logger->WriteEvent(Logger::INFO, "Initialization beginning in process %d.", GetCurrentProcessId());
+	HMODULE hProc = GetModuleHandle(NULL);
+	wchar_t processFileName[MAX_PATH];
+	GetModuleFileName(hProc, processFileName, MAX_PATH);
+	m_logger->WriteEvent(Logger::INFO, L"Parent process: %s", processFileName);
+	m_logger->WriteEvent(Logger::INFO, L"Command line: %s", GetCommandLine());
 
 	//Get the COM interfaces
 	HRESULT hr = pICorProfilerInfoUnk->QueryInterface(IID_ICorProfilerInfo, (void**) &m_ProfilerInfo);
@@ -182,11 +194,12 @@ STDMETHODIMP ClrProfiler::Initialize(IUnknown *pICorProfilerInfoUnk)
 
 	//Query for .NET 4.0 (not required)
 	pICorProfilerInfoUnk->QueryInterface(IID_ICorProfilerInfo3, (void**) &m_ProfilerInfo3);
-
+	if(m_ProfilerInfo3)
+		m_logger->WriteEvent(Logger::INFO, "Looks like .NET 4.0 application (found ICorProfilerInfo3).");
 	m_logger->WriteEvent(Logger::INFO, "Got ICorProfilerInfo interfaces.");
 
-	m_config.LoadEnv();
-
+	m_config.LoadEnv(m_logger);
+	m_config.VerifySettings(m_logger);
 	m_logger->WriteEvent(Logger::INFO, "Loaded configuration.");
 
 	//m_config.SampleUnmanaged = true;
@@ -208,6 +221,7 @@ STDMETHODIMP ClrProfiler::Initialize(IUnknown *pICorProfilerInfoUnk)
 #ifdef X86
 	if(m_config.Mode & PM_Tracing)
 	{
+		m_logger->WriteEvent(Logger::INFO, "Function level instrumentation is enabled.");
 		hr = m_ProfilerInfo2->SetEnterLeaveFunctionHooks2(FunctionEnterNaked, FunctionLeaveNaked, FunctionTailcallNaked);
 		assert(SUCCEEDED(hr));
 	}
@@ -217,19 +231,21 @@ STDMETHODIMP ClrProfiler::Initialize(IUnknown *pICorProfilerInfoUnk)
 
 	//set up dbghelp
 	if(!SymInitializeLocal())
+	{
+		m_logger->WriteEvent(Logger::FAIL, "Failed to initialize DbgHelp/symbol library.");
 		return E_FAIL;
+	}
 	SymSetOptionsPtr(SYMOPT_UNDNAME);
 	SymInitializePtr(GetCurrentProcess(), NULL, TRUE);
-
 	m_logger->WriteEvent(Logger::INFO, "Symbols are ready.");
 
 	//CONFIG: Server type?
+	m_logger->WriteEvent(Logger::INFO, "Creating socket server.");
 	m_samplerActive = false;
 	CoCreateGuid(&m_sessionId);
 	m_server.reset(IProfilerServer::CreateSocketServer(*this, static_cast<unsigned short>(m_config.ListenPort), m_lock));
 	m_server->SetCallbacks(boost::bind(&ClrProfiler::OnConnect, this), boost::bind(&ClrProfiler::OnDisconnect, this));
 	m_server->Start();
-
 	m_logger->WriteEvent(Logger::INFO, "Server is up and running.");
 
 	//initialize timing (and use cycle timing if enabled and on Vista+)
@@ -256,23 +272,24 @@ STDMETHODIMP ClrProfiler::Initialize(IUnknown *pICorProfilerInfoUnk)
 		m_config.CounterInterval = 50;
 	CreateTimerQueueTimer(&m_counterTimer, NULL, &ClrProfiler::OnCounterTimerGlobal, this,
 		m_config.CounterInterval, m_config.CounterInterval, WT_EXECUTEDEFAULT);
-
 	m_logger->WriteEvent(Logger::INFO, "Performance counters are active.");
 
 	// set up our global access pointer
 	g_Profiler = this;
 
 	m_samplerActive = (m_config.Mode & PM_Sampling) != 0;
+	if(m_samplerActive)
+		m_logger->WriteEvent(Logger::INFO, "Sampling profiler is active.");
+
 	if(m_config.WaitForConnection)
 	{
-		m_logger->WriteEvent(Logger::INFO, "Waiting for connection.");
+		m_logger->WriteEvent(Logger::INFO, "Waiting for client connection.");
 		m_server->WaitForConnection();
 	}
 
 	//kick off the IO thread
 	IoThreadFunc threadFunc(*m_server);
 	m_ioThread.reset(new boost::thread(threadFunc));
-
 	m_logger->WriteEvent(Logger::INFO, "IO thread is running.");
 
 	m_logger->WriteEvent(Logger::INFO, "Profiler initialization succeeded.");
@@ -281,6 +298,8 @@ STDMETHODIMP ClrProfiler::Initialize(IUnknown *pICorProfilerInfoUnk)
 
 STDMETHODIMP ClrProfiler::Shutdown()
 {
+	m_logger->WriteEvent(Logger::INFO, "Profiler is shutting down.");
+
 	//terminate the sampler
 	StopSampleTimer();
 
@@ -298,6 +317,7 @@ STDMETHODIMP ClrProfiler::Shutdown()
 	}
 
 	//take down the IO system
+	m_logger->WriteEvent(Logger::INFO, "Stopping profiler IO system.");
 	m_server->Stop();
 	m_ioThread->join();
 
@@ -1145,6 +1165,8 @@ void ClrProfiler::OnSampleTimer()
 			//Couldn't access the thread for whatever reason
 			continue;
 		}
+
+		sample.Time = 1;
 
 		//Find out how many cycles the thread has actually run, and weight the sample
 		unsigned __int64 threadTime = 0;

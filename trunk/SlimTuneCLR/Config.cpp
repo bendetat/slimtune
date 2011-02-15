@@ -21,6 +21,7 @@
 */
 #include "stdafx.h"
 #include "Config.h"
+#include "Logger.h"
 
 ProfilerConfig::ProfilerConfig()
 {
@@ -33,7 +34,7 @@ ProfilerConfig::ProfilerConfig()
 	TrackGarbageCollections = false;
 	TrackObjectAllocations = false;
 
-	CycleTiming = false;
+	WeightedSampling = true;
 	InstrumentSmallFunctions = false;
 
 	SampleInterval = 3;
@@ -65,7 +66,7 @@ void ParseRef(const wchar_t* str, T& value)
 	value = Parse<T>(str, value);
 }
 
-void ParseVar(ProfilerConfig& config, wchar_t* var)
+void ParseVar(ProfilerConfig& config, wchar_t* var, Logger* logger)
 {
 	wchar_t* equals = wcsstr(var, L"=");
 	if(equals == NULL)
@@ -88,8 +89,8 @@ void ParseVar(ProfilerConfig& config, wchar_t* var)
 		ParseRef(valueStr, config.TrackObjectAllocations);
 	else if(_wcsicmp(var, L"allowinlining") == 0)
 		ParseRef(valueStr, config.AllowInlining);
-	else if(_wcsicmp(var, L"cycletiming") == 0)
-		ParseRef(valueStr, config.CycleTiming);
+	else if(_wcsicmp(var, L"weightedsampling") == 0)
+		ParseRef(valueStr, config.WeightedSampling);
 	else if(_wcsicmp(var, L"sampleinterval") == 0)
 		ParseRef(valueStr, config.SampleInterval);
 	else if(_wcsicmp(var, L"sampleunmanaged") == 0)
@@ -98,9 +99,11 @@ void ParseVar(ProfilerConfig& config, wchar_t* var)
 		ParseRef(valueStr, config.SampleSuspended);
 	else if(_wcsicmp(var, L"counterinterval") == 0)
 		ParseRef(valueStr, config.CounterInterval);
+	else
+		logger->WriteEvent(Logger::WARNING, "Unknown configuration option: %s", valueStr);
 }
 
-void ParseCounter(ProfilerConfig& config, wchar_t* counter)
+void ParseCounter(ProfilerConfig& config, wchar_t* counter, Logger* logger)
 {
 	if(counter[0] == L'@')
 	{
@@ -112,17 +115,19 @@ void ParseCounter(ProfilerConfig& config, wchar_t* counter)
 		if(split)
 		{
 			std::wstring object(counter, split - counter);
-			std::wstring counter(split + 1);
-			config.Counters.push_back(std::make_pair(object, counter));
+			std::wstring counterStr(split + 1);
+			config.Counters.push_back(std::make_pair(object, counterStr));
+			logger->WriteEvent(Logger::INFO, "Added counter: %s", counterStr.c_str());
 		}
 		else
 		{
 			config.Counters.push_back(std::make_pair(std::wstring(L"Process"), std::wstring(counter)));
+			logger->WriteEvent(Logger::INFO, "Added counter: %s", counter);
 		}
 	}
 }
 
-bool ProfilerConfig::LoadEnv()
+bool ProfilerConfig::LoadEnv(Logger* logger)
 {
 	//load config variables
 	const int kBufferSize = 2048;
@@ -130,7 +135,12 @@ bool ProfilerConfig::LoadEnv()
 	size_t length = 0;
 	length = GetEnvironmentVariable(L"SLIMTUNE_CONFIG", buffer, kBufferSize);
 	if(length == 0 || length > kBufferSize)
+	{
+		logger->WriteEvent(Logger::FAIL, "Could not read SLIMTUNE_CONFIG environment variable.");
 		return false;
+	}
+
+	logger->WriteEvent(Logger::INFO, L"SLIMTUNE_CONFIG = %s", buffer);
 
 	wchar_t* beginVar = buffer;
 	wchar_t* endVar = NULL;
@@ -141,14 +151,19 @@ bool ProfilerConfig::LoadEnv()
 			break;
 		
 		*endVar = 0;
-		ParseVar(*this, beginVar);
+		ParseVar(*this, beginVar, logger);
 		beginVar = endVar + 1;
 	}
 
 	//load counters
 	length = GetEnvironmentVariable(L"SLIMTUNE_COUNTERS", buffer, kBufferSize);
 	if(length == 0 || length > kBufferSize)
+	{
+		logger->WriteEvent(Logger::WARNING, "Could not read SLIMTUNE_COUNTERS environment variable.");
 		return true;
+	}
+
+	logger->WriteEvent(Logger::INFO, "SLIMTUNE_COUNTERS = %s", buffer);
 
 	beginVar = buffer;
 	endVar = NULL;
@@ -159,9 +174,32 @@ bool ProfilerConfig::LoadEnv()
 			break;
 
 		*endVar = 0;
-		ParseCounter(*this, beginVar);
+		ParseCounter(*this, beginVar, logger);
 		beginVar = endVar + 1;
 	}
 
 	return true;
+}
+
+const char* StringForBool(bool value)
+{
+	return value ? "YES" : "NO";
+}
+
+void ProfilerConfig::VerifySettings(Logger* logger)
+{
+	logger->WriteEvent(Logger::INFO, "Operating system version: %d.%d.%d %s", Version.dwMajorVersion, Version.dwMinorVersion, Version.dwBuildNumber, Version.szCSDVersion);
+
+	logger->WriteEvent(Logger::INFO, "Listening on port %d.", ListenPort);
+	logger->WriteEvent(Logger::INFO, "Wait for connection: %s", StringForBool(WaitForConnection));
+	logger->WriteEvent(Logger::INFO, "Suspend connection: %s", StringForBool(SuspendOnConnection));
+	logger->WriteEvent(Logger::INFO, "Wait for connection: %s", StringForBool(WaitForConnection));
+	logger->WriteEvent(Logger::INFO, "Sampling interval: %d ms", SampleInterval);
+	logger->WriteEvent(Logger::INFO, "Performance counter interval: %d ms", CounterInterval);
+
+	if(Version.dwMajorVersion < 6)
+	{
+		logger->WriteEvent(Logger::WARNING, "Weighted sampling not available before Windows Vista.");
+		WeightedSampling = false;
+	}
 }

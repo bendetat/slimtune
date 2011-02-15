@@ -56,7 +56,7 @@ struct ProfilerConfig
 
 	//Instrumentation properties
 	bool InstrumentSmallFunctions;
-	bool CycleTiming;
+	bool WeightedSampling;
 
 	//Sampling properties
 	unsigned int SampleInterval;
@@ -68,7 +68,8 @@ struct ProfilerConfig
 	std::vector<std::pair<std::wstring, std::wstring> > Counters;
 
 	ProfilerConfig();
-	bool LoadEnv();
+	bool LoadEnv(class Logger* logger);
+	void VerifySettings(class Logger* logger);
 };
 
 #endif
