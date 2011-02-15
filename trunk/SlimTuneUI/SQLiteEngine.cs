@@ -220,8 +220,8 @@ namespace SlimTuneUI
 
 		protected override void DoClearData()
 		{
-			Command("UPDATE Calls SET Time = 0");
-			Command("UPDATE Samples SET Time = 0");
+			Command("UPDATE Calls SET Time = 0 WHERE SnapshotId = 0");
+			Command("UPDATE Samples SET Time = 0 WHERE SnapshotId = 0");
 			Command("DELETE FROM CounterValues");
 			Command("DELETE FROM Counters");
 		}
