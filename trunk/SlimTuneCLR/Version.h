@@ -5,7 +5,7 @@
 #include <boost/preprocessor/stringize.hpp>
 
 #define MAJOR_VERSION 0
-#define MINOR_VERSION 2
+#define MINOR_VERSION 3
 #define REVISION_VERSION 1
 #define BUILD_VERSION 0
 
