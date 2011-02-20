@@ -5,12 +5,21 @@ using FluentNHibernate.Mapping;
 
 namespace UICore.Filters
 {
-	public class SnapshotFilter : FilterDefinition
+	public class Snapshot : FilterDefinition
 	{
-		public SnapshotFilter()
+		public Snapshot()
 		{
-			WithName("SnapshotFilter")
+			WithName("Snapshot")
 				.AddParameter("snapshot", NHibernate.NHibernateUtil.Int32);
+		}
+	}
+
+	public class Thread : FilterDefinition
+	{
+		public Thread()
+		{
+			WithName("Thread")
+				.AddParameter("threadId", NHibernate.NHibernateUtil.Int32);
 		}
 	}
 }

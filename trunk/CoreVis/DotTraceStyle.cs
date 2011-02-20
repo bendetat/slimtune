@@ -34,63 +34,27 @@ namespace SlimTuneUI.CoreVis
 	[DisplayName("Per-Thread Call Trees (recommended)")]
 	public partial class DotTraceStyle : UserControl, IVisualizer
 	{
-		const string kParentTime = @"
-SELECT SUM(Time)
-FROM Calls
-WHERE ParentId = {0} AND ThreadId = {1} AND SnapshotId = 0
+		const string kQuery = @"
+from Call
+where ParentId = :parentId
+order by Time desc
 ";
 
-		const string kTopLevelQuery = @"
-SELECT F.Id, C.ThreadId, C.Time, T.Name AS ""ThreadName"", F.Name AS ""Function"", F.Signature AS ""Signature""
-FROM Calls C
-JOIN Functions F
-	ON C.ChildId = F.Id
-LEFT OUTER JOIN Threads T
-	ON T.Id = C.ThreadId
-WHERE C.ParentId = 0 AND C.SnapshotId = 0
-ORDER BY C.Time DESC
+		const string kExclusiveTimeQuery = @"
+select Time
+from Call
+where ParentId = :parentId and ChildId = 0
 ";
-
-		const string kChildQuery = @"
-SELECT C1.ChildId AS ""Id"", Time, Name AS ""Function"", Signature, CASE TotalCalls
-	WHEN 0 THEN 0
-	ELSE (1.0 * C1.Time / TotalCalls)
-	END AS ""Percent""
-FROM Calls C1
-JOIN Functions F
-	ON C1.ChildId = F.Id
-JOIN (SELECT ParentId, SUM(Time) AS ""TotalCalls"" FROM Calls WHERE ThreadId = {1} AND SnapshotId = 0 GROUP BY ParentId) C2
-	ON C1.ParentId = C2.ParentId
-WHERE C1.ParentId = {0} AND ThreadId = {1} AND C1.SnapshotId = 0
-ORDER BY Time DESC
-";
-
-		const string kExclusiveQuery = @"
-SELECT Time, CASE TotalCalls
-	WHEN 0 THEN 0
-	ELSE (1.0 * C1.Time / TotalCalls)
-	END AS ""Percent""
-FROM Calls C1
-JOIN (
-	SELECT ParentId, SUM(Time) AS ""TotalCalls""
-	FROM Calls
-	WHERE ThreadId = {1} AND SnapshotId = 0
-	GROUP BY ParentId
-) C2
-	ON C1.ParentId = C2.ParentId
-WHERE C1.ParentId = {0} AND C1.ChildId = 0 AND C1.ThreadId = {1} AND C1.SnapshotId = 0
-";
-
 		class NodeData
 		{
 			public int Id;
 			public int ThreadId;
 			public string Name;
-			public decimal Percent;
+			public double Percent;
 			public string FormattedText;
 			public string TipText;
 
-			public NodeData(int id, int threadId, string name, decimal percent, string formattedText, string tipText)
+			public NodeData(int id, int threadId, string name, double percent, string formattedText, string tipText)
 			{
 				Id = id;
 				ThreadId = threadId;
@@ -224,19 +188,22 @@ WHERE C1.ParentId = {0} AND C1.ChildId = 0 AND C1.ThreadId = {1} AND C1.Snapshot
 		{
 			m_extraInfoTextBox.Text = string.Empty;
 
-			using(var transact = new TransactionHandle(m_connection.DataEngine))
+			using(var session = m_mainWindow.OpenActiveSnapshot())
 			{
-				var data = m_connection.DataEngine.RawQuery(kTopLevelQuery);
+				//var data = m_connection.DataEngine.RawQuery(kTopLevelQuery);
+				var query = session.CreateQuery(kQuery);
+				query.SetInt32("parentId", 0);
+				var threads = query.List<Call>();
 
 				double totalTime = 0;
-				foreach(DataRow row in data.Tables[0].Rows)
+				foreach(var t in threads)
 				{
-					totalTime += Convert.ToInt32(row["Time"]);
+					totalTime += t.Time;
 				}
 
-				foreach(DataRow row in data.Tables[0].Rows)
+				foreach(var t in threads)
 				{
-					string name = Convert.ToString(row["Function"]) + Convert.ToString(row["Signature"]);
+					string name = t.Child.Name + t.Child.Signature;
 
 					const string rawString = @"{0:P2} Thread {1} - {2}{3}{4}";
 					const string tipString = "{0:P2} - Thread {1}\r\nEntry point: {2}{3}{4}";
@@ -244,18 +211,17 @@ WHERE C1.ParentId = {0} AND C1.ChildId = 0 AND C1.ThreadId = {1} AND C1.Snapshot
 
 					string signature, funcName, classAndFunc, baseName;
 					BreakName(name, out signature, out funcName, out classAndFunc, out baseName);
-					decimal percent = totalTime == 0 ? 0 : Convert.ToInt32(row["Time"]) / (decimal) totalTime;
-					int threadId = Convert.ToInt32(row["ThreadId"]);
-					string threadName = Convert.ToString(row["ThreadName"]);
+					double percent = totalTime == 0 ? 0 : t.Time / totalTime;
+					string threadName = t.Thread.Name;
 					if(string.IsNullOrEmpty(threadName))
-						threadName = "#" + threadId;
+						threadName = "#" + t.ThreadId;
 
 					string nodeText = string.Format(rawString, percent, threadName, baseName, classAndFunc, signature);
 					string tipText = string.Format(tipString, percent, threadName, baseName, classAndFunc, signature);
 					string formatText = string.Format(niceString, percent, threadName, baseName, classAndFunc, signature);
 
 					TreeNode newNode = new TreeNode(nodeText, new TreeNode[] { new TreeNode("dummy") });
-					newNode.Tag = new NodeData(Convert.ToInt32( row["Id"]), threadId, string.Empty, 1, formatText, tipText);
+					newNode.Tag = new NodeData(t.ChildId, t.ThreadId, string.Empty, 1, formatText, tipText);
 					m_treeView.Nodes.Add(newNode);
 				}
 			}
@@ -265,16 +231,30 @@ WHERE C1.ParentId = {0} AND C1.ChildId = 0 AND C1.ThreadId = {1} AND C1.Snapshot
 		{
 			try
 			{
-				using(var transact = new TransactionHandle(m_connection.DataEngine))
+				using(var session = m_mainWindow.OpenActiveSnapshot())
 				{
 					var parent = (NodeData) node.Tag;
-					var data = m_connection.DataEngine.RawQuery(string.Format(kChildQuery, parent.Id, parent.ThreadId));
+					//var data = m_connection.DataEngine.RawQuery(string.Format(kChildQuery, parent.Id, parent.ThreadId));
+					var query = session.CreateQuery(kQuery);
+					query.SetInt32("parentId", parent.Id);
+					session.EnableFilter("Thread").SetParameter("threadId", parent.ThreadId);
+					var calls = query.List<Call>();
+
+					//find out total child time
+					double totalTime = 0;
+					foreach(Call c in calls)
+					{
+						totalTime += c.Time;
+					}
 
 					//find out what the current number of calls by the parent is
 					//var parentHits = Convert.ToInt32(m_connection.StorageEngine.QueryScalar(string.Format(kParentHits, parent.Id, parent.ThreadId)));
-					foreach(DataRow row in data.Tables[0].Rows)
+					foreach(Call c in calls)
 					{
-						string name = Convert.ToString(row["Function"]) + Convert.ToString(row["Signature"]);
+						if(c.ChildId == 0)
+							continue;
+
+						string name = c.Child.Name + c.Child.Signature;
 						const string rawString = @"{0:P2} {1} - {2:P2} - {3}{4}{5}";
 						const string tipString = "[Id {6}] {3}{4}{5}\r\n{0:P3} of thread - {1} weighted samples - {2:P3} of parent\r\n{7:P3} outside children - {8} weighted samples";
 						const string niceString = @"\1{0:P2} \2{1} \0- \3{2:P2} \0- {3}\2{4}\0{5}";
@@ -282,29 +262,25 @@ WHERE C1.ParentId = {0} AND C1.ChildId = 0 AND C1.ThreadId = {1} AND C1.Snapshot
 
 						string signature, funcName, classAndFunc, baseName;
 						BreakName(name, out signature, out funcName, out classAndFunc, out baseName);
-						decimal percentOfParent = Convert.ToDecimal(row["Percent"]);
-						decimal percent = percentOfParent * parent.Percent;
-						int id = Convert.ToInt32(row["Id"]);
+						double percentOfParent = totalTime == 0 ? 0 : c.Time / totalTime;
+						double percent = percentOfParent * parent.Percent;
 
-						//find out how much time was spent exclusive of children
-						//we don't have children at this point so we have to query separately
-						var excl = m_connection.DataEngine.RawQuery(string.Format(kExclusiveQuery, id, parent.ThreadId));
-						var hasExcl = excl.Tables[0].Rows.Count > 0;
-						var exclRow = hasExcl ? excl.Tables[0].Rows[0] : null;
-						double exclPercent = exclRow != null ? Convert.ToDouble(exclRow["Percent"]) : 0.0;
-						double exclTime = exclRow != null ? Convert.ToSingle(exclRow["Time"]) : 0;
+						var exclusiveQuery = session.CreateQuery(kExclusiveTimeQuery);
+						exclusiveQuery.SetInt32("parentId", c.ChildId);
+						var exclusiveTime = exclusiveQuery.UniqueResult<double>();
+						var exclusivePercent = totalTime == 0 ? 0 : exclusiveTime / totalTime;
 
 						string nodeText = string.Format(rawString, percent, funcName, percentOfParent, baseName, classAndFunc, signature);
-						string tipText = string.Format(tipString, percent, Convert.ToSingle(row["Time"]), percentOfParent,
-							baseName, classAndFunc, signature, id, exclPercent, exclTime);
+						string tipText = string.Format(tipString, percent, c.Time, percentOfParent,
+							baseName, classAndFunc, signature, c.ChildId, exclusivePercent, exclusiveTime);
 						string formatText = string.Format(niceString, percent, funcName, percentOfParent,
 							baseName, classAndFunc, signature);
-						if(id == parent.Id)
+						if(c.ChildId == parent.Id)
 							formatText = string.Format(recursiveString, percent);
 
-						var childNodes = id == parent.Id ? new TreeNode[] { } : new TreeNode[] { new TreeNode() };
+						var childNodes = c.ChildId == parent.Id ? new TreeNode[] { } : new TreeNode[] { new TreeNode() };
 						TreeNode newNode = new TreeNode(nodeText, childNodes);
-						newNode.Tag = new NodeData(id, (int) parent.ThreadId, name, percent, formatText, tipText);
+						newNode.Tag = new NodeData(c.ChildId, (int) parent.ThreadId, name, percent, formatText, tipText);
 						node.Nodes.Add(newNode);
 					}
 				}

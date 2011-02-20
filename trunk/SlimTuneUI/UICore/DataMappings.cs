@@ -105,7 +105,8 @@ namespace UICore.Mappings
 			References(x => x.Parent, "ParentId");
 			References(x => x.Child, "ChildId");
 
-			ApplyFilter("SnapshotFilter", "SnapshotId = :snapshot");
+			ApplyFilter<Filters.Snapshot>("SnapshotId = :snapshot");
+			ApplyFilter<Filters.Thread>("ThreadId = :threadId");
 
 			Table("Calls");
 		}
@@ -127,7 +128,7 @@ namespace UICore.Mappings
 			References(x => x.Thread, "ThreadId");
 			//References(x => x.Function, "FunctionId");
 
-			ApplyFilter("SnapshotFilter", "SnapshotId = :snapshot");
+			ApplyFilter("Snapshot", "SnapshotId = :snapshot");
 			
 			Table("Samples");
 		}
