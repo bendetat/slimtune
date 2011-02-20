@@ -35,7 +35,10 @@ namespace SlimTuneUI.CoreVis
 	public partial class CallTrees : UserControl, IVisualizer
 	{
 		const string kQuery = @"
-from Call
+from Call c
+left join fetch c.Parent
+left join fetch c.Child
+left join fetch c.Thread
 where ParentId = :parentId
 order by Time desc
 ";
