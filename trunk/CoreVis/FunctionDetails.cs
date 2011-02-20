@@ -57,7 +57,7 @@ namespace SlimTuneUI.CoreVis
 		private void UpdateFunctionList()
 		{
 			FunctionList.Items.Clear();
-			using(var session = m_connection.DataEngine.OpenSession())
+			using(var session = m_mainWindow.OpenActiveSnapshot())
 			{
 				var list = session.CreateQuery("from FunctionInfo where Name like :search order by Name")
 					.SetMaxResults(250)
@@ -89,7 +89,7 @@ namespace SlimTuneUI.CoreVis
 			pane.Title.Text = "Function Breakdown (samples)";
 
 			using(var transact = new TransactionHandle(m_connection.DataEngine))
-			using(var session = m_connection.DataEngine.OpenSession(0))
+			using(var session = m_mainWindow.OpenActiveSnapshot())
 			{
 				double totalTime = session.CreateQuery("select sum(c.Time) from Call c where c.ParentId = :parentId")
 					.SetInt32("parentId", entry.Id)
