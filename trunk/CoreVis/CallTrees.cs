@@ -193,7 +193,6 @@ where ParentId = :parentId and ChildId = 0
 
 			using(var session = m_mainWindow.OpenActiveSnapshot())
 			{
-				//var data = m_connection.DataEngine.RawQuery(kTopLevelQuery);
 				var query = session.CreateQuery(kQuery);
 				query.SetInt32("parentId", 0);
 				var threads = query.List<Call>();
@@ -237,7 +236,6 @@ where ParentId = :parentId and ChildId = 0
 				using(var session = m_mainWindow.OpenActiveSnapshot())
 				{
 					var parent = (NodeData) node.Tag;
-					//var data = m_connection.DataEngine.RawQuery(string.Format(kChildQuery, parent.Id, parent.ThreadId));
 					var query = session.CreateQuery(kQuery);
 					query.SetInt32("parentId", parent.Id);
 					session.EnableFilter("Thread").SetParameter("threadId", parent.ThreadId);
@@ -250,8 +248,6 @@ where ParentId = :parentId and ChildId = 0
 						totalTime += c.Time;
 					}
 
-					//find out what the current number of calls by the parent is
-					//var parentHits = Convert.ToInt32(m_connection.StorageEngine.QueryScalar(string.Format(kParentHits, parent.Id, parent.ThreadId)));
 					foreach(Call c in calls)
 					{
 						if(c.ChildId == 0)
