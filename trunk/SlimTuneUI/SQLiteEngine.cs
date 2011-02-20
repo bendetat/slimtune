@@ -119,7 +119,6 @@ namespace SlimTuneUI
 			}
 
 			m_cachedSamples = 0;
-			//m_cachedTimings = 0;
 			timer.Stop();
 			Debug.WriteLine(string.Format("Database update took {0} milliseconds for {1} queries.", timer.ElapsedMilliseconds, queryCount));
 		}
@@ -131,23 +130,6 @@ namespace SlimTuneUI
 				Flush();
 				m_database.Backup(file);
 			}*/
-		}
-
-		public override void Snapshot(string name)
-		{
-			lock(m_lock)
-			{
-				Flush();
-
-				var cmd = CreateCommand("INSERT INTO Snapshots (Name, DateTime) VALUES (?, ?)", 2);
-				cmd.Parameters[0].Value = name;
-				cmd.Parameters[1].Value = DateTime.Now.ToFileTime();
-				cmd.ExecuteNonQuery();
-
-				int id = Convert.ToInt32(RawQueryScalar("SELECT MAX(Id) FROM Snapshots"));
-				Command(string.Format("INSERT INTO Samples (ThreadId, FunctionId, Time, SnapshotId) SELECT ThreadId, FunctionId, Time, {0} FROM Samples WHERE SnapshotId=0", id));
-				Command(string.Format("INSERT INTO Calls (ThreadId, ParentId, ChildId, Time, SnapshotId) SELECT ThreadId, ParentId, ChildId, Time, {0} FROM Calls WHERE SnapshotId=0", id));
-			}
 		}
 
 		public override DataSet RawQuery(string query, int limit)
@@ -216,14 +198,6 @@ namespace SlimTuneUI
 			{
 				return cmd.ExecuteScalar();
 			}
-		}
-
-		protected override void DoClearData()
-		{
-			Command("UPDATE Calls SET Time = 0 WHERE SnapshotId = 0");
-			Command("UPDATE Samples SET Time = 0 WHERE SnapshotId = 0");
-			Command("DELETE FROM CounterValues");
-			Command("DELETE FROM Counters");
 		}
 
 		private int Command(string command)
@@ -366,7 +340,7 @@ namespace SlimTuneUI
 		{
 			base.Dispose();
 
-			//and this is why C# could really use some RAII constructs
+			//and this is why C# could really use some real RAII constructs
 			Utilities.Dispose(m_insertCallerCmd);
 			Utilities.Dispose(m_updateCallerCmd);
 			Utilities.Dispose(m_insertSampleCmd);

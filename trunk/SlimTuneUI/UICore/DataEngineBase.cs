@@ -141,11 +141,9 @@ namespace UICore
 		protected abstract void PrepareCommands();
 		protected abstract void DoFlush();
 		public abstract void Save(string file);
-		public abstract void Snapshot(string name);
 		public abstract System.Data.DataSet RawQuery(string query);
 		public abstract System.Data.DataSet RawQuery(string query, int limit);
 		public abstract object RawQueryScalar(string query);
-		protected abstract void DoClearData();
 
 		public DataEngineBase(string name)
 		{
@@ -193,7 +191,7 @@ namespace UICore
 
 		public virtual NHibernate.ISession OpenSession()
 		{
-			return OpenSession(0);
+			return m_sessionFactory.OpenSession(Connection);
 		}
 
 		public virtual NHibernate.ISession OpenSession(int snapshot)
@@ -293,6 +291,27 @@ namespace UICore
 			}
 		}
 
+		public void Snapshot(string name)
+		{
+			lock(m_lock)
+			{
+				Flush();
+
+				using(var session = OpenSession())
+				{
+					Snapshot snapshot = new Snapshot();
+					snapshot.Name = name;
+					snapshot.DateTime = DateTime.Now.ToFileTime();
+					session.Save(snapshot);
+
+					string sampleQuery = string.Format("insert into Sample (ThreadId, FunctionId, Time, SnapshotId) select s.ThreadId, s.FunctionId, s.Time, {0} from Sample s where SnapshotId = 0", snapshot.Id);
+					session.CreateQuery(sampleQuery).ExecuteUpdate();
+					string callQuery = string.Format("insert into Call (ThreadId, ParentId, ChildId, Time, SnapshotId) select ThreadId, ParentId, ChildId, Time, {0} from Call where SnapshotId = 0", snapshot.Id);
+					session.CreateQuery(callQuery).ExecuteUpdate();
+				}
+			}
+		}
+
 		public void ClearData()
 		{
 			lock(m_lock)
@@ -309,10 +328,11 @@ namespace UICore
 				m_samples.Clear();
 				m_cachedSamples = 0;
 
-				//m_timings.Clear();
-				//m_cachedTimings = 0;
-
-				DoClearData();
+				using(var session = OpenSession())
+				{
+					session.CreateQuery("delete from Call where SnapshotId = 0").ExecuteUpdate();
+					session.CreateQuery("delete from Sample where SnapshotId = 0").ExecuteUpdate();
+				}
 			}
 		}
 
