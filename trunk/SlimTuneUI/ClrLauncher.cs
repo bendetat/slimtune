@@ -88,9 +88,23 @@ namespace SlimTuneUI
 
 		public override bool Launch()
 		{
-			string config = LauncherCommon.CreateConfigStringCLR(ProfilingMode, ListenPort, WaitForConnection, IncludeNative, SamplingInterval, CounterInterval, AllowMethodInlining, TrackGC, TrackAllocs);
+			ClrConfig config = new ClrConfig
+			{
+				ProfilingMode = ProfilingMode,
+				ListenPort = ListenPort,
+				WaitForConnection = WaitForConnection,
+				IncludeNative = IncludeNative,
+				SamplingInterval = SamplingInterval,
+				CounterInterval = CounterInterval,
+				AllowMethodInlining = AllowMethodInlining,
+				TrackGC = TrackGC,
+				TrackAllocs = TrackAllocs,
+				WeightedSampling = WeightedSampling,
+			};
+
+			string configString = config.CreateString();
 			var psi = new ProcessStartInfo(Executable, Arguments);
-			LauncherCommon.SetProcessOptions(psi, config, LauncherCommon.GetCounterString(PerformanceCounters), true);
+			LauncherCommon.SetProcessOptions(psi, configString, LauncherCommon.GetCounterString(PerformanceCounters), true);
 			psi.WorkingDirectory = string.IsNullOrEmpty(WorkingDir) ?
 				Path.GetDirectoryName(Executable) : WorkingDir;
 

@@ -106,8 +106,22 @@ namespace SlimTuneUI
 		{
 			StopService(ServiceName, StopCommand);
 
-			string config = LauncherCommon.CreateConfigStringCLR(ProfilingMode, ListenPort, WaitForConnection, IncludeNative, SamplingInterval, CounterInterval, AllowMethodInlining, TrackGC, TrackAllocs);
-			string[] profEnv = LauncherCommon.CreateProfilerEnvironment(config, LauncherCommon.GetCounterString(PerformanceCounters), true);
+			ClrConfig config = new ClrConfig
+			{
+				ProfilingMode = ProfilingMode,
+				ListenPort = ListenPort,
+				WaitForConnection = WaitForConnection,
+				IncludeNative = IncludeNative,
+				SamplingInterval = SamplingInterval,
+				CounterInterval = CounterInterval,
+				AllowMethodInlining = AllowMethodInlining,
+				TrackGC = TrackGC,
+				TrackAllocs = TrackAllocs,
+				WeightedSampling = WeightedSampling,
+			};
+
+			string configString = config.ToString();
+			string[] profEnv = LauncherCommon.CreateProfilerEnvironment(configString, LauncherCommon.GetCounterString(PerformanceCounters), true);
 
 			string serviceAccountSid = null;
 			string serviceAccountName = LauncherCommon.GetServiceAccountName(ServiceName);

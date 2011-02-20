@@ -77,34 +77,6 @@ namespace UICore
 		private static extern bool DestroyEnvironmentBlock(
 				IntPtr lpEnvironment);
 
-		public static string CreateConfigStringCLR(ProfilerMode profilingMode, int listenPort, bool waitForConnection, bool includeNative,
-			int samplingInterval, int counterInterval, bool allowMethodInlining, bool trackGC, bool trackAllocs)
-		{
-			string config = string.Empty;
-			config += string.Format("Mode={0};", (int) profilingMode);
-			config += string.Format("Port={0};", listenPort);
-			config += string.Format("Wait={0};", waitForConnection ? 1 : 0);
-			config += string.Format("SampleUnmanaged={0};", includeNative ? 1 : 0);
-			config += string.Format("SampleInterval={0};", samplingInterval);
-			config += string.Format("CounterInterval={0};", counterInterval);
-			config += string.Format("AllowInlining={0};", allowMethodInlining ? 1 : 0);
-			config += string.Format("TrackGarbageCollections={0};", trackGC ? 1 : 0);
-			config += string.Format("TrackObjectAllocations={0};", trackAllocs ? 1 : 0);
-
-			return config;
-		}
-
-		public static string CreateConfigStringNative(ProfilerMode profilingMode, int listenPort, int samplingInterval, int counterInterval)
-		{
-			string config = string.Empty;
-			config += string.Format("Mode={0};", (int) profilingMode);
-			config += string.Format("Port={0};", listenPort);
-			config += string.Format("SampleInterval={0};", samplingInterval);
-			config += string.Format("CounterInterval={0};", counterInterval);
-
-			return config;
-		}
-
 		public static void SetProcessOptions(ProcessStartInfo psi, string config, string counters, bool clr)
 		{
 			psi.RedirectStandardOutput = false;

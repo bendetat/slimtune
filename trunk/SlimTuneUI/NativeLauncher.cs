@@ -31,6 +31,25 @@ using UICore;
 
 namespace SlimTuneUI
 {
+	public struct NativeConfig
+	{
+		public ProfilerMode ProfilingMode;
+		public ushort ListenPort;
+		public int SamplingInterval;
+		public int CounterInterval;
+
+		public string CreateString()
+		{
+			string config = string.Empty;
+			config += string.Format("Mode={0};", (int) ProfilingMode);
+			config += string.Format("Port={0};", ListenPort);
+			config += string.Format("SampleInterval={0};", SamplingInterval);
+			config += string.Format("CounterInterval={0};", CounterInterval);
+
+			return config;
+		}
+	}
+
 	[Serializable,
 	DisplayName("Native code application (Visual C++)")]
 	public class NativeLauncher : ILauncher
@@ -126,10 +145,18 @@ namespace SlimTuneUI
 
 		public bool Launch()
 		{
-			string config = LauncherCommon.CreateConfigStringNative(ProfilerMode.Sampling, ListenPort, SamplingInterval, 1000);
+			NativeConfig config = new NativeConfig
+			{
+				ProfilingMode = ProfilerMode.Sampling,
+				ListenPort = ListenPort,
+				SamplingInterval = SamplingInterval,
+				CounterInterval = 1000
+			};
+
+			string configString = config.CreateString();
 			string argStr = Executable + " " + Arguments;
 			var psi = new ProcessStartInfo("Backends\\SlimTuneNative_x86.exe", argStr);
-			LauncherCommon.SetProcessOptions(psi, config, string.Empty, false);
+			LauncherCommon.SetProcessOptions(psi, configString, string.Empty, false);
 			psi.WorkingDirectory = string.IsNullOrEmpty(WorkingDir) ?
 				Path.GetDirectoryName(Executable) : WorkingDir;
 

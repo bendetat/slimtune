@@ -30,6 +30,37 @@ using UICore;
 
 namespace SlimTuneUI
 {
+	public struct ClrConfig
+	{
+		public ProfilerMode ProfilingMode;
+		public ushort ListenPort;
+		public bool WaitForConnection;
+		public bool IncludeNative;
+		public int SamplingInterval;
+		public int CounterInterval;
+		public bool AllowMethodInlining;
+		public bool TrackGC;
+		public bool TrackAllocs;
+		public bool WeightedSampling;
+
+		public string CreateString()
+		{
+			string config = string.Empty;
+			config += string.Format("Mode={0};", (int) ProfilingMode);
+			config += string.Format("Port={0};", ListenPort);
+			config += string.Format("Wait={0};", WaitForConnection ? 1 : 0);
+			config += string.Format("SampleUnmanaged={0};", IncludeNative ? 1 : 0);
+			config += string.Format("SampleInterval={0};", SamplingInterval);
+			config += string.Format("CounterInterval={0};", CounterInterval);
+			config += string.Format("AllowInlining={0};", AllowMethodInlining ? 1 : 0);
+			config += string.Format("TrackGarbageCollections={0};", TrackGC ? 1 : 0);
+			config += string.Format("TrackObjectAllocations={0};", TrackAllocs ? 1 : 0);
+			config += string.Format("WeightedSampling={0};", WeightedSampling ? 1 : 0);
+
+			return config;
+		}
+	}
+
 	public abstract class ClrLauncherBase : ILauncher
 	{
 		public abstract string Name
@@ -68,10 +99,15 @@ namespace SlimTuneUI
 		Description("Causes the target process to suspend when a profiler connects.")]
 		public bool SuspendOnConnect { get; set; }
 
-        [Category("Profiling"),
-        DisplayName("Allow Method Inlining"),
-        Description("Allowing method inlining can give more accurate results in some situations, but may make the profile data harder to interpret.")]
-        public bool AllowMethodInlining { get; set; }
+		[Category("Profiling"),
+		DisplayName("Allow Method Inlining"),
+		Description("Allowing method inlining can give more accurate results in some situations, but may make the profile data harder to interpret.")]
+		public bool AllowMethodInlining { get; set; }
+
+		[Category("Profiling"),
+		DisplayName("Weighted Sampling"),
+		Description("Weight samples based on how many CPU cycles they actually represent.")]
+		public bool WeightedSampling { get; set; }
 
 		private ushort m_listenPort = 3000;
 		[Category("Profiling"),
@@ -129,12 +165,14 @@ namespace SlimTuneUI
 			}
 		}
 
-		[Category("Memory"),
+		[Browsable(false),
+		Category("Memory"),
 		DisplayName("Track object allocations"),
 		Description("Whether or not to monitor object allocations.")]
 		public bool TrackAllocs { get; set; }
 
-		[Category("Memory"),
+		[Browsable(false),
+		Category("Memory"),
 		DisplayName("Track garbage collections"),
 		Description("Whether or not to monitor garbage collections.")]
 		public bool TrackGC { get; set; }
