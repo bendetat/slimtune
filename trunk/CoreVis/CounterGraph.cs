@@ -9,24 +9,13 @@ using System.Windows.Forms;
 using UICore;
 using ZedGraph;
 
+using NHibernate.Criterion;
+
 namespace SlimTuneUI.CoreVis
 {
 	[DisplayName("Performance Counters")]
 	public partial class CounterGraph : UserControl, IVisualizer
 	{
-		const string kCountersQuery = @"
-SELECT *
-FROM Counters
-ORDER BY Id
-";
-
-		const string kValuesQuery = @"
-SELECT Time, Value
-FROM CounterValues
-WHERE CounterId = {0}
-ORDER BY Time DESC
-";
-
 		ProfilerWindowBase m_mainWindow;
 		Connection m_connection;
 		ColorRotator m_colors = new ColorRotator();
@@ -92,17 +81,18 @@ ORDER BY Time DESC
 				entry.Tagged = false;
 			}
 
-			using(var transact = new TransactionHandle(m_connection.DataEngine))
+			using(var session = m_mainWindow.OpenActiveSnapshot())
 			{
-				var data = m_connection.DataEngine.RawQuery(kCountersQuery);
-				foreach(DataRow row in data.Tables[0].Rows)
+				var counters = session.CreateCriteria<Counter>()
+					.AddOrder(Order.Asc("Id"))
+					.List<Counter>();
+				foreach(Counter c in counters)
 				{
-					int id = Convert.ToInt32(row["Id"]);
-					string name = Convert.ToString(row["Name"]);
+					string name = c.Name;
 					if(string.IsNullOrEmpty(name))
-						name = string.Format("Counter #{0}", id);
+						name = string.Format("Counter #{0}", c.Id);
 
-					var newEntry = new CounterEntry(id, name);
+					var newEntry = new CounterEntry(c.Id, name);
 					int existingEntryIndex = m_counterListBox.Items.IndexOf(newEntry);
 					if(existingEntryIndex >= 0)
 					{
@@ -112,7 +102,7 @@ ORDER BY Time DESC
 					}
 					else
 					{
-						m_counterListBox.Items.Add(new CounterEntry(id, name));
+						m_counterListBox.Items.Add(new CounterEntry(c.Id, name));
 					}
 				}
 			}
@@ -157,14 +147,12 @@ ORDER BY Time DESC
 			if(e.NewValue == CheckState.Checked)
 			{
 				var points = new PointPairList();
-				using(var transact = new TransactionHandle(m_connection.DataEngine))
+				using(var session = m_mainWindow.OpenActiveSnapshot())
 				{
-					var data = m_connection.DataEngine.RawQuery(string.Format(kValuesQuery, entry.Id), 3600);
-					foreach(DataRow row in data.Tables[0].Rows)
+					var counter = session.Load<Counter>(entry.Id);
+					foreach(var value in counter.Values)
 					{
-						long time = Convert.ToInt64(row["Time"]);
-						long value = Convert.ToInt64(row["Value"]);
-						points.Add(time / 1000.0, value);
+						points.Add(value.Time / 1000.0, value.Value);
 					}
 				}
 
