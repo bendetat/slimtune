@@ -21,7 +21,7 @@
 */
 namespace SlimTuneUI.CoreVis
 {
-	partial class DotTraceStyle
+	partial class CallTrees
 	{
 		/// <summary>
 		/// Required designer variable.
@@ -50,7 +50,7 @@ namespace SlimTuneUI.CoreVis
 		private void InitializeComponent()
 		{
 			this.components = new System.ComponentModel.Container();
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DotTraceStyle));
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CallTrees));
 			this.m_treeView = new System.Windows.Forms.TreeView();
 			this.m_toolStrip = new System.Windows.Forms.ToolStrip();
 			this.m_refreshButton = new System.Windows.Forms.ToolStripButton();

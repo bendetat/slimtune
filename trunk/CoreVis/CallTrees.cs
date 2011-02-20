@@ -32,7 +32,7 @@ using UICore;
 namespace SlimTuneUI.CoreVis
 {
 	[DisplayName("Per-Thread Call Trees (recommended)")]
-	public partial class DotTraceStyle : UserControl, IVisualizer
+	public partial class CallTrees : UserControl, IVisualizer
 	{
 		const string kQuery = @"
 from Call
@@ -97,7 +97,7 @@ where ParentId = :parentId and ChildId = 0
 			get { return "Thread Calls"; }
 		}
 
-		public DotTraceStyle()
+		public CallTrees()
 		{
 			InitializeComponent();
 

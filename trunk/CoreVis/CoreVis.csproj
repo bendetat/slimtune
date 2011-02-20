@@ -91,18 +91,18 @@
     <Compile Include="..\SlimTuneUI\Properties\AssemblyInfoCommon.cs">
       <Link>Properties\AssemblyInfoCommon.cs</Link>
     </Compile>
+    <Compile Include="CallTrees.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="CallTrees.designer.cs">
+      <DependentUpon>CallTrees.cs</DependentUpon>
+    </Compile>
     <Compile Include="ColorRotator.cs" />
     <Compile Include="CounterGraph.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="CounterGraph.Designer.cs">
       <DependentUpon>CounterGraph.cs</DependentUpon>
-    </Compile>
-    <Compile Include="DotTraceStyle.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="DotTraceStyle.designer.cs">
-      <DependentUpon>DotTraceStyle.cs</DependentUpon>
     </Compile>
     <Compile Include="FunctionDetails.cs">
       <SubType>UserControl</SubType>
@@ -131,12 +131,12 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="CallTrees.resx">
+      <DependentUpon>CallTrees.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="CounterGraph.resx">
       <DependentUpon>CounterGraph.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DotTraceStyle.resx">
-      <DependentUpon>DotTraceStyle.cs</DependentUpon>
-      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="FunctionDetails.resx">
       <DependentUpon>FunctionDetails.cs</DependentUpon>
