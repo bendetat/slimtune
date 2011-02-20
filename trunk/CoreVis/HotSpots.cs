@@ -75,14 +75,12 @@ namespace SlimTuneUI.CoreVis
 				double minimumTime = totalTime / 1000.0;
 
 				//find the functions that consumed the most time-exclusive. These are hotspots.
-				var query = session.CreateQuery("from Call c where c.ChildId = 0 and c.Time >= :minTime order by c.Time desc inner join fetch c.Parent");
+				var query = session.CreateQuery("from Call c inner join fetch c.Parent where c.ChildId = 0 and c.Time >= :minTime order by c.Time desc");
 				query.SetDouble("minTime", minimumTime);
 				query.SetMaxResults(20);
 				var hotspots = query.List<Call>();
 				foreach(var call in hotspots)
 				{
-					var func = call.Parent;
-					var parentName = func.Name;
 					HotspotsList.Items.Add(call);
 				}
 			}
@@ -92,7 +90,7 @@ namespace SlimTuneUI.CoreVis
 		{
 			using(var session = m_mainWindow.OpenActiveSnapshot())
 			{
-				var query = session.CreateQuery("from Call c where c.ChildId = :funcId order by c.Time desc");
+				var query = session.CreateQuery("from Call c left join fetch c.Parent where c.ChildId = :funcId order by c.Time desc");
 				query.SetInt32("funcId", child.ParentId);
 				var parents = query.List<Call>();
 				double totalTime = 0;
@@ -101,8 +99,6 @@ namespace SlimTuneUI.CoreVis
 					if(call.ParentId == 0)
 						return false;
 
-					var func = call.Parent;
-					var parentName = func.Name;
 					totalTime += call.Time;
 					box.Items.Add(call);
 				}
