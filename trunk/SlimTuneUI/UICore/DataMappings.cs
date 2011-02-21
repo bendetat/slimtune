@@ -35,12 +35,6 @@ namespace UICore.Mappings
 				.GeneratedBy.Assigned();
 			Map(x => x.IsAlive);
 			Map(x => x.Name);
-			HasMany(x => x.Samples)
-				.Inverse()
-				.ReadOnly();
-			HasMany(x => x.Calls)
-				.Inverse()
-				.ReadOnly();
 			Table("Threads");
 		}
 	}
@@ -54,18 +48,24 @@ namespace UICore.Mappings
 			Map(x => x.Name);
 			Map(x => x.Signature);
 			Map(x => x.IsNative);
-			Map(x => x.ClassId);
 			References(x => x.Class, "ClassId")
+				.NotFound.Ignore()
 				.ReadOnly();
 			HasMany(x => x.CallsAsParent)
 				.Inverse()
+				.KeyColumn("ParentId")
+				.LazyLoad()
 				.ReadOnly();
 			HasMany(x => x.CallsAsChild)
 				.Inverse()
+				.KeyColumn("ChildId")
+				.LazyLoad()
 				.ReadOnly();
-			/*HasMany(x => x.Samples)
+			HasMany(x => x.Samples)
 				.Inverse()
-				.ReadOnly();*/
+				.KeyColumn("FunctionId")
+				.LazyLoad()
+				.ReadOnly();
 			Table("Functions");
 		}
 	}
@@ -80,6 +80,8 @@ namespace UICore.Mappings
 			Map(x => x.IsValueType);
 			HasMany(x => x.Functions)
 				.Inverse()
+				.KeyColumn("ClassId")
+				.LazyLoad()
 				.ReadOnly();
 			Table("Classes");
 		}
@@ -92,18 +94,22 @@ namespace UICore.Mappings
 			ReadOnly();
 			Id(x => x.Id);
 
-			Map(x => x.ThreadId).Index("Calls_ThreadIndex, Calls_Composite");
-			Map(x => x.ParentId).Index("Calls_ParentIndex, Calls_Composite");
-			Map(x => x.ChildId).Index("Calls_ChildIndex, Calls_Composite");
 			Map(x => x.Time)
 				.Not.Nullable();
 			Map(x => x.SnapshotId)
-				.Not.Nullable()
 				.Default("0");
 
-			References(x => x.Thread, "ThreadId");
-			References(x => x.Parent, "ParentId");
-			References(x => x.Child, "ChildId");
+			References(x => x.Thread, "ThreadId")
+				.Not.Nullable()
+				.Index("Calls_ThreadIndex, Calls_Composite");
+			References(x => x.Parent, "ParentId")
+				.NotFound.Ignore()
+				.Index("Calls_ParentIndex, Calls_Composite");
+			References(x => x.Child, "ChildId")
+				.NotFound.Ignore()
+				.Index("Calls_ChildIndex, Calls_Composite");
+			References(x => x.Snapshot, "SnapshotId")
+				.Not.Nullable();
 
 			ApplyFilter<Filters.Snapshot>("SnapshotId = :snapshot");
 			ApplyFilter<Filters.Thread>("ThreadId = :threadId");
@@ -118,15 +124,18 @@ namespace UICore.Mappings
 		{
 			ReadOnly();
 			Id(x => x.Id);
-			Map(x => x.ThreadId).Index("Samples_ThreadIndex, Samples_Composite");
-			Map(x => x.FunctionId).Index("Samples_FunctionIndex, Samples_Composite");
 			Map(x => x.Time)
 				.Not.Nullable();
-			Map(x => x.SnapshotId, "SnapshotId")
-				.Not.Nullable()
+			Map(x => x.SnapshotId)
 				.Default("0");
-			References(x => x.Thread, "ThreadId");
-			//References(x => x.Function, "FunctionId");
+
+			References(x => x.Thread, "ThreadId")
+				.Index("Samples_ThreadIndex, Samples_Composite");
+			References(x => x.Function, "FunctionId")
+				.NotFound.Ignore()
+				.Index("Samples_FunctionIndex, Samples_Composite");
+			References(x => x.Snapshot, "SnapshotId")
+				.Not.Nullable();
 
 			ApplyFilter("Snapshot", "SnapshotId = :snapshot");
 			
@@ -142,6 +151,8 @@ namespace UICore.Mappings
 			Map(x => x.Name);
 			HasMany(x => x.Values)
 				.Inverse()
+				.KeyColumn("CounterId")
+				.LazyLoad()
 				.ReadOnly();
 			Table("Counters");
 		}
@@ -156,6 +167,7 @@ namespace UICore.Mappings
 			Map(x => x.Time);
 			Map(x => x.Value);
 			References(x => x.Counter, "CounterId")
+				.NotFound.Ignore()
 				.ReadOnly();
 			Table("CounterValues");
 		}

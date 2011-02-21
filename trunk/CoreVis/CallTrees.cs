@@ -39,14 +39,14 @@ from Call c
 left join fetch c.Parent
 left join fetch c.Child
 left join fetch c.Thread
-where ParentId = :parentId
+where c.Parent.Id = :parentId
 order by Time desc
 ";
 
 		const string kExclusiveTimeQuery = @"
 select Time
-from Call
-where ParentId = :parentId and ChildId = 0
+from Call c
+where c.Parent.Id = :parentId and c.Child.Id = 0
 ";
 		class NodeData
 		{
@@ -216,14 +216,14 @@ where ParentId = :parentId and ChildId = 0
 					double percent = totalTime == 0 ? 0 : t.Time / totalTime;
 					string threadName = t.Thread.Name;
 					if(string.IsNullOrEmpty(threadName))
-						threadName = "#" + t.ThreadId;
+						threadName = "#" + t.Thread.Id;
 
 					string nodeText = string.Format(rawString, percent, threadName, baseName, classAndFunc, signature);
 					string tipText = string.Format(tipString, percent, threadName, baseName, classAndFunc, signature);
 					string formatText = string.Format(niceString, percent, threadName, baseName, classAndFunc, signature);
 
 					TreeNode newNode = new TreeNode(nodeText, new TreeNode[] { new TreeNode("dummy") });
-					newNode.Tag = new NodeData(t.ChildId, t.ThreadId, string.Empty, 1, formatText, tipText);
+					newNode.Tag = new NodeData(t.Child.Id, t.Thread.Id, string.Empty, 1, formatText, tipText);
 					m_treeView.Nodes.Add(newNode);
 				}
 			}
@@ -250,7 +250,7 @@ where ParentId = :parentId and ChildId = 0
 
 					foreach(Call c in calls)
 					{
-						if(c.ChildId == 0)
+						if(c.Child.Id == 0)
 							continue;
 
 						string name = c.Child.Name + c.Child.Signature;
@@ -265,21 +265,21 @@ where ParentId = :parentId and ChildId = 0
 						double percent = percentOfParent * parent.Percent;
 
 						var exclusiveQuery = session.CreateQuery(kExclusiveTimeQuery);
-						exclusiveQuery.SetInt32("parentId", c.ChildId);
+						exclusiveQuery.SetInt32("parentId", c.Child.Id);
 						var exclusiveTime = exclusiveQuery.UniqueResult<double>();
 						var exclusivePercent = totalTime == 0 ? 0 : exclusiveTime / totalTime;
 
 						string nodeText = string.Format(rawString, percent, funcName, percentOfParent, baseName, classAndFunc, signature);
 						string tipText = string.Format(tipString, percent, c.Time, percentOfParent,
-							baseName, classAndFunc, signature, c.ChildId, exclusivePercent, exclusiveTime);
+							baseName, classAndFunc, signature, c.Child.Id, exclusivePercent, exclusiveTime);
 						string formatText = string.Format(niceString, percent, funcName, percentOfParent,
 							baseName, classAndFunc, signature);
-						if(c.ChildId == parent.Id)
+						if(c.Child.Id == parent.Id)
 							formatText = string.Format(recursiveString, percent);
 
-						var childNodes = c.ChildId == parent.Id ? new TreeNode[] { } : new TreeNode[] { new TreeNode() };
+						var childNodes = c.Child.Id == parent.Id ? new TreeNode[] { } : new TreeNode[] { new TreeNode() };
 						TreeNode newNode = new TreeNode(nodeText, childNodes);
-						newNode.Tag = new NodeData(c.ChildId, (int) parent.ThreadId, name, percent, formatText, tipText);
+						newNode.Tag = new NodeData(c.Child.Id, (int) parent.ThreadId, name, percent, formatText, tipText);
 						node.Nodes.Add(newNode);
 					}
 				}

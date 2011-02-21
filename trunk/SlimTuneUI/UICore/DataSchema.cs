@@ -57,15 +57,13 @@ namespace UICore
 	public class Call
 	{
 		public virtual int Id { get; set; }
-		public virtual int ThreadId { get; set; }
-		public virtual int ParentId { get; set; }
-		public virtual int ChildId { get; set; }
 		public virtual double Time { get; set; }
 		public virtual int SnapshotId { get; set; }
 
 		public virtual ThreadInfo Thread { get; set; }
 		public virtual FunctionInfo Parent { get; set; }
 		public virtual FunctionInfo Child { get; set; }
+		public virtual Snapshot Snapshot { get; set; }
 
 		public override bool Equals(object obj)
 		{
@@ -73,16 +71,16 @@ namespace UICore
 				return false;
 
 			var other = obj as Call;
-			if(ThreadId == other.ThreadId &&
-				ParentId == other.ParentId &&
-				ChildId == other.ChildId)
+			if(Thread.Id == other.Thread.Id &&
+				Parent.Id == other.Parent.Id &&
+				Child.Id == other.Child.Id)
 				return true;
 			return false;
 		}
 
 		public override int GetHashCode()
 		{
-			int hash = 13 + ThreadId << 16 + ParentId << 8 + ChildId;
+			int hash = 13 + Thread.Id << 16 + Parent.Id << 8 + Child.Id;
 			return hash;
 		}
 	}
@@ -90,13 +88,12 @@ namespace UICore
 	public class Sample
 	{
 		public virtual int Id { get; set; }
-		public virtual int ThreadId { get; set; }
-		public virtual int FunctionId { get; set; }
 		public virtual double Time { get; set; }
 		public virtual int SnapshotId { get; set; }
 
 		public virtual ThreadInfo Thread { get; set; }
 		public virtual FunctionInfo Function { get; set; }
+		public virtual Snapshot Snapshot { get; set; }
 
 		public override bool Equals(object obj)
 		{
@@ -104,14 +101,14 @@ namespace UICore
 				return false;
 
 			var other = obj as Sample;
-			if(ThreadId == other.ThreadId && FunctionId == other.FunctionId)
+			if(Thread.Id == other.Thread.Id && Function.Id == other.Function.Id)
 				return true;
 			return false;
 		}
 
 		public override int GetHashCode()
 		{
-			int hash = 17 + ThreadId << 16 + FunctionId;
+			int hash = 17 + Thread.Id << 16 + Function.Id;
 			return hash;
 		}
 	}
