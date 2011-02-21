@@ -90,14 +90,8 @@ namespace SlimTuneUI
 
 				TypeEntry visEntry = m_visualizerCombo.SelectedItem as TypeEntry;
 				if(visEntry != null && visEntry.Type != null)
-				{
-					IVisualizer visualizer = Activator.CreateInstance(visEntry.Type) as IVisualizer;
-					visualizer.Initialize(profilerWindow, conn);
-					TabPage page = new TabPage(visualizer.DisplayName);
-					visualizer.Show(page.Controls);
-					profilerWindow.VisualizerHost.TabPages.Add(page);
-					profilerWindow.VisualizerHost.SelectedTab = page;
-				}
+					profilerWindow.AddVisualizer(visEntry.Type);
+
 				profilerWindow.BringToFront();
 			}
 			else
