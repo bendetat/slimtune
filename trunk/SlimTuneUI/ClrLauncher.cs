@@ -67,7 +67,7 @@ namespace SlimTuneUI
 		public ClrLauncher()
 		{
 			ListenPort = 3000;
-			SamplingInterval = 5;
+			SamplingInterval = 10;
 		}
 
 		public override bool CheckParams()

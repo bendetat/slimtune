@@ -124,7 +124,7 @@ namespace SlimTuneUI
 			}
 		}
 
-		private int m_samplingInterval = 5;
+		private int m_samplingInterval = 20;
 		[Category("Profiling"),
 		DisplayName("Sampling interval"),
 		Description("The amount of time between stack samples, in milliseconds. Raising this value reduces how much data is collected, but improves application performance.")]
@@ -186,6 +186,7 @@ namespace SlimTuneUI
 		public ClrLauncherBase()
 		{
 			PerformanceCounters = new List<string>();
+			WeightedSampling = true;
 		}
 
 		public virtual bool CheckParams()

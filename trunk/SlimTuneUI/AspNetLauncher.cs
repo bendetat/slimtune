@@ -51,7 +51,7 @@ namespace SlimTuneUI
 		public AspNetLauncher()
 		{
 			ListenPort = 3000;
-			SamplingInterval = 10;
+			SamplingInterval = 50;
 		}
 
 		public override bool CheckParams()
