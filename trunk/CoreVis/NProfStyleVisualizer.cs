@@ -38,7 +38,7 @@ namespace SlimTuneUI.CoreVis
 		ProfilerWindowBase m_mainWindow;
 		Connection m_connection;
 
-		CalleesModel m_calleesModel;
+		ParentsModel m_calleesModel;
 		CallersModel m_callersModel;
 
 		public string DisplayName
@@ -61,16 +61,16 @@ namespace SlimTuneUI.CoreVis
 			m_mainWindow = mainWindow;
 			m_connection = connection;
 
-			m_calleesModel = new CalleesModel(connection.DataEngine);
-			m_callersModel = new CallersModel(connection.DataEngine);
+			m_calleesModel = new ParentsModel(connection.DataEngine, m_mainWindow);
+			m_callersModel = new CallersModel(connection.DataEngine, m_mainWindow);
 			m_callees.Model = new SortedTreeModel(m_calleesModel);
 			m_callers.Model = new SortedTreeModel(m_callersModel);
 
 			//set the sort orders
-			ColumnClicked(m_callees, new TreeColumnEventArgs(m_calleesPercentParentColumn));
-			ColumnClicked(m_callees, new TreeColumnEventArgs(m_calleesPercentParentColumn));
-			ColumnClicked(m_callers, new TreeColumnEventArgs(m_callersPercentTimeColumn));
-			ColumnClicked(m_callers, new TreeColumnEventArgs(m_callersPercentTimeColumn));
+			ColumnClicked(m_callees, new TreeColumnEventArgs(m_parentsTimeColumn));
+			ColumnClicked(m_callees, new TreeColumnEventArgs(m_parentsTimeColumn));
+			ColumnClicked(m_callers, new TreeColumnEventArgs(m_callersTimeColumn));
+			ColumnClicked(m_callers, new TreeColumnEventArgs(m_callersTimeColumn));
 
 			return true;
 		}
@@ -120,7 +120,7 @@ namespace SlimTuneUI.CoreVis
 				this.Order = order;
 			}
 
-			private static int Compare(decimal? x, decimal? y)
+			private static int Compare(double? x, double? y)
 			{
 				if(x.HasValue && y.HasValue)
 					return x.Value.CompareTo(y.Value);
@@ -132,24 +132,20 @@ namespace SlimTuneUI.CoreVis
 			{
 				//yeah, this is awful
 				int result = 0;
-				if(Column == Parent.m_calleesIdColumn || Column == Parent.m_callersIdColumn)
+				if(Column == Parent.m_parentsIdColumn || Column == Parent.m_callersIdColumn)
 					result = x.Id.CompareTo(y.Id);
-				else if(Column == Parent.m_calleesThreadIdColumn || Column == Parent.m_callersThreadIdColumn)
+				else if(Column == Parent.m_parentsThreadIdColumn || Column == Parent.m_callersThreadIdColumn)
 					result = x.Thread.CompareTo(y.Thread);
-				else if(Column == Parent.m_calleesNameColumn || Column == Parent.m_callersNameColumn)
+				else if(Column == Parent.m_parentsNameColumn || Column == Parent.m_callersNameColumn)
 					result = x.Name.CompareTo(y.Name);
-				else if(Column == Parent.m_calleesPercentParentColumn || Column == Parent.m_callersPercentTimeColumn)
-					result = Compare(x.PercentTime, y.PercentTime);
-				else if(Column == Parent.m_calleesPercentCallsColumn || Column == Parent.m_callersPercentCallsColumn)
-					result = Compare(x.PercentCalls, y.PercentCalls);
+				else if(Column == Parent.m_parentsTimeColumn || Column == Parent.m_callersTimeColumn)
+					result = Compare(x.Time, y.Time);
 
 				//if primary sort is not differentiating, go to secondary sort criteria (hard coded for now)
 				if(result == 0)
 					result = x.Thread.CompareTo(y.Thread);
 				if(result == 0)
 					result = -Compare(x.PercentTime, y.PercentTime);
-				if(result == 0)
-					result = -Compare(x.PercentCalls, y.PercentCalls);
 				if(result == 0)
 					result = -x.Name.CompareTo(y.Name);
 				if(result == 0)
@@ -173,97 +169,86 @@ namespace SlimTuneUI.CoreVis
 		public int Thread { get; set; }
 		public string Name { get; set; }
 		public double Time { get; set; }
-		public decimal? PercentTime { get; set; }
-		public decimal? PercentCalls { get; set; }
+		public double? PercentTime { get; set; }
 	}
 
-	class CalleesModel : ITreeModel
+	class ParentsModel : ITreeModel
 	{
-		const string kParentTime = @"
-SELECT SUM(Time)
-FROM Calls
-WHERE ParentId = {0} AND ThreadId = {1} AND SnapshotId = 0
-";
-
+		//find out what functions took the most time inclusive
 		const string kTopLevelQuery = @"
-SELECT Samples.ThreadId, F.Id, Time, Name AS ""Function"", Signature, CASE TotalTime
-	WHEN 0 THEN 0
-	ELSE (1.0 * Time / TotalTime)
-	END AS ""Percent""
-FROM Samples
-JOIN Functions F
-	ON F.Id = FunctionId
-JOIN (SELECT ThreadId, MAX(Time) AS ""TotalTime"" FROM Samples GROUP BY ThreadId) AS ""Totals""
-	ON Samples.ThreadId = Totals.ThreadId
-WHERE Samples.SnapshotId = 0
-ORDER BY Time DESC
+select s, max(s2.Time)
+from Sample s
+	join s.Thread.Samples s2
+	left join fetch s.Function
+where s2.SnapshotId = :snapshotId
+group by s.Id
+order by s.Time desc
 ";
 
 		const string kChildQuery = @"
-SELECT C1.ChildId, Time, Name AS ""Function"", Signature, CASE TotalTime
-	WHEN 0 THEN 0
-	ELSE (1.0 * C1.Time / TotalTime)
-	END AS ""% Calls""
-FROM Calls AS ""C1""
-JOIN Functions F
-	ON C1.ChildId = F.Id
-JOIN (
-	SELECT ChildId, SUM(Time) AS ""TotalTime""
-	FROM Calls
-	WHERE SnapshotId = 0
-	GROUP BY ChildId
-) AS ""C2""
-	ON C1.ChildId = C2.ChildId
-WHERE C1.ParentId = {0} AND C1.SnapshotId = 0 AND ThreadId = {1}
-ORDER BY Time DESC
+select c, sum(c2.Time)
+from Call c
+	join c.Parent.CallsAsParent c2
+	inner join fetch c.Child
+where c.Parent.Id = :parentId and c.Thread.Id = :threadId
+	and c2.Thread.Id = :threadId and c2.Snapshot.Id = :snapshotId
+group by c.Id
 ";
 
 		IDataEngine m_data;
+		ProfilerWindowBase m_mainWindow;
 
-		public CalleesModel(IDataEngine data)
+		public ParentsModel(IDataEngine data, ProfilerWindowBase mainWindow)
 		{
 			m_data = data;
+			m_mainWindow = mainWindow;
 		}
 
 		public System.Collections.IEnumerable GetChildren(TreePath treePath)
 		{
-			using(var transact = new TransactionHandle(m_data))
+			using(var session = m_mainWindow.OpenActiveSnapshot())
 			{
 				if(treePath.IsEmpty())
 				{
 					//top level queries
-					var data = m_data.RawQuery(kTopLevelQuery);
-
-					foreach(DataRow row in data.Tables[0].Rows)
+					var data = session.CreateQuery(kTopLevelQuery)
+						.SetInt32("snapshotId", m_mainWindow.ActiveSnapshot.Id)
+						.List<object[]>();
+					foreach(var row in data)
 					{
+						Sample s = row[0] as Sample;
+						double totalTime = Convert.ToDouble(row[1]);
 						var item = new FunctionItem();
-						item.Id = Convert.ToInt32(row["Id"]);
-						item.Thread = Convert.ToInt32(row["ThreadId"]);
-						item.Name = Convert.ToString(row["Function"]) + Convert.ToString(row["Signature"]);
-						item.Time = Convert.ToInt32(row["Time"]);
-						item.PercentTime = Math.Round(100 * Convert.ToDecimal(row["Percent"]), 3);
+						item.Id = s.Function.Id;
+						item.Thread = s.Thread.Id;
+						item.Name = s.Function.Name + s.Function.Signature;
+						item.Time = s.Time;
+						item.PercentTime = Math.Round(100 * s.Time / totalTime, 3);
 						yield return item;
 					}
 				}
 				else
 				{
 					var parent = treePath.LastNode as FunctionItem;
-					var data = m_data.RawQuery(string.Format(kChildQuery, parent.Id, parent.Thread));
+					var data = session.CreateQuery(kChildQuery)
+						.SetInt32("parentId", parent.Id)
+						.SetInt32("threadId", parent.Thread)
+						.SetInt32("snapshotId", m_mainWindow.ActiveSnapshot.Id)
+						.List<object[]>();
 
-					//find out what the current number of calls by the parent is
-					var parentTime = Convert.ToInt32(m_data.RawQueryScalar(string.Format(kParentTime, parent.Id, parent.Thread)));
-					foreach(DataRow row in data.Tables[0].Rows)
+					foreach(var row in data)
 					{
+						var c = row[0] as Call;
+						var parentTime = Convert.ToDouble(row[1]);
 						var item = new FunctionItem();
-						item.Thread = Convert.ToInt32(parent.Thread);
-						item.Id = Convert.ToInt32(row["ChildId"]);
-						item.Name = Convert.ToString(row["Function"]) + Convert.ToString(row["Signature"]);
-						item.Time = Convert.ToInt32(row["Time"]);
+						item.Thread = parent.Thread;
+						item.Id = c.Child.Id;
+						item.Name = c.Child.Name + c.Child.Signature;
+						item.Time = c.Time;
 						if(parentTime == 0)
 							item.PercentTime = 0;
 						else
-							item.PercentTime = Math.Round(100 * (decimal) item.Time / (decimal) parentTime, 3);
-						item.PercentCalls = Math.Round(100 * Convert.ToDecimal(row["% Calls"]), 3);
+							item.PercentTime = Math.Round(100 * item.Time / parentTime, 3);
 						yield return item;
 					}
 				}
@@ -292,78 +277,74 @@ ORDER BY Time DESC
 
 	class CallersModel : ITreeModel
 	{
+		//find the methods that account for the most time exclusive
+		//that means high time in Call.ChildId = 0
 		const string kTopLevelQuery = @"
-SELECT Calls.ThreadId, F.Id, Name AS ""Function"", Signature, Time, CASE TotalTime
-	WHEN 0 THEN 0
-	ELSE (1.0 * Time / TotalTime)
-	END AS ""Percent""
-FROM Calls
-JOIN Functions F
-	ON F.Id = ParentId
-JOIN (SELECT ThreadId, SUM(Time) AS ""TotalTime"" FROM Calls WHERE ChildId = 0 AND SnapshotId = 0 GROUP BY ThreadId) AS ""Totals""
-	ON Calls.ThreadId = Totals.ThreadId
-WHERE ChildId = 0 AND SnapshotId = 0
-ORDER BY Time DESC
+from Call c
+inner join fetch c.Parent
+where c.Child.Id = 0
+order by Time desc
 ";
 
 		const string kChildQuery = @"
-SELECT F.Id, Time, Name AS ""Function"", Signature, CASE TotalTime
-	WHEN 0 THEN 0
-	ELSE (1.0 * Time / TotalTime)
-	END AS ""Percent""
-FROM Calls C
-JOIN Functions F
-	ON F.Id = ParentId
-JOIN (
-	SELECT ChildId, SUM(Time) AS ""TotalTime""
-	FROM Calls C2
-	WHERE C2.ChildId = {0} AND C2.ThreadId = {1} AND C2.SnapshotId = 0
-) AS ""Totals""
-	ON C.ChildId = Totals.ChildId
-WHERE C.ThreadId = {1} AND C.SnapshotId = 0
-ORDER BY Time DESC
+select c, sum(c2.Time)
+from Call c
+	join c.Child.CallsAsChild c2
+	inner join fetch c.Parent
+where c.Child.Id = :childId and c.Thread.Id = :threadId
+	and c2.Thread.Id = :threadId and c2.Snapshot.Id = :snapshotId
+group by c.Id
 ";
 
 		IDataEngine m_data;
+		ProfilerWindowBase m_mainWindow;
 
-		public CallersModel(IDataEngine data)
+		public CallersModel(IDataEngine data, ProfilerWindowBase mainWindow)
 		{
 			m_data = data;
+			m_mainWindow = mainWindow;
 		}
 
 		public System.Collections.IEnumerable GetChildren(TreePath treePath)
 		{
-			using(var transact = new TransactionHandle(m_data))
+			using(var session = m_mainWindow.OpenActiveSnapshot())
 			{
 				if(treePath.IsEmpty())
 				{
 					//top level queries
-					var data = m_data.RawQuery(kTopLevelQuery);
-
-					foreach(DataRow row in data.Tables[0].Rows)
+					var calls = session.CreateQuery(kTopLevelQuery).List<Call>();
+					foreach(var c in calls)
 					{
 						var item = new FunctionItem();
-						item.Id = Convert.ToInt32(row["Id"]);
-						item.Thread = Convert.ToInt32(row["ThreadId"]);
-						item.Name = Convert.ToString(row["Function"]) + Convert.ToString(row["Signature"]);
-						item.Time = Convert.ToInt32(row["Time"]);
-						item.PercentTime = Math.Round(100 * Convert.ToDecimal(row["Percent"]), 3);
+						item.Id = c.Parent.Id;
+						item.Thread = c.Thread.Id;
+						item.Name = c.Parent.Name + c.Parent.Signature;
+						item.Time = c.Time;
 						yield return item;
 					}
 				}
 				else
 				{
-					var parent = treePath.LastNode as FunctionItem;
-					var data = m_data.RawQuery(string.Format(kChildQuery, parent.Id, parent.Thread));
+					var parentNode = treePath.LastNode as FunctionItem;
+					var data = session.CreateQuery(kChildQuery)
+						.SetInt32("childId", parentNode.Id)
+						.SetInt32("threadId", parentNode.Thread)
+						.SetInt32("snapshotId", m_mainWindow.ActiveSnapshot.Id)
+						.List<object[]>();
 
-					foreach(DataRow row in data.Tables[0].Rows)
+					foreach(var row in data)
 					{
+						Call c = row[0] as Call;
+						var parentTime = Convert.ToDouble(row[1]);
 						var item = new FunctionItem();
-						item.Thread = Convert.ToInt32(parent.Thread);
-						item.Id = Convert.ToInt32(row["Id"]);
-						item.Name = Convert.ToString(row["Function"]) + Convert.ToString(row["Signature"]);
-						item.Time = Convert.ToInt32(row["Time"]);
-						item.PercentCalls = Math.Round(100 * Convert.ToDecimal(row["Percent"]), 3);
+						item.Thread = parentNode.Thread;
+						item.Id = c.Parent.Id;
+						item.Name = c.Parent.Name + c.Parent.Signature;
+						item.Time = c.Time;
+						if(parentTime == 0)
+							item.PercentTime = 0;
+						else
+							item.PercentTime = Math.Round(100 * item.Time / parentTime, 3);
 						yield return item;
 					}
 				}

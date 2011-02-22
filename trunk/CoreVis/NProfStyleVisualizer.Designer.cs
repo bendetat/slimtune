@@ -52,28 +52,28 @@ namespace SlimTuneUI.CoreVis
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(NProfStyleVisualizer));
 			this.m_splitter = new System.Windows.Forms.SplitContainer();
 			this.m_callees = new Aga.Controls.Tree.TreeViewAdv();
-			this.m_calleesIdColumn = new Aga.Controls.Tree.TreeColumn();
-			this.m_calleesThreadIdColumn = new Aga.Controls.Tree.TreeColumn();
-			this.m_calleesNameColumn = new Aga.Controls.Tree.TreeColumn();
-			this.m_calleesPercentParentColumn = new Aga.Controls.Tree.TreeColumn();
-			this.m_calleesPercentCallsColumn = new Aga.Controls.Tree.TreeColumn();
-			this.m_calleesIdTextBox = new Aga.Controls.Tree.NodeControls.NodeTextBox();
-			this.m_calleesThreadTextBox = new Aga.Controls.Tree.NodeControls.NodeTextBox();
-			this.m_calleesNameTextBox = new Aga.Controls.Tree.NodeControls.NodeTextBox();
-			this.m_calleesPercentParentTextBox = new Aga.Controls.Tree.NodeControls.NodeTextBox();
-			this.m_calleesPercentCallsTextBox = new Aga.Controls.Tree.NodeControls.NodeTextBox();
+			this.m_parentsIdColumn = new Aga.Controls.Tree.TreeColumn();
+			this.m_parentsThreadIdColumn = new Aga.Controls.Tree.TreeColumn();
+			this.m_parentsNameColumn = new Aga.Controls.Tree.TreeColumn();
+			this.m_parentsTimeColumn = new Aga.Controls.Tree.TreeColumn();
+			this.m_parentsPercentColumn = new Aga.Controls.Tree.TreeColumn();
+			this.m_parentsIdTextBox = new Aga.Controls.Tree.NodeControls.NodeTextBox();
+			this.m_parentsThreadTextBox = new Aga.Controls.Tree.NodeControls.NodeTextBox();
+			this.m_parentsNameTextBox = new Aga.Controls.Tree.NodeControls.NodeTextBox();
+			this.m_parentsTimeTextBox = new Aga.Controls.Tree.NodeControls.NodeTextBox();
+			this.m_parentsPercentTextBox = new Aga.Controls.Tree.NodeControls.NodeTextBox();
 			this.m_callers = new Aga.Controls.Tree.TreeViewAdv();
 			this.m_callersIdColumn = new Aga.Controls.Tree.TreeColumn();
 			this.m_callersThreadIdColumn = new Aga.Controls.Tree.TreeColumn();
 			this.m_callersNameColumn = new Aga.Controls.Tree.TreeColumn();
-			this.m_callersPercentTimeColumn = new Aga.Controls.Tree.TreeColumn();
-			this.m_callersPercentCallsColumn = new Aga.Controls.Tree.TreeColumn();
+			this.m_callersTimeColumn = new Aga.Controls.Tree.TreeColumn();
+			this.m_callersPercentColumn = new Aga.Controls.Tree.TreeColumn();
 			this.m_callersIdTextBox = new Aga.Controls.Tree.NodeControls.NodeTextBox();
 			this.m_callersThreadTextBox = new Aga.Controls.Tree.NodeControls.NodeTextBox();
 			this.m_callersNameTextBox = new Aga.Controls.Tree.NodeControls.NodeTextBox();
-			this.m_callersPercentTimeTextBox = new Aga.Controls.Tree.NodeControls.NodeTextBox();
+			this.m_callersTimeTextBox = new Aga.Controls.Tree.NodeControls.NodeTextBox();
+			this.m_callersPercentTextBox = new Aga.Controls.Tree.NodeControls.NodeTextBox();
 			this.m_refreshButton = new System.Windows.Forms.Button();
-			this.m_callersPercentCallsTextBox = new Aga.Controls.Tree.NodeControls.NodeTextBox();
 			this.m_splitter.Panel1.SuspendLayout();
 			this.m_splitter.Panel2.SuspendLayout();
 			this.m_splitter.SuspendLayout();
@@ -103,11 +103,11 @@ namespace SlimTuneUI.CoreVis
 			// 
 			this.m_callees.BackColor = System.Drawing.SystemColors.Window;
 			this.m_callees.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.m_callees.Columns.Add(this.m_calleesIdColumn);
-			this.m_callees.Columns.Add(this.m_calleesThreadIdColumn);
-			this.m_callees.Columns.Add(this.m_calleesNameColumn);
-			this.m_callees.Columns.Add(this.m_calleesPercentParentColumn);
-			this.m_callees.Columns.Add(this.m_calleesPercentCallsColumn);
+			this.m_callees.Columns.Add(this.m_parentsIdColumn);
+			this.m_callees.Columns.Add(this.m_parentsThreadIdColumn);
+			this.m_callees.Columns.Add(this.m_parentsNameColumn);
+			this.m_callees.Columns.Add(this.m_parentsTimeColumn);
+			this.m_callees.Columns.Add(this.m_parentsPercentColumn);
 			this.m_callees.DefaultToolTipProvider = null;
 			this.m_callees.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.m_callees.DragDropMarkColor = System.Drawing.Color.Black;
@@ -117,11 +117,11 @@ namespace SlimTuneUI.CoreVis
 			this.m_callees.Location = new System.Drawing.Point(0, 0);
 			this.m_callees.Model = null;
 			this.m_callees.Name = "m_callees";
-			this.m_callees.NodeControls.Add(this.m_calleesIdTextBox);
-			this.m_callees.NodeControls.Add(this.m_calleesThreadTextBox);
-			this.m_callees.NodeControls.Add(this.m_calleesNameTextBox);
-			this.m_callees.NodeControls.Add(this.m_calleesPercentParentTextBox);
-			this.m_callees.NodeControls.Add(this.m_calleesPercentCallsTextBox);
+			this.m_callees.NodeControls.Add(this.m_parentsIdTextBox);
+			this.m_callees.NodeControls.Add(this.m_parentsThreadTextBox);
+			this.m_callees.NodeControls.Add(this.m_parentsNameTextBox);
+			this.m_callees.NodeControls.Add(this.m_parentsTimeTextBox);
+			this.m_callees.NodeControls.Add(this.m_parentsPercentTextBox);
 			this.m_callees.SelectedNode = null;
 			this.m_callees.Size = new System.Drawing.Size(884, 268);
 			this.m_callees.TabIndex = 0;
@@ -129,85 +129,83 @@ namespace SlimTuneUI.CoreVis
 			this.m_callees.UseColumns = true;
 			this.m_callees.ColumnClicked += new System.EventHandler<Aga.Controls.Tree.TreeColumnEventArgs>(this.ColumnClicked);
 			// 
-			// m_calleesIdColumn
+			// m_parentsIdColumn
 			// 
-			this.m_calleesIdColumn.Header = "Id";
-			this.m_calleesIdColumn.MinColumnWidth = 100;
-			this.m_calleesIdColumn.Sortable = true;
-			this.m_calleesIdColumn.SortOrder = System.Windows.Forms.SortOrder.None;
-			this.m_calleesIdColumn.TooltipText = null;
-			this.m_calleesIdColumn.Width = 200;
+			this.m_parentsIdColumn.Header = "Id";
+			this.m_parentsIdColumn.MinColumnWidth = 100;
+			this.m_parentsIdColumn.Sortable = true;
+			this.m_parentsIdColumn.SortOrder = System.Windows.Forms.SortOrder.None;
+			this.m_parentsIdColumn.TooltipText = null;
+			this.m_parentsIdColumn.Width = 200;
 			// 
-			// m_calleesThreadIdColumn
+			// m_parentsThreadIdColumn
 			// 
-			this.m_calleesThreadIdColumn.Header = "Thread";
-			this.m_calleesThreadIdColumn.MinColumnWidth = 50;
-			this.m_calleesThreadIdColumn.Sortable = true;
-			this.m_calleesThreadIdColumn.SortOrder = System.Windows.Forms.SortOrder.None;
-			this.m_calleesThreadIdColumn.TooltipText = null;
-			this.m_calleesThreadIdColumn.Width = 80;
+			this.m_parentsThreadIdColumn.Header = "Thread";
+			this.m_parentsThreadIdColumn.MinColumnWidth = 50;
+			this.m_parentsThreadIdColumn.Sortable = true;
+			this.m_parentsThreadIdColumn.SortOrder = System.Windows.Forms.SortOrder.None;
+			this.m_parentsThreadIdColumn.TooltipText = null;
+			this.m_parentsThreadIdColumn.Width = 80;
 			// 
-			// m_calleesNameColumn
+			// m_parentsNameColumn
 			// 
-			this.m_calleesNameColumn.Header = "Callees";
-			this.m_calleesNameColumn.MinColumnWidth = 200;
-			this.m_calleesNameColumn.Sortable = true;
-			this.m_calleesNameColumn.SortOrder = System.Windows.Forms.SortOrder.None;
-			this.m_calleesNameColumn.TooltipText = null;
-			this.m_calleesNameColumn.Width = 420;
+			this.m_parentsNameColumn.Header = "Parents";
+			this.m_parentsNameColumn.MinColumnWidth = 200;
+			this.m_parentsNameColumn.Sortable = true;
+			this.m_parentsNameColumn.SortOrder = System.Windows.Forms.SortOrder.None;
+			this.m_parentsNameColumn.TooltipText = null;
+			this.m_parentsNameColumn.Width = 420;
 			// 
-			// m_calleesPercentParentColumn
+			// m_parentsTimeColumn
 			// 
-			this.m_calleesPercentParentColumn.Header = "% of Parent";
-			this.m_calleesPercentParentColumn.MinColumnWidth = 60;
-			this.m_calleesPercentParentColumn.Sortable = true;
-			this.m_calleesPercentParentColumn.SortOrder = System.Windows.Forms.SortOrder.None;
-			this.m_calleesPercentParentColumn.TooltipText = null;
-			this.m_calleesPercentParentColumn.Width = 90;
+			this.m_parentsTimeColumn.Header = "Time";
+			this.m_parentsTimeColumn.MinColumnWidth = 60;
+			this.m_parentsTimeColumn.Sortable = true;
+			this.m_parentsTimeColumn.SortOrder = System.Windows.Forms.SortOrder.None;
+			this.m_parentsTimeColumn.TooltipText = null;
+			this.m_parentsTimeColumn.Width = 70;
 			// 
-			// m_calleesPercentCallsColumn
+			// m_parentsPercentColumn
 			// 
-			this.m_calleesPercentCallsColumn.Header = "% Calls";
-			this.m_calleesPercentCallsColumn.MinColumnWidth = 60;
-			this.m_calleesPercentCallsColumn.Sortable = true;
-			this.m_calleesPercentCallsColumn.SortOrder = System.Windows.Forms.SortOrder.None;
-			this.m_calleesPercentCallsColumn.TooltipText = null;
-			this.m_calleesPercentCallsColumn.Width = 90;
+			this.m_parentsPercentColumn.Header = "% of Parent";
+			this.m_parentsPercentColumn.SortOrder = System.Windows.Forms.SortOrder.None;
+			this.m_parentsPercentColumn.TooltipText = null;
+			this.m_parentsPercentColumn.Width = 80;
 			// 
-			// m_calleesIdTextBox
+			// m_parentsIdTextBox
 			// 
-			this.m_calleesIdTextBox.DataPropertyName = "Id";
-			this.m_calleesIdTextBox.IncrementalSearchEnabled = true;
-			this.m_calleesIdTextBox.LeftMargin = 3;
-			this.m_calleesIdTextBox.ParentColumn = this.m_calleesIdColumn;
+			this.m_parentsIdTextBox.DataPropertyName = "Id";
+			this.m_parentsIdTextBox.IncrementalSearchEnabled = true;
+			this.m_parentsIdTextBox.LeftMargin = 3;
+			this.m_parentsIdTextBox.ParentColumn = this.m_parentsIdColumn;
 			// 
-			// m_calleesThreadTextBox
+			// m_parentsThreadTextBox
 			// 
-			this.m_calleesThreadTextBox.DataPropertyName = "Thread";
-			this.m_calleesThreadTextBox.IncrementalSearchEnabled = true;
-			this.m_calleesThreadTextBox.LeftMargin = 3;
-			this.m_calleesThreadTextBox.ParentColumn = this.m_calleesThreadIdColumn;
+			this.m_parentsThreadTextBox.DataPropertyName = "Thread";
+			this.m_parentsThreadTextBox.IncrementalSearchEnabled = true;
+			this.m_parentsThreadTextBox.LeftMargin = 3;
+			this.m_parentsThreadTextBox.ParentColumn = this.m_parentsThreadIdColumn;
 			// 
-			// m_calleesNameTextBox
+			// m_parentsNameTextBox
 			// 
-			this.m_calleesNameTextBox.DataPropertyName = "Name";
-			this.m_calleesNameTextBox.IncrementalSearchEnabled = true;
-			this.m_calleesNameTextBox.LeftMargin = 3;
-			this.m_calleesNameTextBox.ParentColumn = this.m_calleesNameColumn;
+			this.m_parentsNameTextBox.DataPropertyName = "Name";
+			this.m_parentsNameTextBox.IncrementalSearchEnabled = true;
+			this.m_parentsNameTextBox.LeftMargin = 3;
+			this.m_parentsNameTextBox.ParentColumn = this.m_parentsNameColumn;
 			// 
-			// m_calleesPercentParentTextBox
+			// m_parentsTimeTextBox
 			// 
-			this.m_calleesPercentParentTextBox.DataPropertyName = "PercentTime";
-			this.m_calleesPercentParentTextBox.IncrementalSearchEnabled = true;
-			this.m_calleesPercentParentTextBox.LeftMargin = 3;
-			this.m_calleesPercentParentTextBox.ParentColumn = this.m_calleesPercentParentColumn;
+			this.m_parentsTimeTextBox.DataPropertyName = "Time";
+			this.m_parentsTimeTextBox.IncrementalSearchEnabled = true;
+			this.m_parentsTimeTextBox.LeftMargin = 3;
+			this.m_parentsTimeTextBox.ParentColumn = this.m_parentsTimeColumn;
 			// 
-			// m_calleesPercentCallsTextBox
+			// m_parentsPercentTextBox
 			// 
-			this.m_calleesPercentCallsTextBox.DataPropertyName = "PercentCalls";
-			this.m_calleesPercentCallsTextBox.IncrementalSearchEnabled = true;
-			this.m_calleesPercentCallsTextBox.LeftMargin = 3;
-			this.m_calleesPercentCallsTextBox.ParentColumn = this.m_calleesPercentCallsColumn;
+			this.m_parentsPercentTextBox.DataPropertyName = "PercentTime";
+			this.m_parentsPercentTextBox.IncrementalSearchEnabled = true;
+			this.m_parentsPercentTextBox.LeftMargin = 3;
+			this.m_parentsPercentTextBox.ParentColumn = this.m_parentsPercentColumn;
 			// 
 			// m_callers
 			// 
@@ -216,8 +214,8 @@ namespace SlimTuneUI.CoreVis
 			this.m_callers.Columns.Add(this.m_callersIdColumn);
 			this.m_callers.Columns.Add(this.m_callersThreadIdColumn);
 			this.m_callers.Columns.Add(this.m_callersNameColumn);
-			this.m_callers.Columns.Add(this.m_callersPercentTimeColumn);
-			this.m_callers.Columns.Add(this.m_callersPercentCallsColumn);
+			this.m_callers.Columns.Add(this.m_callersTimeColumn);
+			this.m_callers.Columns.Add(this.m_callersPercentColumn);
 			this.m_callers.DefaultToolTipProvider = null;
 			this.m_callers.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.m_callers.DragDropMarkColor = System.Drawing.Color.Black;
@@ -230,8 +228,8 @@ namespace SlimTuneUI.CoreVis
 			this.m_callers.NodeControls.Add(this.m_callersIdTextBox);
 			this.m_callers.NodeControls.Add(this.m_callersThreadTextBox);
 			this.m_callers.NodeControls.Add(this.m_callersNameTextBox);
-			this.m_callers.NodeControls.Add(this.m_callersPercentTimeTextBox);
-			this.m_callers.NodeControls.Add(this.m_callersPercentCallsTextBox);
+			this.m_callers.NodeControls.Add(this.m_callersTimeTextBox);
+			this.m_callers.NodeControls.Add(this.m_callersPercentTextBox);
 			this.m_callers.SelectedNode = null;
 			this.m_callers.Size = new System.Drawing.Size(884, 297);
 			this.m_callers.TabIndex = 1;
@@ -264,23 +262,23 @@ namespace SlimTuneUI.CoreVis
 			this.m_callersNameColumn.TooltipText = null;
 			this.m_callersNameColumn.Width = 420;
 			// 
-			// m_callersPercentTimeColumn
+			// m_callersTimeColumn
 			// 
-			this.m_callersPercentTimeColumn.Header = "% Time";
-			this.m_callersPercentTimeColumn.MinColumnWidth = 50;
-			this.m_callersPercentTimeColumn.Sortable = true;
-			this.m_callersPercentTimeColumn.SortOrder = System.Windows.Forms.SortOrder.None;
-			this.m_callersPercentTimeColumn.TooltipText = null;
-			this.m_callersPercentTimeColumn.Width = 90;
+			this.m_callersTimeColumn.Header = "% Time";
+			this.m_callersTimeColumn.MinColumnWidth = 50;
+			this.m_callersTimeColumn.Sortable = true;
+			this.m_callersTimeColumn.SortOrder = System.Windows.Forms.SortOrder.None;
+			this.m_callersTimeColumn.TooltipText = null;
+			this.m_callersTimeColumn.Width = 90;
 			// 
-			// m_callersPercentCallsColumn
+			// m_callersPercentColumn
 			// 
-			this.m_callersPercentCallsColumn.Header = "% Calls";
-			this.m_callersPercentCallsColumn.MinColumnWidth = 50;
-			this.m_callersPercentCallsColumn.Sortable = true;
-			this.m_callersPercentCallsColumn.SortOrder = System.Windows.Forms.SortOrder.None;
-			this.m_callersPercentCallsColumn.TooltipText = null;
-			this.m_callersPercentCallsColumn.Width = 90;
+			this.m_callersPercentColumn.Header = "% of Calls";
+			this.m_callersPercentColumn.MinColumnWidth = 50;
+			this.m_callersPercentColumn.Sortable = true;
+			this.m_callersPercentColumn.SortOrder = System.Windows.Forms.SortOrder.None;
+			this.m_callersPercentColumn.TooltipText = null;
+			this.m_callersPercentColumn.Width = 90;
 			// 
 			// m_callersIdTextBox
 			// 
@@ -303,12 +301,19 @@ namespace SlimTuneUI.CoreVis
 			this.m_callersNameTextBox.LeftMargin = 3;
 			this.m_callersNameTextBox.ParentColumn = this.m_callersNameColumn;
 			// 
-			// m_callersPercentTimeTextBox
+			// m_callersTimeTextBox
 			// 
-			this.m_callersPercentTimeTextBox.DataPropertyName = "PercentTime";
-			this.m_callersPercentTimeTextBox.IncrementalSearchEnabled = true;
-			this.m_callersPercentTimeTextBox.LeftMargin = 3;
-			this.m_callersPercentTimeTextBox.ParentColumn = this.m_callersPercentTimeColumn;
+			this.m_callersTimeTextBox.DataPropertyName = "Time";
+			this.m_callersTimeTextBox.IncrementalSearchEnabled = true;
+			this.m_callersTimeTextBox.LeftMargin = 3;
+			this.m_callersTimeTextBox.ParentColumn = this.m_callersTimeColumn;
+			// 
+			// m_callersPercentTextBox
+			// 
+			this.m_callersPercentTextBox.DataPropertyName = "PercentTime";
+			this.m_callersPercentTextBox.IncrementalSearchEnabled = true;
+			this.m_callersPercentTextBox.LeftMargin = 3;
+			this.m_callersPercentTextBox.ParentColumn = this.m_callersPercentColumn;
 			// 
 			// m_refreshButton
 			// 
@@ -323,23 +328,15 @@ namespace SlimTuneUI.CoreVis
 			this.m_refreshButton.UseVisualStyleBackColor = true;
 			this.m_refreshButton.Click += new System.EventHandler(this.m_refreshButton_Click);
 			// 
-			// m_callersPercentCallsTextBox
-			// 
-			this.m_callersPercentCallsTextBox.DataPropertyName = "PercentCalls";
-			this.m_callersPercentCallsTextBox.IncrementalSearchEnabled = true;
-			this.m_callersPercentCallsTextBox.LeftMargin = 3;
-			this.m_callersPercentCallsTextBox.ParentColumn = this.m_callersPercentCallsColumn;
-			// 
 			// NProfStyleVisualizer
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(884, 595);
 			this.Controls.Add(this.m_refreshButton);
 			this.Controls.Add(this.m_splitter);
 			this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
 			this.Name = "NProfStyleVisualizer";
-			this.Text = "NProfStyleVisualizer";
+			this.Size = new System.Drawing.Size(884, 595);
 			this.m_splitter.Panel1.ResumeLayout(false);
 			this.m_splitter.Panel2.ResumeLayout(false);
 			this.m_splitter.ResumeLayout(false);
@@ -352,26 +349,26 @@ namespace SlimTuneUI.CoreVis
 		private System.Windows.Forms.SplitContainer m_splitter;
 		private Aga.Controls.Tree.TreeViewAdv m_callees;
 		private Aga.Controls.Tree.TreeViewAdv m_callers;
-		private Aga.Controls.Tree.TreeColumn m_calleesIdColumn;
-		private Aga.Controls.Tree.TreeColumn m_calleesThreadIdColumn;
-		private Aga.Controls.Tree.TreeColumn m_calleesNameColumn;
-		private Aga.Controls.Tree.TreeColumn m_calleesPercentParentColumn;
+		private Aga.Controls.Tree.TreeColumn m_parentsIdColumn;
+		private Aga.Controls.Tree.TreeColumn m_parentsThreadIdColumn;
+		private Aga.Controls.Tree.TreeColumn m_parentsNameColumn;
+		private Aga.Controls.Tree.TreeColumn m_parentsTimeColumn;
 		private Aga.Controls.Tree.TreeColumn m_callersIdColumn;
 		private Aga.Controls.Tree.TreeColumn m_callersThreadIdColumn;
 		private Aga.Controls.Tree.TreeColumn m_callersNameColumn;
-		private Aga.Controls.Tree.TreeColumn m_callersPercentTimeColumn;
-		private Aga.Controls.Tree.NodeControls.NodeTextBox m_calleesIdTextBox;
-		private Aga.Controls.Tree.NodeControls.NodeTextBox m_calleesThreadTextBox;
-		private Aga.Controls.Tree.NodeControls.NodeTextBox m_calleesNameTextBox;
-		private Aga.Controls.Tree.NodeControls.NodeTextBox m_calleesPercentParentTextBox;
+		private Aga.Controls.Tree.TreeColumn m_callersTimeColumn;
+		private Aga.Controls.Tree.NodeControls.NodeTextBox m_parentsIdTextBox;
+		private Aga.Controls.Tree.NodeControls.NodeTextBox m_parentsThreadTextBox;
+		private Aga.Controls.Tree.NodeControls.NodeTextBox m_parentsNameTextBox;
 		private Aga.Controls.Tree.NodeControls.NodeTextBox m_callersIdTextBox;
 		private Aga.Controls.Tree.NodeControls.NodeTextBox m_callersThreadTextBox;
 		private Aga.Controls.Tree.NodeControls.NodeTextBox m_callersNameTextBox;
-		private Aga.Controls.Tree.NodeControls.NodeTextBox m_callersPercentTimeTextBox;
+		private Aga.Controls.Tree.NodeControls.NodeTextBox m_callersTimeTextBox;
 		private System.Windows.Forms.Button m_refreshButton;
-		private Aga.Controls.Tree.TreeColumn m_calleesPercentCallsColumn;
-		private Aga.Controls.Tree.NodeControls.NodeTextBox m_calleesPercentCallsTextBox;
-		private Aga.Controls.Tree.TreeColumn m_callersPercentCallsColumn;
-		private Aga.Controls.Tree.NodeControls.NodeTextBox m_callersPercentCallsTextBox;
+		private Aga.Controls.Tree.NodeControls.NodeTextBox m_parentsTimeTextBox;
+		private Aga.Controls.Tree.TreeColumn m_callersPercentColumn;
+		private Aga.Controls.Tree.NodeControls.NodeTextBox m_callersPercentTextBox;
+		private Aga.Controls.Tree.TreeColumn m_parentsPercentColumn;
+		private Aga.Controls.Tree.NodeControls.NodeTextBox m_parentsPercentTextBox;
 	}
 }
