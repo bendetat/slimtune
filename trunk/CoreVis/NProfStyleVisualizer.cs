@@ -139,14 +139,16 @@ namespace SlimTuneUI.CoreVis
 				else if(Column == Parent.m_parentsNameColumn || Column == Parent.m_callersNameColumn)
 					result = x.Name.CompareTo(y.Name);
 				else if(Column == Parent.m_parentsTimeColumn || Column == Parent.m_callersTimeColumn)
-					result = Compare(x.Time, y.Time);
+					result = x.Time.CompareTo(y.Time);
+				else if(Column == Parent.m_parentsPercentColumn || Column == Parent.m_callersPercentColumn)
+					result = Compare(x.PercentTime, y.PercentTime);
 
 				//if primary sort is not differentiating, go to secondary sort criteria (hard coded for now)
 				if(result == 0)
 					result = x.Thread.CompareTo(y.Thread);
 				if(result == 0)
 					result = -Compare(x.PercentTime, y.PercentTime);
-				if(result == 0)
+				if(result == 0 && x.Name != null)
 					result = -x.Name.CompareTo(y.Name);
 				if(result == 0)
 					result = x.Id.CompareTo(y.Id);
@@ -189,9 +191,9 @@ order by s.Time desc
 select c, sum(c2.Time)
 from Call c
 	join c.Parent.CallsAsParent c2
-	inner join fetch c.Child
-where c.Parent.Id = :parentId and c.Thread.Id = :threadId
-	and c2.Thread.Id = :threadId and c2.Snapshot.Id = :snapshotId
+	left join fetch c.Child
+where c.ParentId = :parentId and c.ThreadId = :threadId
+	and c2.ThreadId = :threadId and c2.SnapshotId = :snapshotId
 group by c.Id
 ";
 
@@ -213,15 +215,20 @@ group by c.Id
 					//top level queries
 					var data = session.CreateQuery(kTopLevelQuery)
 						.SetInt32("snapshotId", m_mainWindow.ActiveSnapshot.Id)
+						.SetMaxResults(200)
 						.List<object[]>();
 					foreach(var row in data)
 					{
 						Sample s = row[0] as Sample;
 						double totalTime = Convert.ToDouble(row[1]);
 						var item = new FunctionItem();
-						item.Id = s.Function.Id;
-						item.Thread = s.Thread.Id;
-						item.Name = s.Function.Name + s.Function.Signature;
+						item.Id = s.FunctionId;
+						item.Thread = s.ThreadId;
+						item.Name = FunctionInfo.GetFullSignature(s.Function);
+						if(s.Function != null)
+							item.Name = s.Function.Name + s.Function.Signature;
+						else
+							item.Name = "(unknown)";
 						item.Time = s.Time;
 						item.PercentTime = Math.Round(100 * s.Time / totalTime, 3);
 						yield return item;
@@ -229,10 +236,10 @@ group by c.Id
 				}
 				else
 				{
-					var parent = treePath.LastNode as FunctionItem;
+					var parentNode = treePath.LastNode as FunctionItem;
 					var data = session.CreateQuery(kChildQuery)
-						.SetInt32("parentId", parent.Id)
-						.SetInt32("threadId", parent.Thread)
+						.SetInt32("parentId", parentNode.Id)
+						.SetInt32("threadId", parentNode.Thread)
 						.SetInt32("snapshotId", m_mainWindow.ActiveSnapshot.Id)
 						.List<object[]>();
 
@@ -241,9 +248,9 @@ group by c.Id
 						var c = row[0] as Call;
 						var parentTime = Convert.ToDouble(row[1]);
 						var item = new FunctionItem();
-						item.Thread = parent.Thread;
-						item.Id = c.Child.Id;
-						item.Name = c.Child.Name + c.Child.Signature;
+						item.Thread = parentNode.Thread;
+						item.Id = c.ChildId;
+						item.Name = FunctionInfo.GetFullSignature(c.Child);
 						item.Time = c.Time;
 						if(parentTime == 0)
 							item.PercentTime = 0;
@@ -281,7 +288,7 @@ group by c.Id
 		//that means high time in Call.ChildId = 0
 		const string kTopLevelQuery = @"
 from Call c
-inner join fetch c.Parent
+	left join fetch c.Parent
 where c.Child.Id = 0
 order by Time desc
 ";
@@ -290,7 +297,7 @@ order by Time desc
 select c, sum(c2.Time)
 from Call c
 	join c.Child.CallsAsChild c2
-	inner join fetch c.Parent
+	left join fetch c.Parent
 where c.Child.Id = :childId and c.Thread.Id = :threadId
 	and c2.Thread.Id = :threadId and c2.Snapshot.Id = :snapshotId
 group by c.Id
@@ -316,9 +323,9 @@ group by c.Id
 					foreach(var c in calls)
 					{
 						var item = new FunctionItem();
-						item.Id = c.Parent.Id;
+						item.Id = c.ParentId;
 						item.Thread = c.Thread.Id;
-						item.Name = c.Parent.Name + c.Parent.Signature;
+						item.Name = FunctionInfo.GetFullSignature(c.Parent);
 						item.Time = c.Time;
 						yield return item;
 					}
@@ -338,8 +345,8 @@ group by c.Id
 						var parentTime = Convert.ToDouble(row[1]);
 						var item = new FunctionItem();
 						item.Thread = parentNode.Thread;
-						item.Id = c.Parent.Id;
-						item.Name = c.Parent.Name + c.Parent.Signature;
+						item.Id = c.ParentId;
+						item.Name = FunctionInfo.GetFullSignature(c.Parent);
 						item.Time = c.Time;
 						if(parentTime == 0)
 							item.PercentTime = 0;

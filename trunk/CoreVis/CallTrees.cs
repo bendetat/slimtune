@@ -36,9 +36,9 @@ namespace SlimTuneUI.CoreVis
 	{
 		const string kQuery = @"
 from Call c
-left join fetch c.Parent
-left join fetch c.Child
-left join fetch c.Thread
+inner join fetch c.Parent
+inner join fetch c.Child
+inner join fetch c.Thread
 where c.Parent.Id = :parentId
 order by Time desc
 ";
@@ -46,7 +46,7 @@ order by Time desc
 		const string kExclusiveTimeQuery = @"
 select Time
 from Call c
-where c.Parent.Id = :parentId and c.Child.Id = 0
+where c.ParentId = :parentId and c.ChildId = 0
 ";
 		class NodeData
 		{
