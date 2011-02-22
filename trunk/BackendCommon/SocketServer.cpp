@@ -392,7 +392,7 @@ void SocketServer::Accept(TcpConnectionPtr conn, const boost::system::error_code
 		if(m_connections.size() == 1 && m_onConnect)
 			m_onConnect();
 
-		m_profilerData.GetLogger()->WriteEvent(Logger::INFO, "Received new client connection.");
+		m_profilerData.GetLogger()->WriteEvent(Logger::INFO, "Received new client connection, total of %d clients.", m_connections.size());
 		Start();
 	}
 }
@@ -411,7 +411,7 @@ void SocketServer::HandleWrite(TcpConnectionPtr source, const boost::system::err
 		//so we can't be sure the connection exists to erase
 		if(deadConn != m_connections.end())
 		{
-			m_profilerData.GetLogger()->WriteEvent(Logger::INFO, "Lost client connection.");
+			m_profilerData.GetLogger()->WriteEvent(Logger::INFO, "Lost client connection, %d clients remaining.", m_connections.size());
 			m_connections.erase(deadConn);
 
 			if(m_connections.size() == 0 && m_onDisconnect)
