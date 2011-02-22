@@ -35,6 +35,18 @@ namespace UICore.Mappings
 				.GeneratedBy.Assigned();
 			Map(x => x.IsAlive);
 			Map(x => x.Name);
+
+			HasMany(x => x.Samples)
+				.Inverse()
+				.KeyColumn("ThreadId")
+				.LazyLoad()
+				.ReadOnly();
+			HasMany(x => x.Calls)
+				.Inverse()
+				.KeyColumn("ThreadId")
+				.LazyLoad()
+				.ReadOnly();
+
 			Table("Threads");
 		}
 	}
@@ -49,7 +61,8 @@ namespace UICore.Mappings
 			Map(x => x.Signature);
 			Map(x => x.IsNative);
 			References(x => x.Class, "ClassId")
-				.NotFound.Ignore()
+				.Fetch.Join()
+				.LazyLoad()
 				.ReadOnly();
 			HasMany(x => x.CallsAsParent)
 				.Inverse()
@@ -96,17 +109,23 @@ namespace UICore.Mappings
 
 			Map(x => x.Time)
 				.Not.Nullable();
+			Map(x => x.ThreadId);
+			Map(x => x.ParentId);
+			Map(x => x.ChildId);
 			Map(x => x.SnapshotId)
 				.Default("0");
 
 			References(x => x.Thread, "ThreadId")
+				.Fetch.Join()
 				.Not.Nullable()
 				.Index("Calls_ThreadIndex, Calls_Composite");
 			References(x => x.Parent, "ParentId")
-				.NotFound.Ignore()
+				.Fetch.Join()
+				.LazyLoad()
 				.Index("Calls_ParentIndex, Calls_Composite");
 			References(x => x.Child, "ChildId")
-				.NotFound.Ignore()
+				.Fetch.Join()
+				.LazyLoad()
 				.Index("Calls_ChildIndex, Calls_Composite");
 			References(x => x.Snapshot, "SnapshotId")
 				.Not.Nullable();
@@ -126,19 +145,25 @@ namespace UICore.Mappings
 			Id(x => x.Id);
 			Map(x => x.Time)
 				.Not.Nullable();
+			Map(x => x.ThreadId);
+			Map(x => x.FunctionId);
 			Map(x => x.SnapshotId)
 				.Default("0");
 
 			References(x => x.Thread, "ThreadId")
+				.Fetch.Join()
 				.Index("Samples_ThreadIndex, Samples_Composite");
 			References(x => x.Function, "FunctionId")
+				.LazyLoad()
+				.Fetch.Join()
 				.NotFound.Ignore()
 				.Index("Samples_FunctionIndex, Samples_Composite");
 			References(x => x.Snapshot, "SnapshotId")
 				.Not.Nullable();
 
-			ApplyFilter("Snapshot", "SnapshotId = :snapshot");
-			
+			ApplyFilter<Filters.Snapshot>("SnapshotId = :snapshot");
+			ApplyFilter<Filters.Thread>("ThreadId = :threadId");
+
 			Table("Samples");
 		}
 	}
@@ -167,7 +192,6 @@ namespace UICore.Mappings
 			Map(x => x.Time);
 			Map(x => x.Value);
 			References(x => x.Counter, "CounterId")
-				.NotFound.Ignore()
 				.ReadOnly();
 			Table("CounterValues");
 		}

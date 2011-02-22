@@ -58,6 +58,10 @@ namespace UICore
 	{
 		public virtual int Id { get; set; }
 		public virtual double Time { get; set; }
+
+		public virtual int ThreadId { get; set; }
+		public virtual int ParentId { get; set; }
+		public virtual int ChildId { get; set; }
 		public virtual int SnapshotId { get; set; }
 
 		public virtual ThreadInfo Thread { get; set; }
@@ -89,6 +93,9 @@ namespace UICore
 	{
 		public virtual int Id { get; set; }
 		public virtual double Time { get; set; }
+
+		public virtual int ThreadId { get; set; }
+		public virtual int FunctionId { get; set; }
 		public virtual int SnapshotId { get; set; }
 
 		public virtual ThreadInfo Thread { get; set; }
