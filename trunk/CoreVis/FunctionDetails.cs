@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -64,7 +65,9 @@ namespace SlimTuneUI.CoreVis
 					.SetString("search", "%" + SearchBox.Text + "%")
 					.List<FunctionInfo>();
 				foreach(var entry in list)
+				{
 					FunctionList.Items.Add(new FunctionEntry(entry.Id, entry.Name));
+				}
 			}
 
 			if(FunctionList.Items.Count > 0)
@@ -88,18 +91,20 @@ namespace SlimTuneUI.CoreVis
 			pane.CurveList.Clear();
 			pane.Title.Text = "Function Breakdown (samples)";
 
-			using(var transact = new TransactionHandle(m_connection.DataEngine))
 			using(var session = m_mainWindow.OpenActiveSnapshot())
 			{
-				double totalTime = session.CreateQuery("select sum(c.Time) from Call c where c.Parent.Id = :parentId")
-					.SetInt32("parentId", entry.Id)
-					.UniqueResult<double>();
-				double inFunc = session.CreateQuery("select sum(c.Time) from Call c where c.Parent.Id = :parentId and c.Child.Id = 0")
-					.SetInt32("parentId", entry.Id)
-					.UniqueResult<double>();
-				var children = session.CreateQuery("from Call c inner join fetch c.Child where c.Parent.Id = :parentId order by c.Time desc")
-					.SetInt32("parentId", entry.Id)
-					.List<Call>();
+				var totalTimeFuture = session.CreateQuery("select sum(c.Time) from Call c where c.Parent.Id = :parentId1")
+					.SetInt32("parentId1", entry.Id)
+					.FutureValue<double>();
+				var inFuncFuture = session.CreateQuery("select sum(c.Time) from Call c where c.Parent.Id = :parentId2 and c.Child.Id = 0")
+					.SetInt32("parentId2", entry.Id)
+					.FutureValue<double>();
+				var children = session.CreateQuery("from Call c inner join fetch c.Child where c.Parent.Id = :parentId3 order by c.Time desc")
+					.SetInt32("parentId3", entry.Id)
+					.Future<Call>();
+
+				var totalTime = totalTimeFuture.Value;
+				var inFunc = inFuncFuture.Value;
 
 				int index = 1;
 				double pieTotal = 0;
