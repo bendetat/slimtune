@@ -66,14 +66,14 @@ namespace SlimTuneUI.CoreVis
 		{
 			HotspotsList.Items.Clear();
 			using(var session = m_mainWindow.OpenActiveSnapshot())
-			using(var tx = session.BeginTransaction(IsolationLevel.RepeatableRead))
+			using(var tx = session.BeginTransaction())
 			{
 				//find the total time consumed
 				var totalQuery = session.CreateQuery("select sum(call.Time) from Call call where call.ChildId = 0");
 				var totalTimeFuture = totalQuery.FutureValue<double>();
 
 				//find the functions that consumed the most time-exclusive. These are hotspots.
-				var query = session.CreateQuery("from Call c inner join fetch c.Parent where c.ChildId = 0 from Call call where call.ChildId = 0) order by c.Time desc");
+				var query = session.CreateQuery("from Call c inner join fetch c.Parent where c.ChildId = 0 order by c.Time desc");
 				query.SetMaxResults(20);
 				var hotspots = query.Future<Call>();
 

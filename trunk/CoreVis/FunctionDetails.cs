@@ -95,7 +95,7 @@ namespace SlimTuneUI.CoreVis
 			pane.Title.Text = "Function Breakdown (samples)";
 
 			using(var session = m_mainWindow.OpenActiveSnapshot())
-			using(var tx = session.BeginTransaction(IsolationLevel.RepeatableRead))
+			using(var tx = session.BeginTransaction())
 			{
 				var totalTimeFuture = session.CreateQuery("select sum(c.Time) from Call c where c.Parent.Id = :parentId1")
 					.SetInt32("parentId1", entry.Id)
