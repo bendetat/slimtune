@@ -20,6 +20,7 @@
 * THE SOFTWARE.
 */
 using System;
+using System.Data;
 using System.Collections.Generic;
 using System.Text;
 
@@ -83,7 +84,7 @@ namespace UICore
 		private IPersistenceConfigurer m_configurer;
 		private Configuration m_config;
 		private IStatelessSession m_statelessSession;
-		private Dictionary<int, ISessionFactory> m_snapshotFactories = new Dictionary<int,ISessionFactory>(8);
+		private Dictionary<int, ISessionFactory> m_snapshotFactories = new Dictionary<int, ISessionFactory>(8);
 
 		protected object m_lock = new object();
 
@@ -163,13 +164,15 @@ namespace UICore
 			else
 			{
 				using(var session = OpenSession())
+				using(var tx = session.BeginTransaction())
 				{
-					var crit = session.CreateCriteria<Property>();
 					var versionProp = session.Get<Property>("FileVersion");
 					if(versionProp == null || int.Parse(versionProp.Value) != 3)
 					{
 						throw new System.IO.InvalidDataException("Wrong file version.");
 					}
+
+					tx.Commit();
 				}
 			}
 
@@ -282,6 +285,7 @@ namespace UICore
 				Flush();
 
 				using(var session = OpenSession())
+				using(var tx = session.BeginTransaction(IsolationLevel.Serializable))
 				{
 					Snapshot snapshot = new Snapshot();
 					snapshot.Name = name;
@@ -292,6 +296,8 @@ namespace UICore
 					session.CreateQuery(sampleQuery).ExecuteUpdate();
 					string callQuery = string.Format("insert into Call (ThreadId, ParentId, ChildId, Time, SnapshotId) select ThreadId, ParentId, ChildId, Time, {0} from Call where SnapshotId = 0", snapshot.Id);
 					session.CreateQuery(callQuery).ExecuteUpdate();
+
+					tx.Commit();
 				}
 			}
 		}
@@ -313,9 +319,11 @@ namespace UICore
 				m_cachedSamples = 0;
 
 				using(var session = OpenSession())
+				using(var tx = session.BeginTransaction(IsolationLevel.Serializable))
 				{
 					session.CreateQuery("delete from Call where SnapshotId = 0").ExecuteUpdate();
 					session.CreateQuery("delete from Sample where SnapshotId = 0").ExecuteUpdate();
+					tx.Commit();
 				}
 			}
 		}
@@ -325,18 +333,29 @@ namespace UICore
 			using(var session = OpenSession(0))
 			using(var tx = session.BeginTransaction())
 			{
-				var prop = new Property() { Name = name, Value = value };
-				session.SaveOrUpdateCopy(prop);
+				WriteProperty(session, name, value);
 				tx.Commit();
 			}
 		}
 
+		public virtual void WriteProperty(ISession session, string name, string value)
+		{
+			var prop = new Property() { Name = name, Value = value };
+			session.SaveOrUpdateCopy(prop);
+		}
+
 		protected void WriteCoreProperties()
 		{
-			WriteProperty("Application", "SlimTune Profiler");
-			WriteProperty("Version", System.Windows.Forms.Application.ProductVersion);
-			WriteProperty("FileVersion", "3");
-			WriteProperty("FileName", Name);
+			using(var session = OpenSession(0))
+			using(var tx = session.BeginTransaction(IsolationLevel.Serializable))
+			{
+				WriteProperty(session, "Application", "SlimTune Profiler");
+				WriteProperty(session, "Version", System.Windows.Forms.Application.ProductVersion);
+				WriteProperty(session, "FileVersion", "3");
+				WriteProperty(session, "FileName", Name);
+
+				tx.Commit();
+			}
 		}
 
 		public virtual void FunctionTiming(int functionId, long time)

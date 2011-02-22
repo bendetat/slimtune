@@ -79,10 +79,12 @@ namespace SlimTuneUI.CoreVis
 			try
 			{
 				using(var session = m_connection.DataEngine.OpenSession())
+				using(var tx = session.BeginTransaction(IsolationLevel.Serializable))
 				{
 					var query = session.CreateQuery(QueryEditor.Text);
 					var list = query.List();
 					DataViewer.DataSource = list;
+					tx.Commit();
 				}
 			}
 			catch(Exception ex)

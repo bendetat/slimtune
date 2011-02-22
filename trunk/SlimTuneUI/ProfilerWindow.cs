@@ -212,6 +212,7 @@ namespace SlimTuneUI
 
 			SnapshotsListBox.Items.Clear();
 			using(var session = Connection.DataEngine.OpenSession())
+			using(var tx = session.BeginTransaction())
 			{
 				var snapshots = session.CreateCriteria<Snapshot>().List<Snapshot>();
 				foreach(var snap in snapshots)
@@ -220,6 +221,8 @@ namespace SlimTuneUI
 						selIndex = SnapshotsListBox.Items.Count;
 					SnapshotsListBox.Items.Add(snap);
 				}
+
+				tx.Commit();
 			}
 
 			SnapshotsListBox.SetItemChecked(selIndex, true);
