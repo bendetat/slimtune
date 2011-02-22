@@ -166,6 +166,12 @@ namespace UICore
 				using(var session = OpenSession())
 				using(var tx = session.BeginTransaction())
 				{
+					var applicationProp = session.Get<Property>("Application");
+					if(applicationProp == null || applicationProp.Value != System.Windows.Forms.Application.ProductName)
+					{
+						throw new System.IO.InvalidDataException("Wrong or missing application name.");
+					}
+
 					var versionProp = session.Get<Property>("FileVersion");
 					if(versionProp == null || int.Parse(versionProp.Value) != 3)
 					{
@@ -381,7 +387,7 @@ namespace UICore
 			using(var session = OpenSession(0))
 			using(var tx = session.BeginTransaction(IsolationLevel.Serializable))
 			{
-				WriteProperty(session, "Application", "SlimTune Profiler");
+				WriteProperty(session, "Application", System.Windows.Forms.Application.ProductName);
 				WriteProperty(session, "Version", System.Windows.Forms.Application.ProductVersion);
 				WriteProperty(session, "FileVersion", "3");
 				WriteProperty(session, "FileName", Name);
