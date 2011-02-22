@@ -53,7 +53,7 @@ namespace SlimTuneUI
 			{
 				m_appTypeCombo.Items.Add(launcher);
 
-				if(Utilities.GetAttribute<DefaultItemAttribute>(launcher.Type) != null)
+				if(Utilities.HasAttribute<DefaultItemAttribute>(launcher.Type))
 					m_launcherIndex = launcherIndex;
 				++launcherIndex;
 			}

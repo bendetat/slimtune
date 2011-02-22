@@ -183,13 +183,21 @@ namespace UICore
 			return null;
 		}
 
-		public static T GetAttribute<T>(Type type) where T : class
+		public static T GetAttribute<T>(Type type) where T : Attribute
 		{
 			var attribs = type.GetCustomAttributes(typeof(T), false);
 			if(attribs.Length > 0)
 				return attribs[0] as T;
 			else
 				return null;
+		}
+
+		public static bool HasAttribute<T>(Type type) where T : Attribute
+		{
+			if(type == null)
+				return false;
+
+			return GetAttribute<T>(type) != null;
 		}
 
 		public static IEnumerable<TypeEntry> GetVisualizerList(bool includeDummy)
