@@ -64,6 +64,7 @@ namespace SlimTuneUI
 			this.SnapshotButton = new System.Windows.Forms.Button();
 			this.TasksLabel = new System.Windows.Forms.Label();
 			this.InfoGroupBox = new System.Windows.Forms.GroupBox();
+			this.ReconnectButton = new System.Windows.Forms.Button();
 			this.StatusLabel = new System.Windows.Forms.Label();
 			this.NameLabel = new System.Windows.Forms.Label();
 			this.EngineLabel = new System.Windows.Forms.Label();
@@ -71,7 +72,6 @@ namespace SlimTuneUI
 			this.HostLabel = new System.Windows.Forms.Label();
 			this.m_closeVisualizerButton = new System.Windows.Forms.Button();
 			this.VisualizerHost = new System.Windows.Forms.TabControl();
-			this.m_reconnectButton = new System.Windows.Forms.Button();
 			VisualizersGroupBox = new System.Windows.Forms.GroupBox();
 			VisualizersGroupBox.SuspendLayout();
 			this.MainSplitter.Panel1.SuspendLayout();
@@ -255,7 +255,7 @@ namespace SlimTuneUI
 			// 
 			this.InfoGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
 						| System.Windows.Forms.AnchorStyles.Right)));
-			this.InfoGroupBox.Controls.Add(this.m_reconnectButton);
+			this.InfoGroupBox.Controls.Add(this.ReconnectButton);
 			this.InfoGroupBox.Controls.Add(this.StatusLabel);
 			this.InfoGroupBox.Controls.Add(this.NameLabel);
 			this.InfoGroupBox.Controls.Add(this.EngineLabel);
@@ -266,6 +266,17 @@ namespace SlimTuneUI
 			this.InfoGroupBox.Size = new System.Drawing.Size(195, 152);
 			this.InfoGroupBox.TabIndex = 5;
 			this.InfoGroupBox.TabStop = false;
+			// 
+			// ReconnectButton
+			// 
+			this.ReconnectButton.Enabled = false;
+			this.ReconnectButton.Location = new System.Drawing.Point(6, 124);
+			this.ReconnectButton.Name = "ReconnectButton";
+			this.ReconnectButton.Size = new System.Drawing.Size(75, 22);
+			this.ReconnectButton.TabIndex = 9;
+			this.ReconnectButton.Text = "Reconnect";
+			this.ReconnectButton.UseVisualStyleBackColor = true;
+			this.ReconnectButton.Click += new System.EventHandler(this.ReconnectButton_Click);
 			// 
 			// StatusLabel
 			// 
@@ -341,17 +352,6 @@ namespace SlimTuneUI
 			this.VisualizerHost.TabIndex = 1;
 			this.VisualizerHost.MouseClick += new System.Windows.Forms.MouseEventHandler(this.VisualizerHost_MouseClick);
 			// 
-			// m_reconnectButton
-			// 
-			this.m_reconnectButton.Enabled = false;
-			this.m_reconnectButton.Location = new System.Drawing.Point(6, 124);
-			this.m_reconnectButton.Name = "m_reconnectButton";
-			this.m_reconnectButton.Size = new System.Drawing.Size(75, 22);
-			this.m_reconnectButton.TabIndex = 9;
-			this.m_reconnectButton.Text = "Reconnect";
-			this.m_reconnectButton.UseVisualStyleBackColor = true;
-			this.m_reconnectButton.Click += new System.EventHandler(this.m_reconnectButton_Click);
-			// 
 			// ProfilerWindow
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -400,7 +400,7 @@ namespace SlimTuneUI
 		private System.Windows.Forms.Label label2;
 		private System.Windows.Forms.Button ResumeButton;
 		private System.Windows.Forms.Button PauseButton;
-		private System.Windows.Forms.Button m_reconnectButton;
+		private System.Windows.Forms.Button ReconnectButton;
 
 	}
 }

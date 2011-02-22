@@ -63,7 +63,7 @@ namespace SlimTuneUI
 			else
 			{
 				status = "Stopped";
-				m_reconnectButton.Enabled = true;
+				ReconnectButton.Enabled = true;
 			}
 			StatusLabel.Text = "Status: " + status;
 
@@ -323,7 +323,7 @@ namespace SlimTuneUI
 			ActiveSnapshot = SnapshotsListBox.SelectedItem as Snapshot;
 		}
 
-		private void m_reconnectButton_Click(object sender, EventArgs e)
+		private void ReconnectButton_Click(object sender, EventArgs e)
 		{
 			ConnectProgress progress = new ConnectProgress(Connection.HostName, Connection.Port, Connection.DataEngine, 10);
 			progress.ShowDialog(this);
@@ -331,6 +331,8 @@ namespace SlimTuneUI
 			if(progress.Client != null)
 			{
 				Connection.RunClient(progress.Client);
+				ReconnectButton.Enabled = false;
+				StatusLabel.Text = "Status: Running";
 				this.BringToFront();
 			}
 		}
