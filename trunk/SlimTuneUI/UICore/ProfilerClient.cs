@@ -62,10 +62,11 @@ namespace UICore
 		BinaryReader m_reader;
 		BinaryWriter m_writer;
 		Guid? m_sessionId;
+		//this is a private cache we use to figure out what mappings we need to request
 		Dictionary<int, FunctionInfo> m_functions = new Dictionary<int, FunctionInfo>();
 		Dictionary<int, ClassInfo> m_classes = new Dictionary<int, ClassInfo>();
 		Dictionary<int, ThreadContext> m_threads = new Dictionary<int, ThreadContext>();
-		Dictionary<int, string> m_counters = new Dictionary<int, string>();
+		Dictionary<int, Counter> m_counters = new Dictionary<int, Counter>();
 
 		IDataEngine m_data;
 
@@ -93,11 +94,31 @@ namespace UICore
 			m_writer = new BinaryWriter(m_stream, Encoding.Unicode);
 			m_data = data;
 
-			m_classes.Add(0, new ClassInfo { Id = 0, Name = "$INVALID$" });
-			m_functions.Add(0, new FunctionInfo { Id = 0, ClassId = 0, IsNative = false, Name = "$INVALID$", Signature = string.Empty });
+			//load all existing mappings into our private cache
+			using(var session = data.OpenSession())
+			using(var tx = session.BeginTransaction())
+			{
+				var functions = session.CreateCriteria<FunctionInfo>().List<FunctionInfo>();
+				foreach(var f in functions)
+					m_functions.Add(f.Id, f);
+
+				var classes = session.CreateCriteria<ClassInfo>().List<ClassInfo>();
+				foreach(var c in classes)
+					m_classes.Add(c.Id, c);
+
+				//threads are not recovered from the database, we want updated info there
+
+				var counters = session.CreateCriteria<Counter>().List<Counter>();
+				foreach(var c in counters)
+					m_counters.Add(c.Id, c);
+			}
 
 			HostName = host;
 			Port = port;
+
+			//record the network info
+			data.WriteProperty("HostName", host);
+			data.WriteProperty("Port", port.ToString());
 
 			Debug.WriteLine("Successfully connected.");
 		}
@@ -176,7 +197,7 @@ namespace UICore
 						break;
 
 					case MessageId.MID_Sample:
-						var sample = Messages.Sample.Read(m_reader, m_functions);
+						var sample = Messages.Sample.Read(m_reader);
 						ParseSample(sample);
 						break;
 
@@ -350,23 +371,25 @@ namespace UICore
 
 		private void NameCounter(Messages.CounterName counterName)
 		{
-			if(!m_counters.ContainsKey(counterName.CounterId))
-				m_counters.Add(counterName.CounterId, counterName.Name);
+			Counter counter = new Counter { Id = counterName.CounterId, Name = counterName.Name };
+			if(!m_counters.ContainsKey(counter.Id))
+				m_counters.Add(counter.Id, counter);
 			else
-				m_counters[counterName.CounterId] = counterName.Name;
+				m_counters[counter.Id].Name = counter.Name;
 
-			m_data.CounterName(counterName.CounterId, counterName.Name);
+			m_data.MapCounter(counter);
 		}
 
-		private void ParseCounter(Messages.PerfCounter counter)
+		private void ParseCounter(Messages.PerfCounter perfCounter)
 		{
-			if(!m_counters.ContainsKey(counter.CounterId))
+			if(!m_counters.ContainsKey(perfCounter.CounterId))
 			{
-				m_counters.Add(counter.CounterId, string.Empty);
-				RequestCounterName(counter.CounterId);
+				var counter = new Counter { Id = perfCounter.CounterId, Name = string.Empty };
+				m_counters.Add(counter.Id, counter);
+				RequestCounterName(counter.Id);
 			}
 
-			m_data.PerfCounter(counter.CounterId, counter.TimeStamp, counter.Value);
+			m_data.PerfCounter(perfCounter.CounterId, perfCounter.TimeStamp, perfCounter.Value);
 		}
 
 		private void RequestFunctionMapping(int functionId)

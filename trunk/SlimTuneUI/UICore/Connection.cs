@@ -52,12 +52,29 @@ namespace UICore
 		public string Executable { get; set; }
 		public string HostName
 		{
-			get { return Client != null ? Client.HostName : string.Empty; }
+			get
+			{
+				if(Client != null)
+					return Client.HostName;
+
+				string hostProp = DataEngine.GetProperty("HostName");
+				return hostProp;
+			}
 		}
 
 		public int Port
 		{
-			get { return Client != null ? Client.Port : 0; }
+			get
+			{
+				if(Client != null)
+					return Client.Port;
+
+				string portProp = DataEngine.GetProperty("Port");
+				if(portProp != null)
+					return int.Parse(portProp);
+
+				return 0;
+			}
 		}
 
 		public IDataEngine DataEngine { get; private set; }

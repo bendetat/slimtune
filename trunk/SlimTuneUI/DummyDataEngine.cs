@@ -31,6 +31,11 @@ namespace SlimTuneUI
 			get { return null; }
 		}
 
+		public string GetProperty(string name)
+		{
+			throw new NotImplementedException();
+		}
+
 		public void WriteProperty(string name, string value)
 		{
 		}
@@ -59,7 +64,7 @@ namespace SlimTuneUI
 		{
 		}
 
-		public void CounterName(int counterId, string name)
+		public void MapCounter(UICore.Counter counter)
 		{
 		}
 

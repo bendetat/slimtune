@@ -196,7 +196,7 @@ namespace UICore
 			public float Time;
 			public List<int> Functions;
 
-			public static Sample Read(BinaryReader reader, Dictionary<int, FunctionInfo> funcDict)
+			public static Sample Read(BinaryReader reader)
 			{
 				Sample result = new Sample();
 

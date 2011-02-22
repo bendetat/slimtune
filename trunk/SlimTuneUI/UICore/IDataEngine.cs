@@ -55,6 +55,7 @@ namespace UICore
 		IDbConnection Connection { get; }
 
 		void WriteProperty(string name, string value);
+		string GetProperty(string name);
 
 		void MapFunction(FunctionInfo funcInfo);
 		void MapClass(ClassInfo classInfo);
@@ -65,7 +66,7 @@ namespace UICore
 
 		void FunctionTiming(int functionId, long time);
 
-		void CounterName(int counterId, string name);
+		void MapCounter(Counter counter);
 		void PerfCounter(int counterId, long time, double value);
 
 		void GarbageCollection(int generation, int function, long time);

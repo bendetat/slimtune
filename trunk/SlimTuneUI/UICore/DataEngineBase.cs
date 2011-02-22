@@ -204,11 +204,31 @@ namespace UICore
 				{
 					//flush functions
 					foreach(var f in m_functionCache)
-						m_statelessSession.Insert(f);
+					{
+						try
+						{
+							m_statelessSession.Insert(f);
+						}
+						catch(NHibernate.Exceptions.GenericADOException)
+						{
+							//this can happen with duplicates, which should not be possible with the caching in ProfilerClient
+							//that may change, though, and we want to be robust to this particular failure
+						}
+					}
 					m_functionCache.Clear();
+
 					//flush classes
 					foreach(var c in m_classCache)
-						m_statelessSession.Insert(c);
+					{
+						try
+						{
+							m_statelessSession.Insert(c);
+						}
+						catch(NHibernate.Exceptions.GenericADOException)
+						{
+							//see above
+						}
+					}
 					m_classCache.Clear();
 
 					tx.Commit();
@@ -330,7 +350,7 @@ namespace UICore
 
 		public virtual void WriteProperty(string name, string value)
 		{
-			using(var session = OpenSession(0))
+			using(var session = OpenSession())
 			using(var tx = session.BeginTransaction())
 			{
 				WriteProperty(session, name, value);
@@ -342,6 +362,18 @@ namespace UICore
 		{
 			var prop = new Property() { Name = name, Value = value };
 			session.SaveOrUpdateCopy(prop);
+		}
+
+		public virtual string GetProperty(string name)
+		{
+			using(var session = OpenSession())
+			{
+				var prop = session.Get<Property>(name);
+				if(prop == null)
+					return null;
+
+				return prop.Value;
+			}
 		}
 
 		protected void WriteCoreProperties()
@@ -408,12 +440,11 @@ namespace UICore
 			}
 		}
 
-		public virtual void CounterName(int counterId, string name)
+		public virtual void MapCounter(Counter counter)
 		{
 			using(var session = OpenSession(0))
 			using(var tx = session.BeginTransaction())
 			{
-				var counter = new Counter() { Id = counterId, Name = name };
 				session.SaveOrUpdateCopy(counter);
 				tx.Commit();
 			}
