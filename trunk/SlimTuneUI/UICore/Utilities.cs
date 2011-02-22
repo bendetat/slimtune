@@ -54,6 +54,13 @@ namespace UICore
 		}
 	}
 
+	public class DefaultItemAttribute : Attribute
+	{
+		public DefaultItemAttribute()
+		{
+		}
+	}
+
 	public static class Utilities
 	{
 		public static void Dispose(IDisposable dispose)

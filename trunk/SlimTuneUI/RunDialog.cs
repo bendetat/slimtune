@@ -48,9 +48,14 @@ namespace SlimTuneUI
 			m_mainWindow = mainWindow;
 
 			//enumerate all the launchers
+			int launcherIndex = 0;
 			foreach(var launcher in Utilities.GetLauncherList())
 			{
 				m_appTypeCombo.Items.Add(launcher);
+
+				if(Utilities.GetAttribute<DefaultItemAttribute>(launcher.Type) != null)
+					m_launcherIndex = launcherIndex;
+				++launcherIndex;
 			}
 
 			//select an initial launcher

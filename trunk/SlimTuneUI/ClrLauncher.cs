@@ -32,6 +32,7 @@ using UICore;
 namespace SlimTuneUI
 {
 	[Serializable,
+	DefaultItem,
 	DisplayName("CLR Application (Microsoft .NET 2.0, 4.0)")]
 	public class ClrLauncher : ClrLauncherBase
 	{
