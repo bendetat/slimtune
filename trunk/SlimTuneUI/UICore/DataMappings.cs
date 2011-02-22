@@ -61,7 +61,6 @@ namespace UICore.Mappings
 			Map(x => x.Signature);
 			Map(x => x.IsNative);
 			References(x => x.Class, "ClassId")
-				.Fetch.Join()
 				.LazyLoad()
 				.ReadOnly();
 			HasMany(x => x.CallsAsParent)
@@ -116,15 +115,12 @@ namespace UICore.Mappings
 				.Default("0");
 
 			References(x => x.Thread, "ThreadId")
-				.Fetch.Join()
 				.Not.Nullable()
 				.Index("Calls_ThreadIndex, Calls_Composite");
 			References(x => x.Parent, "ParentId")
-				.Fetch.Join()
 				.LazyLoad()
 				.Index("Calls_ParentIndex, Calls_Composite");
 			References(x => x.Child, "ChildId")
-				.Fetch.Join()
 				.LazyLoad()
 				.Index("Calls_ChildIndex, Calls_Composite");
 			References(x => x.Snapshot, "SnapshotId")
@@ -151,11 +147,9 @@ namespace UICore.Mappings
 				.Default("0");
 
 			References(x => x.Thread, "ThreadId")
-				.Fetch.Join()
 				.Index("Samples_ThreadIndex, Samples_Composite");
 			References(x => x.Function, "FunctionId")
 				.LazyLoad()
-				.Fetch.Join()
 				.NotFound.Ignore()
 				.Index("Samples_FunctionIndex, Samples_Composite");
 			References(x => x.Snapshot, "SnapshotId")

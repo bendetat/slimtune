@@ -75,7 +75,6 @@ namespace UICore
 		//this is: ClassId, FunctionId, AllocData
 		protected SortedDictionary<int, SortedDictionary<int, AllocData>> m_allocs = new SortedDictionary<int, SortedDictionary<int, AllocData>>();
 
-		private volatile bool m_allowFlush = true;
 		private DateTime m_lastFlush = DateTime.UtcNow;
 		//we use this so we don't have to check DateTime.Now on every single sample
 		protected int m_cachedSamples;
@@ -112,18 +111,6 @@ namespace UICore
 		public virtual bool InMemory
 		{
 			get { return false; }
-		}
-
-		public bool AllowFlush
-		{
-			get { return m_allowFlush; }
-			set
-			{
-				lock(m_lock)
-				{
-					m_allowFlush = value;
-				}
-			}
 		}
 
 		private bool ShouldFlush
@@ -210,9 +197,6 @@ namespace UICore
 		{
 			lock(m_lock)
 			{
-				if(!m_allowFlush)
-					return;
-
 				using(var tx = m_statelessSession.BeginTransaction())
 				{
 					//flush functions

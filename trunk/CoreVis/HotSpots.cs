@@ -66,6 +66,7 @@ namespace SlimTuneUI.CoreVis
 		{
 			HotspotsList.Items.Clear();
 			using(var session = m_mainWindow.OpenActiveSnapshot())
+			using(var tx = session.BeginTransaction(IsolationLevel.RepeatableRead))
 			{
 				//find the total time consumed
 				var totalQuery = session.CreateQuery("select sum(call.Time) from Call call where call.ChildId = 0");
@@ -88,12 +89,15 @@ namespace SlimTuneUI.CoreVis
 
 					HotspotsList.Items.Add(call);
 				}
+
+				tx.Commit();
 			}
 		}
 
 		private bool UpdateParents(Call child, ListBox box)
 		{
 			using(var session = m_mainWindow.OpenActiveSnapshot())
+			using(var tx = session.BeginTransaction())
 			{
 				var query = session.CreateQuery("from Call c inner join fetch c.Parent where c.ChildId = :funcId order by c.Time desc")
 					.SetInt32("funcId", child.Parent.Id);
@@ -108,6 +112,8 @@ namespace SlimTuneUI.CoreVis
 					box.Items.Add(call);
 				}
 				(box.Tag as ListTag).TotalTime = totalTime;
+
+				tx.Commit();
 			}
 
 			return true;

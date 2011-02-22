@@ -209,6 +209,7 @@ group by c.Id
 		public System.Collections.IEnumerable GetChildren(TreePath treePath)
 		{
 			using(var session = m_mainWindow.OpenActiveSnapshot())
+			using(var tx = session.BeginTransaction())
 			{
 				if(treePath.IsEmpty())
 				{
@@ -260,6 +261,7 @@ group by c.Id
 					}
 				}
 
+				tx.Commit();
 				yield break;
 			}
 		}
@@ -315,6 +317,7 @@ group by c.Id
 		public System.Collections.IEnumerable GetChildren(TreePath treePath)
 		{
 			using(var session = m_mainWindow.OpenActiveSnapshot())
+			using(var tx = session.BeginTransaction())
 			{
 				if(treePath.IsEmpty())
 				{
@@ -356,6 +359,7 @@ group by c.Id
 					}
 				}
 
+				tx.Commit();
 				yield break;
 			}
 		}

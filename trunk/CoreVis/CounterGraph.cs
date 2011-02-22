@@ -82,6 +82,7 @@ namespace SlimTuneUI.CoreVis
 			}
 
 			using(var session = m_mainWindow.OpenActiveSnapshot())
+			using(var tx = session.BeginTransaction())
 			{
 				var counters = session.CreateCriteria<Counter>()
 					.AddOrder(Order.Asc("Id"))
@@ -105,6 +106,8 @@ namespace SlimTuneUI.CoreVis
 						m_counterListBox.Items.Add(new CounterEntry(c.Id, name));
 					}
 				}
+
+				tx.Commit();
 			}
 
 			int index = 0;
@@ -148,12 +151,15 @@ namespace SlimTuneUI.CoreVis
 			{
 				var points = new PointPairList();
 				using(var session = m_mainWindow.OpenActiveSnapshot())
+				using(var tx = session.BeginTransaction())
 				{
 					var counter = session.Load<Counter>(entry.Id);
 					foreach(var value in counter.Values)
 					{
 						points.Add(value.Time / 1000.0, value.Value);
 					}
+
+					tx.Commit();
 				}
 
 				Graph.GraphPane.AddCurve(entry.Name, points, m_colors.ColorForIndex(entry.Id), SymbolType.None);

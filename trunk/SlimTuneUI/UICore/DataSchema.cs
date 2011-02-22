@@ -41,6 +41,22 @@ namespace UICore
 		public virtual string Name { get; set; }
 		public virtual string Signature { get; set; }
 
+		public static string GetFullSignature(FunctionInfo fi)
+		{
+			const string kUnknown = "(unknown)";
+			try
+			{
+				if(fi != null)
+					return fi.Name + fi.Signature;
+
+				return kUnknown;
+			}
+			catch(NHibernate.ObjectNotFoundException)
+			{
+				return kUnknown;
+			}
+		}
+
 		public virtual IList<Call> CallsAsParent { get; set; }
 		public virtual IList<Call> CallsAsChild { get; set; }
 		public virtual IList<Sample> Samples { get; set; }

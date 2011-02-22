@@ -27,25 +27,6 @@ using NHibernate;
 
 namespace UICore
 {
-	public class TransactionHandle : IDisposable
-	{
-		IDataEngine m_engine;
-
-		public TransactionHandle(IDataEngine engine)
-		{
-			if(engine == null)
-				throw new ArgumentNullException("engine");
-
-			m_engine = engine;
-			m_engine.AllowFlush = false;
-		}
-
-		public void Dispose()
-		{
-			m_engine.AllowFlush = true;
-		}
-	}
-
 	[AttributeUsage(AttributeTargets.Class)]
 	public class HandlesExtensionAttribute : Attribute
 	{
@@ -90,7 +71,6 @@ namespace UICore
 		void GarbageCollection(int generation, int function, long time);
 		void ObjectAllocated(int classId, long size, int functionId, long time);
 
-		bool AllowFlush { get; set; }
 		void Flush();
 		void Snapshot(string name);
 

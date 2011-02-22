@@ -59,6 +59,7 @@ namespace SlimTuneUI.CoreVis
 		{
 			FunctionList.Items.Clear();
 			using(var session = m_mainWindow.OpenActiveSnapshot())
+			using(var tx = session.BeginTransaction())
 			{
 				var list = session.CreateQuery("from FunctionInfo where Name like :search order by Name")
 					.SetMaxResults(250)
@@ -68,6 +69,8 @@ namespace SlimTuneUI.CoreVis
 				{
 					FunctionList.Items.Add(new FunctionEntry(entry.Id, entry.Name));
 				}
+
+				tx.Commit();
 			}
 
 			if(FunctionList.Items.Count > 0)
@@ -92,6 +95,7 @@ namespace SlimTuneUI.CoreVis
 			pane.Title.Text = "Function Breakdown (samples)";
 
 			using(var session = m_mainWindow.OpenActiveSnapshot())
+			using(var tx = session.BeginTransaction(IsolationLevel.RepeatableRead))
 			{
 				var totalTimeFuture = session.CreateQuery("select sum(c.Time) from Call c where c.Parent.Id = :parentId1")
 					.SetInt32("parentId1", entry.Id)
@@ -154,6 +158,8 @@ namespace SlimTuneUI.CoreVis
 				{
 					pane.AddPieSlice(otherTotal, m_colors.ColorForIndex(1), 0.0, string.Format("Other: {0} functions", otherCount));
 				}
+
+				tx.Commit();
 			}
 
 			pane.Title.Text = entry.Name;

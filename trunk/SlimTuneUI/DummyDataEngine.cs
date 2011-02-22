@@ -67,17 +67,6 @@ namespace SlimTuneUI
 		{
 		}
 
-		public bool AllowFlush
-		{
-			get
-			{
-				return true;
-			}
-			set
-			{
-			}
-		}
-
 		public void Flush()
 		{
 		}

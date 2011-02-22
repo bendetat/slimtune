@@ -192,6 +192,7 @@ where c.ParentId = :parentId and c.ChildId = 0
 			m_extraInfoTextBox.Text = string.Empty;
 
 			using(var session = m_mainWindow.OpenActiveSnapshot())
+			using(var tx = session.BeginTransaction())
 			{
 				var query = session.CreateQuery(kQuery);
 				query.SetInt32("parentId", 0);
@@ -226,6 +227,7 @@ where c.ParentId = :parentId and c.ChildId = 0
 					newNode.Tag = new NodeData(t.ChildId, t.Thread.Id, string.Empty, 1, formatText, tipText);
 					m_treeView.Nodes.Add(newNode);
 				}
+				tx.Commit();
 			}
 		}
 
@@ -234,6 +236,7 @@ where c.ParentId = :parentId and c.ChildId = 0
 			try
 			{
 				using(var session = m_mainWindow.OpenActiveSnapshot())
+				using(var tx = session.BeginTransaction())
 				{
 					var parent = (NodeData) node.Tag;
 					var query = session.CreateQuery(kQuery);
@@ -282,6 +285,8 @@ where c.ParentId = :parentId and c.ChildId = 0
 						newNode.Tag = new NodeData(c.ChildId, (int) parent.ThreadId, name, percent, formatText, tipText);
 						node.Nodes.Add(newNode);
 					}
+
+					tx.Commit();
 				}
 			}
 			catch(Exception ex)
