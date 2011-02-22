@@ -53,11 +53,18 @@ namespace SlimTuneUI
 
 			string status;
 			if(conn.Port == 0)
+			{
 				status = "Opened From File";
+			}
 			else if(conn.IsConnected)
+			{
 				status = "Running";
+			}
 			else
+			{
 				status = "Stopped";
+				m_reconnectButton.Enabled = true;
+			}
 			StatusLabel.Text = "Status: " + status;
 
 			//SnapshotButton.Enabled = conn.IsConnected;
@@ -314,6 +321,18 @@ namespace SlimTuneUI
 
 			SnapshotsListBox.SetItemChecked(SnapshotsListBox.SelectedIndex, true);
 			ActiveSnapshot = SnapshotsListBox.SelectedItem as Snapshot;
+		}
+
+		private void m_reconnectButton_Click(object sender, EventArgs e)
+		{
+			ConnectProgress progress = new ConnectProgress(Connection.HostName, Connection.Port, Connection.DataEngine, 10);
+			progress.ShowDialog(this);
+
+			if(progress.Client != null)
+			{
+				Connection.RunClient(progress.Client);
+				this.BringToFront();
+			}
 		}
 	}
 }

@@ -61,7 +61,9 @@ namespace UICore
 		BufferedStream m_bufferedStream;
 		BinaryReader m_reader;
 		BinaryWriter m_writer;
+		bool m_receivedSessionId = false;
 		Guid? m_sessionId;
+
 		//this is a private cache we use to figure out what mappings we need to request
 		Dictionary<int, FunctionInfo> m_functions = new Dictionary<int, FunctionInfo>();
 		Dictionary<int, ClassInfo> m_classes = new Dictionary<int, ClassInfo>();
@@ -120,6 +122,10 @@ namespace UICore
 			data.WriteProperty("HostName", host);
 			data.WriteProperty("Port", port.ToString());
 
+			string sessionId = data.GetProperty("SessionId");
+			if(sessionId != null)
+				m_sessionId = new Guid(sessionId);
+
 			Debug.WriteLine("Successfully connected.");
 		}
 
@@ -146,12 +152,9 @@ namespace UICore
 				if(m_stream == null)
 					return true;
 
-				if(m_sessionId == null)
+				if(!m_receivedSessionId)
 				{
-					byte[] guidBytes = m_reader.ReadBytes(16);
-					m_sessionId = new Guid(guidBytes);
-					OnSessionId();
-					return true;
+					return ParseSessionId();
 				}
 
 				MessageId messageId = (MessageId) m_reader.ReadByte();
@@ -245,6 +248,34 @@ namespace UICore
 			{
 				return false;
 			}
+		}
+
+		private bool ParseSessionId()
+		{
+			byte[] guidBytes = m_reader.ReadBytes(16);
+			Guid sessionId = new Guid(guidBytes);
+			if(m_sessionId == null)
+			{
+				//we've been created without a session id, so use this one
+				m_sessionId = sessionId;
+				OnSessionId();
+				m_receivedSessionId = true;
+			}
+			else
+			{
+				//verify that the submitted session id matches what the client was created with
+				if(sessionId == m_sessionId)
+				{
+					m_receivedSessionId = true;
+				}
+				else
+				{
+					//terminate the connection
+					return false;
+				}
+			}
+
+			return true;
 		}
 
 		private void OnSessionId()

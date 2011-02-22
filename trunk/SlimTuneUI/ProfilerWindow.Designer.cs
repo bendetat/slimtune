@@ -71,6 +71,7 @@ namespace SlimTuneUI
 			this.HostLabel = new System.Windows.Forms.Label();
 			this.m_closeVisualizerButton = new System.Windows.Forms.Button();
 			this.VisualizerHost = new System.Windows.Forms.TabControl();
+			this.m_reconnectButton = new System.Windows.Forms.Button();
 			VisualizersGroupBox = new System.Windows.Forms.GroupBox();
 			VisualizersGroupBox.SuspendLayout();
 			this.MainSplitter.Panel1.SuspendLayout();
@@ -88,7 +89,7 @@ namespace SlimTuneUI
 			VisualizersGroupBox.Controls.Add(this.label1);
 			VisualizersGroupBox.Controls.Add(this.m_openVisualizerButton);
 			VisualizersGroupBox.Controls.Add(this.m_visualizerCombo);
-			VisualizersGroupBox.Location = new System.Drawing.Point(3, 136);
+			VisualizersGroupBox.Location = new System.Drawing.Point(3, 161);
 			VisualizersGroupBox.Name = "VisualizersGroupBox";
 			VisualizersGroupBox.Size = new System.Drawing.Size(195, 98);
 			VisualizersGroupBox.TabIndex = 4;
@@ -156,7 +157,7 @@ namespace SlimTuneUI
 						| System.Windows.Forms.AnchorStyles.Right)));
 			this.SnapshotsGroupBox.Controls.Add(this.SnapshotsListBox);
 			this.SnapshotsGroupBox.Controls.Add(this.label2);
-			this.SnapshotsGroupBox.Location = new System.Drawing.Point(4, 349);
+			this.SnapshotsGroupBox.Location = new System.Drawing.Point(4, 374);
 			this.SnapshotsGroupBox.Name = "SnapshotsGroupBox";
 			this.SnapshotsGroupBox.Size = new System.Drawing.Size(194, 140);
 			this.SnapshotsGroupBox.TabIndex = 11;
@@ -194,7 +195,7 @@ namespace SlimTuneUI
 			this.TasksGroupBox.Controls.Add(this.ClearDataButton);
 			this.TasksGroupBox.Controls.Add(this.SnapshotButton);
 			this.TasksGroupBox.Controls.Add(this.TasksLabel);
-			this.TasksGroupBox.Location = new System.Drawing.Point(3, 240);
+			this.TasksGroupBox.Location = new System.Drawing.Point(3, 265);
 			this.TasksGroupBox.Name = "TasksGroupBox";
 			this.TasksGroupBox.Size = new System.Drawing.Size(194, 103);
 			this.TasksGroupBox.TabIndex = 6;
@@ -254,6 +255,7 @@ namespace SlimTuneUI
 			// 
 			this.InfoGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
 						| System.Windows.Forms.AnchorStyles.Right)));
+			this.InfoGroupBox.Controls.Add(this.m_reconnectButton);
 			this.InfoGroupBox.Controls.Add(this.StatusLabel);
 			this.InfoGroupBox.Controls.Add(this.NameLabel);
 			this.InfoGroupBox.Controls.Add(this.EngineLabel);
@@ -261,7 +263,7 @@ namespace SlimTuneUI
 			this.InfoGroupBox.Controls.Add(this.HostLabel);
 			this.InfoGroupBox.Location = new System.Drawing.Point(3, 3);
 			this.InfoGroupBox.Name = "InfoGroupBox";
-			this.InfoGroupBox.Size = new System.Drawing.Size(195, 127);
+			this.InfoGroupBox.Size = new System.Drawing.Size(195, 152);
 			this.InfoGroupBox.TabIndex = 5;
 			this.InfoGroupBox.TabStop = false;
 			// 
@@ -339,6 +341,17 @@ namespace SlimTuneUI
 			this.VisualizerHost.TabIndex = 1;
 			this.VisualizerHost.MouseClick += new System.Windows.Forms.MouseEventHandler(this.VisualizerHost_MouseClick);
 			// 
+			// m_reconnectButton
+			// 
+			this.m_reconnectButton.Enabled = false;
+			this.m_reconnectButton.Location = new System.Drawing.Point(6, 124);
+			this.m_reconnectButton.Name = "m_reconnectButton";
+			this.m_reconnectButton.Size = new System.Drawing.Size(75, 22);
+			this.m_reconnectButton.TabIndex = 9;
+			this.m_reconnectButton.Text = "Reconnect";
+			this.m_reconnectButton.UseVisualStyleBackColor = true;
+			this.m_reconnectButton.Click += new System.EventHandler(this.m_reconnectButton_Click);
+			// 
 			// ProfilerWindow
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -387,6 +400,7 @@ namespace SlimTuneUI
 		private System.Windows.Forms.Label label2;
 		private System.Windows.Forms.Button ResumeButton;
 		private System.Windows.Forms.Button PauseButton;
+		private System.Windows.Forms.Button m_reconnectButton;
 
 	}
 }
