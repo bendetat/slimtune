@@ -44,6 +44,8 @@ namespace SlimTuneUI
 			m_mainWindow = mainWindow;
 			m_mainWindow.AddWindow(this);
 
+			Connection.Disconnected += new EventHandler(Connection_Disconnected);
+
 			string host = string.IsNullOrEmpty(conn.HostName) ? "(file)" : conn.HostName;
 			HostLabel.Text = "Host: " + host;
 			string port = conn.Port == 0 ? "(file)" : conn.Port.ToString();
@@ -66,9 +68,6 @@ namespace SlimTuneUI
 				ReconnectButton.Enabled = true;
 			}
 			StatusLabel.Text = "Status: " + status;
-
-			//SnapshotButton.Enabled = conn.IsConnected;
-			Connection.Disconnected += new EventHandler(Connection_Disconnected);
 
 			foreach(var vis in Utilities.GetVisualizerList(false))
 			{
@@ -184,7 +183,8 @@ namespace SlimTuneUI
 			Visualizers.Add(visualizer);
 			TabPage page = new TabPage(visualizer.DisplayName);
 			page.Tag = visualizer;
-			visualizer.Show(page.Controls);
+			visualizer.Control.Dock = DockStyle.Fill;
+			page.Controls.Add(visualizer.Control);
 			VisualizerHost.TabPages.Add(page);
 			VisualizerHost.SelectedTab = page;
 			m_closeVisualizerButton.Enabled = true;
@@ -192,10 +192,13 @@ namespace SlimTuneUI
 
 		private void ClearDataButton_Click(object sender, EventArgs e)
 		{
-			DialogResult result = MessageBox.Show("WARNING: This will clear all collected data, and cannot be reversed. Continue?",
+			DialogResult result = MessageBox.Show("WARNING: This will save a snapshot and then reset the 'Current' data. Continue?",
 				"Clear All Data", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2);
 			if(result == DialogResult.Yes)
+			{
+				Connection.DataEngine.Snapshot("Clear Data");
 				Connection.DataEngine.ClearData();
+			}
 		}
 
 		private void SnapshotButton_Click(object sender, EventArgs e)

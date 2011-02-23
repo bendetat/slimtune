@@ -29,9 +29,9 @@ namespace UICore
 	public interface IVisualizer
 	{
 		string DisplayName { get; }
+		System.Windows.Forms.UserControl Control { get; }
 
 		bool Initialize(ProfilerWindowBase mainWindow, Connection connection);
-		void Show(System.Windows.Forms.Control.ControlCollection parent);
 		void OnClose();
 	}
 }
