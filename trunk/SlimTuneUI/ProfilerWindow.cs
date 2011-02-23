@@ -192,11 +192,12 @@ namespace SlimTuneUI
 
 		private void ClearDataButton_Click(object sender, EventArgs e)
 		{
-			DialogResult result = MessageBox.Show("WARNING: This will save a snapshot and then reset the 'Current' data. Continue?",
-				"Clear All Data", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2);
+			DialogResult result = MessageBox.Show("WARNING: This will save a snapshot and then clear all current data. Continue?",
+				"Clear Data", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2);
 			if(result == DialogResult.Yes)
 			{
 				Connection.DataEngine.Snapshot("Clear Data");
+				RefreshSnapshots();
 				Connection.DataEngine.ClearData();
 			}
 		}
