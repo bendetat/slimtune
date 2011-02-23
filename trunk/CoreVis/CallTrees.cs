@@ -100,6 +100,11 @@ where c.ParentId = :parentId and c.ChildId = 0
 			get { return "Thread Calls"; }
 		}
 
+		public UserControl Control
+		{
+			get { return this; }
+		}
+
 		public CallTrees()
 		{
 			InitializeComponent();
@@ -135,12 +140,6 @@ where c.ParentId = :parentId and c.ChildId = 0
 
 			UpdateTopLevel();
 			return true;
-		}
-
-		public void Show(Control.ControlCollection parent)
-		{
-			this.Dock = DockStyle.Fill;
-			parent.Add(this);
 		}
 
 		public void OnClose()

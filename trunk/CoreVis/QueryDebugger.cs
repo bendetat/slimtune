@@ -16,16 +16,21 @@ namespace SlimTuneUI.CoreVis
 	{
 		Connection m_connection;
 
+		public string DisplayName
+		{
+			get { return "Query Debugger"; }
+		}
+
+		public UserControl Control
+		{
+			get { return this; }
+		}
+
 		public QueryDebugger()
 		{
 			InitializeComponent();
 			string dir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase);
 			QueryEditor.ConfigurationManager.Language = "mssql";			
-		}
-
-		public string DisplayName
-		{
-			get { return "Query Debugger"; }
 		}
 
 		public bool Initialize(ProfilerWindowBase mainWindow, Connection connection)
@@ -37,12 +42,6 @@ namespace SlimTuneUI.CoreVis
 			this.Text = Utilities.GetStandardCaption(connection);
 
 			return true;
-		}
-
-		public void Show(Control.ControlCollection parent)
-		{
-			this.Dock = DockStyle.Fill;
-			parent.Add(this);
 		}
 
 		public void OnClose()

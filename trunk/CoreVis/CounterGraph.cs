@@ -29,6 +29,11 @@ namespace SlimTuneUI.CoreVis
 			}
 		}
 
+		public UserControl Control
+		{
+			get { return this; }
+		}
+
 		public CounterGraph()
 		{
 			InitializeComponent();
@@ -60,12 +65,6 @@ namespace SlimTuneUI.CoreVis
 					MessageBoxButtons.OK, MessageBoxIcon.Error);
 				return false;
 			}
-		}
-
-		public void Show(Control.ControlCollection parent)
-		{
-			this.Dock = DockStyle.Fill;
-			parent.Add(this);
 		}
 
 		public void OnClose()

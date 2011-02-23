@@ -46,6 +46,11 @@ namespace SlimTuneUI.CoreVis
 			get { return "Tree Views"; }
 		}
 
+		public UserControl Control
+		{
+			get { return this; }
+		}
+
 		public NProfStyleVisualizer()
 		{
 			InitializeComponent();
@@ -73,12 +78,6 @@ namespace SlimTuneUI.CoreVis
 			ColumnClicked(m_callers, new TreeColumnEventArgs(m_callersTimeColumn));
 
 			return true;
-		}
-
-		public void Show(Control.ControlCollection parent)
-		{
-			this.Dock = DockStyle.Fill;
-			parent.Add(this);
 		}
 
 		public void OnClose()

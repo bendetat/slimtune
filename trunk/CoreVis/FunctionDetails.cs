@@ -24,6 +24,11 @@ namespace SlimTuneUI.CoreVis
 			get { return Utilities.GetDisplayName(typeof(FunctionDetails)); }
 		}
 
+		public UserControl Control
+		{
+			get { return this; }
+		}
+
 		public FunctionDetails()
 		{
 			InitializeComponent();
@@ -42,12 +47,6 @@ namespace SlimTuneUI.CoreVis
 
 			UpdateFunctionList();
 			return true;
-		}
-
-		public void Show(Control.ControlCollection parent)
-		{
-			this.Dock = DockStyle.Fill;
-			parent.Add(this);
 		}
 
 		public void OnClose()
@@ -97,18 +96,15 @@ namespace SlimTuneUI.CoreVis
 			using(var session = m_mainWindow.OpenActiveSnapshot())
 			using(var tx = session.BeginTransaction())
 			{
-				var totalTimeFuture = session.CreateQuery("select sum(c.Time) from Call c where c.Parent.Id = :parentId1")
+				var totalTime = session.CreateQuery("select sum(c.Time) from Call c where c.Parent.Id = :parentId1")
 					.SetInt32("parentId1", entry.Id)
-					.FutureValue<double>();
-				var inFuncFuture = session.CreateQuery("select sum(c.Time) from Call c where c.Parent.Id = :parentId2 and c.Child.Id = 0")
+					.UniqueResult<double>();
+				var inFunc = session.CreateQuery("select sum(c.Time) from Call c where c.Parent.Id = :parentId2 and c.Child.Id = 0")
 					.SetInt32("parentId2", entry.Id)
-					.FutureValue<double>();
+					.UniqueResult<double>();
 				var children = session.CreateQuery("from Call c inner join fetch c.Child where c.Parent.Id = :parentId3 order by c.Time desc")
 					.SetInt32("parentId3", entry.Id)
-					.Future<Call>();
-
-				var totalTime = totalTimeFuture.Value;
-				var inFunc = inFuncFuture.Value;
+					.List<Call>();
 
 				int index = 1;
 				double pieTotal = 0;

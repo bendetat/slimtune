@@ -27,15 +27,20 @@ namespace SlimTuneUI.CoreVis
 			public double TotalTime;
 		}
 
+		public string DisplayName
+		{
+			get { return "Hotspots"; }
+		}
+
+		public UserControl Control
+		{
+			get { return this; }
+		}
+
 		public HotSpots()
 		{
 			InitializeComponent();
 			HotspotsList.Tag = new ListTag();
-		}
-
-		public string DisplayName
-		{
-			get { return "Hotspots"; }
 		}
 
 		public bool Initialize(ProfilerWindowBase mainWindow, Connection connection)
@@ -50,12 +55,6 @@ namespace SlimTuneUI.CoreVis
 
 			UpdateHotspots();
 			return true;
-		}
-
-		public void Show(Control.ControlCollection parent)
-		{
-			this.Dock = DockStyle.Fill;
-			parent.Add(this);
 		}
 
 		public void OnClose()
