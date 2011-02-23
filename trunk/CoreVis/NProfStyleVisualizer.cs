@@ -37,6 +37,7 @@ namespace SlimTuneUI.CoreVis
 	{
 		ProfilerWindowBase m_mainWindow;
 		Connection m_connection;
+		Snapshot m_snapshot;
 
 		ParentsModel m_calleesModel;
 		CallersModel m_callersModel;
@@ -56,7 +57,7 @@ namespace SlimTuneUI.CoreVis
 			InitializeComponent();
 		}
 
-		public bool Initialize(ProfilerWindowBase mainWindow, Connection connection)
+		public bool Initialize(ProfilerWindowBase mainWindow, Connection connection, Snapshot snapshot)
 		{
 			if(mainWindow == null)
 				throw new ArgumentNullException("mainWindow");
@@ -65,9 +66,10 @@ namespace SlimTuneUI.CoreVis
 
 			m_mainWindow = mainWindow;
 			m_connection = connection;
+			m_snapshot = snapshot;
 
-			m_calleesModel = new ParentsModel(connection.DataEngine, m_mainWindow);
-			m_callersModel = new CallersModel(connection.DataEngine, m_mainWindow);
+			m_calleesModel = new ParentsModel(connection.DataEngine, m_snapshot);
+			m_callersModel = new CallersModel(connection.DataEngine, m_snapshot);
 			m_callees.Model = new SortedTreeModel(m_calleesModel);
 			m_callers.Model = new SortedTreeModel(m_callersModel);
 
@@ -197,24 +199,24 @@ group by c.Id
 ";
 
 		IDataEngine m_data;
-		ProfilerWindowBase m_mainWindow;
+		Snapshot m_snapshot;
 
-		public ParentsModel(IDataEngine data, ProfilerWindowBase mainWindow)
+		public ParentsModel(IDataEngine data, Snapshot snapshot)
 		{
 			m_data = data;
-			m_mainWindow = mainWindow;
+			m_snapshot = snapshot;
 		}
 
 		public System.Collections.IEnumerable GetChildren(TreePath treePath)
 		{
-			using(var session = m_mainWindow.OpenActiveSnapshot())
+			using(var session = m_data.OpenSession(m_snapshot.Id))
 			using(var tx = session.BeginTransaction())
 			{
 				if(treePath.IsEmpty())
 				{
 					//top level queries
 					var data = session.CreateQuery(kTopLevelQuery)
-						.SetInt32("snapshotId", m_mainWindow.ActiveSnapshot.Id)
+						.SetInt32("snapshotId", m_snapshot.Id)
 						.SetMaxResults(200)
 						.List<object[]>();
 					foreach(var row in data)
@@ -240,7 +242,7 @@ group by c.Id
 					var data = session.CreateQuery(kChildQuery)
 						.SetInt32("parentId", parentNode.Id)
 						.SetInt32("threadId", parentNode.Thread)
-						.SetInt32("snapshotId", m_mainWindow.ActiveSnapshot.Id)
+						.SetInt32("snapshotId", m_snapshot.Id)
 						.List<object[]>();
 
 					foreach(var row in data)
@@ -305,17 +307,17 @@ group by c.Id
 ";
 
 		IDataEngine m_data;
-		ProfilerWindowBase m_mainWindow;
+		Snapshot m_snapshot;
 
-		public CallersModel(IDataEngine data, ProfilerWindowBase mainWindow)
+		public CallersModel(IDataEngine data, Snapshot snapshot)
 		{
 			m_data = data;
-			m_mainWindow = mainWindow;
+			m_snapshot = snapshot;
 		}
 
 		public System.Collections.IEnumerable GetChildren(TreePath treePath)
 		{
-			using(var session = m_mainWindow.OpenActiveSnapshot())
+			using(var session = m_data.OpenSession(m_snapshot.Id))
 			using(var tx = session.BeginTransaction())
 			{
 				if(treePath.IsEmpty())
@@ -338,7 +340,7 @@ group by c.Id
 					var data = session.CreateQuery(kChildQuery)
 						.SetInt32("childId", parentNode.Id)
 						.SetInt32("threadId", parentNode.Thread)
-						.SetInt32("snapshotId", m_mainWindow.ActiveSnapshot.Id)
+						.SetInt32("snapshotId", m_snapshot.Id)
 						.List<object[]>();
 
 					foreach(var row in data)

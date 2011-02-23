@@ -18,6 +18,8 @@ namespace SlimTuneUI.CoreVis
 	{
 		ProfilerWindowBase m_mainWindow;
 		Connection m_connection;
+		Snapshot m_snapshot;
+
 		ColorRotator m_colors = new ColorRotator();
 		bool m_redrawGraph = true;
 
@@ -39,7 +41,7 @@ namespace SlimTuneUI.CoreVis
 			InitializeComponent();
 		}
 
-		public bool Initialize(ProfilerWindowBase mainWindow, Connection connection)
+		public bool Initialize(ProfilerWindowBase mainWindow, Connection connection, Snapshot snapshot)
 		{
 			if(mainWindow == null)
 				throw new ArgumentNullException("mainWindow");
@@ -48,6 +50,7 @@ namespace SlimTuneUI.CoreVis
 
 			m_mainWindow = mainWindow;
 			m_connection = connection;
+			m_snapshot = snapshot;
 
 			Graph.GraphPane.Title.Text = "Performance Counters";
 			Graph.GraphPane.XAxis.Title.Text = "Time";
@@ -80,7 +83,7 @@ namespace SlimTuneUI.CoreVis
 				entry.Tagged = false;
 			}
 
-			using(var session = m_mainWindow.OpenActiveSnapshot())
+			using(var session = m_connection.DataEngine.OpenSession(m_snapshot.Id))
 			using(var tx = session.BeginTransaction())
 			{
 				var counters = session.CreateCriteria<Counter>()
@@ -149,7 +152,7 @@ namespace SlimTuneUI.CoreVis
 			if(e.NewValue == CheckState.Checked)
 			{
 				var points = new PointPairList();
-				using(var session = m_mainWindow.OpenActiveSnapshot())
+				using(var session = m_connection.DataEngine.OpenSession(m_snapshot.Id))
 				using(var tx = session.BeginTransaction())
 				{
 					var counter = session.Load<Counter>(entry.Id);

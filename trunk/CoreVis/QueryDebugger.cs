@@ -33,7 +33,7 @@ namespace SlimTuneUI.CoreVis
 			QueryEditor.ConfigurationManager.Language = "mssql";			
 		}
 
-		public bool Initialize(ProfilerWindowBase mainWindow, Connection connection)
+		public bool Initialize(ProfilerWindowBase mainWindow, Connection connection, Snapshot snapshot)
 		{
 			if(connection == null)
 				throw new ArgumentNullException("connection");

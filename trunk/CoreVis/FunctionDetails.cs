@@ -17,6 +17,7 @@ namespace SlimTuneUI.CoreVis
 	{
 		ProfilerWindowBase m_mainWindow;
 		Connection m_connection;
+		Snapshot m_snapshot;
 		ColorRotator m_colors = new ColorRotator();
 
 		public string DisplayName
@@ -34,7 +35,7 @@ namespace SlimTuneUI.CoreVis
 			InitializeComponent();
 		}
 
-		public bool Initialize(ProfilerWindowBase mainWindow, Connection connection)
+		public bool Initialize(ProfilerWindowBase mainWindow, Connection connection, Snapshot snapshot)
 		{
 			if(mainWindow == null)
 				throw new ArgumentNullException("mainWindow");
@@ -43,6 +44,7 @@ namespace SlimTuneUI.CoreVis
 
 			m_mainWindow = mainWindow;
 			m_connection = connection;
+			m_snapshot = snapshot;
 			m_refreshTimer.Enabled = m_connection.IsConnected;
 
 			UpdateFunctionList();
@@ -57,7 +59,7 @@ namespace SlimTuneUI.CoreVis
 		private void UpdateFunctionList()
 		{
 			FunctionList.Items.Clear();
-			using(var session = m_mainWindow.OpenActiveSnapshot())
+			using(var session = m_connection.DataEngine.OpenSession(m_snapshot.Id))
 			using(var tx = session.BeginTransaction())
 			{
 				var list = session.CreateQuery("from FunctionInfo where Name like :search order by Name")
@@ -93,7 +95,7 @@ namespace SlimTuneUI.CoreVis
 			pane.CurveList.Clear();
 			pane.Title.Text = "Function Breakdown (samples)";
 
-			using(var session = m_mainWindow.OpenActiveSnapshot())
+			using(var session = m_connection.DataEngine.OpenSession(m_snapshot.Id))
 			using(var tx = session.BeginTransaction())
 			{
 				var totalTime = session.CreateQuery("select sum(c.Time) from Call c where c.Parent.Id = :parentId1")

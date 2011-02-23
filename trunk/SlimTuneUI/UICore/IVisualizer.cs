@@ -31,7 +31,7 @@ namespace UICore
 		string DisplayName { get; }
 		System.Windows.Forms.UserControl Control { get; }
 
-		bool Initialize(ProfilerWindowBase mainWindow, Connection connection);
+		bool Initialize(ProfilerWindowBase mainWindow, Connection connection, Snapshot snapshot);
 		void OnClose();
 	}
 }

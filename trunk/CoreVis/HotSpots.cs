@@ -16,6 +16,7 @@ namespace SlimTuneUI.CoreVis
 	{
 		ProfilerWindowBase m_mainWindow;
 		Connection m_connection;
+		Snapshot m_snapshot;
 
 		//drawing stuff
 		Font m_functionFont = new Font(SystemFonts.DefaultFont.FontFamily, 12, FontStyle.Bold);
@@ -43,7 +44,7 @@ namespace SlimTuneUI.CoreVis
 			HotspotsList.Tag = new ListTag();
 		}
 
-		public bool Initialize(ProfilerWindowBase mainWindow, Connection connection)
+		public bool Initialize(ProfilerWindowBase mainWindow, Connection connection, Snapshot snapshot)
 		{
 			if(mainWindow == null)
 				throw new ArgumentNullException("mainWindow");
@@ -52,6 +53,7 @@ namespace SlimTuneUI.CoreVis
 
 			m_mainWindow = mainWindow;
 			m_connection = connection;
+			m_snapshot = snapshot;
 
 			UpdateHotspots();
 			return true;
@@ -64,7 +66,7 @@ namespace SlimTuneUI.CoreVis
 		private void UpdateHotspots()
 		{
 			HotspotsList.Items.Clear();
-			using(var session = m_mainWindow.OpenActiveSnapshot())
+			using(var session = m_connection.DataEngine.OpenSession(m_snapshot.Id))
 			using(var tx = session.BeginTransaction())
 			{
 				//find the total time consumed
@@ -95,7 +97,7 @@ namespace SlimTuneUI.CoreVis
 
 		private bool UpdateParents(Call child, ListBox box)
 		{
-			using(var session = m_mainWindow.OpenActiveSnapshot())
+			using(var session = m_connection.DataEngine.OpenSession(m_snapshot.Id))
 			using(var tx = session.BeginTransaction())
 			{
 				var query = session.CreateQuery("from Call c inner join fetch c.Parent where c.ChildId = :funcId order by c.Time desc")

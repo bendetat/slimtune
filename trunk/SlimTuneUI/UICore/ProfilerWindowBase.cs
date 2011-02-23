@@ -55,10 +55,5 @@ namespace UICore
 			Visualizers = new List<IVisualizer>();
 			Connection = conn;
 		}
-
-		public NHibernate.ISession OpenActiveSnapshot()
-		{
-			return Connection.DataEngine.OpenSession(ActiveSnapshot.Id);
-		}
 	}
 }

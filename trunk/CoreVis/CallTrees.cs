@@ -94,6 +94,7 @@ where c.ParentId = :parentId and c.ChildId = 0
 
 		ProfilerWindowBase m_mainWindow;
 		Connection m_connection;
+		Snapshot m_snapshot;
 
 		public string DisplayName
 		{
@@ -128,7 +129,7 @@ where c.ParentId = :parentId and c.ChildId = 0
 			m_filteredFonts.Add(new Font(fontName, fontSize, FontStyle.Bold), Brushes.DimGray);
 		}
 
-		public bool Initialize(ProfilerWindowBase mainWindow, Connection connection)
+		public bool Initialize(ProfilerWindowBase mainWindow, Connection connection, Snapshot snapshot)
 		{
 			if(mainWindow == null)
 				throw new ArgumentNullException("mainWindow");
@@ -137,6 +138,7 @@ where c.ParentId = :parentId and c.ChildId = 0
 
 			m_mainWindow = mainWindow;
 			m_connection = connection;
+			m_snapshot = snapshot;
 
 			UpdateTopLevel();
 			return true;
@@ -190,7 +192,7 @@ where c.ParentId = :parentId and c.ChildId = 0
 		{
 			m_extraInfoTextBox.Text = string.Empty;
 
-			using(var session = m_mainWindow.OpenActiveSnapshot())
+			using(var session = m_connection.DataEngine.OpenSession(m_snapshot.Id))
 			using(var tx = session.BeginTransaction())
 			{
 				var query = session.CreateQuery(kQuery);
@@ -234,7 +236,7 @@ where c.ParentId = :parentId and c.ChildId = 0
 		{
 			try
 			{
-				using(var session = m_mainWindow.OpenActiveSnapshot())
+				using(var session = m_connection.DataEngine.OpenSession(m_snapshot.Id))
 				using(var tx = session.BeginTransaction())
 				{
 					var parent = (NodeData) node.Tag;

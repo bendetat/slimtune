@@ -177,7 +177,7 @@ namespace SlimTuneUI
 		public void AddVisualizer(Type visType)
 		{
 			IVisualizer visualizer = (IVisualizer) Activator.CreateInstance(visType);
-			if(!visualizer.Initialize(this, Connection))
+			if(!visualizer.Initialize(this, Connection, ActiveSnapshot))
 				return;
 
 			Visualizers.Add(visualizer);
