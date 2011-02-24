@@ -99,17 +99,17 @@ namespace SlimTuneUI
 			throw new NotImplementedException();
 		}
 
-		public System.Data.DataSet RawQuery(string query)
+		public System.Data.IDataReader SqlQuery(string query)
 		{
 			throw new NotImplementedException();
 		}
 
-		public System.Data.DataSet RawQuery(string query, int limit)
+		public object SqlScalar(string query)
 		{
 			throw new NotImplementedException();
 		}
 
-		public object RawQueryScalar(string query)
+		public void SqlCommand(string query)
 		{
 			throw new NotImplementedException();
 		}

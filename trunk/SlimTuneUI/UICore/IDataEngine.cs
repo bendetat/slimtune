@@ -21,7 +21,6 @@
 */
 using System;
 using System.Data;
-using System.Collections.Generic;
 
 using NHibernate;
 
@@ -81,8 +80,8 @@ namespace UICore
 		ISession OpenSession(int snapshot);
 		IStatelessSession OpenStatelessSession();
 
-		DataSet RawQuery(string query);
-		DataSet RawQuery(string query, int limit);
-		object RawQueryScalar(string query);
+		IDataReader SqlQuery(string query);
+		object SqlScalar(string query);
+		void SqlCommand(string query);
 	}
 }

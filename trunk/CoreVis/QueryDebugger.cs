@@ -30,7 +30,7 @@ namespace SlimTuneUI.CoreVis
 		{
 			InitializeComponent();
 			string dir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase);
-			QueryEditor.ConfigurationManager.Language = "mssql";			
+			QueryEditor.ConfigurationManager.Language = "mssql";
 		}
 
 		public bool Initialize(ProfilerWindowBase mainWindow, Connection connection, Snapshot snapshot)
@@ -60,9 +60,10 @@ namespace SlimTuneUI.CoreVis
 		{
 			try
 			{
-				DataSet ds = m_connection.DataEngine.RawQuery(QueryEditor.Text);
-				if(ds != null)
+				var dr = m_connection.DataEngine.SqlQuery(QueryEditor.Text);
+				if(dr != null)
 				{
+					var ds = Utilities.ConvertDataReaderToDataSet(dr);
 					DataViewer.DataSource = ds;
 					DataViewer.DataMember = "Query";
 				}

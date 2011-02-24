@@ -129,9 +129,33 @@ namespace UICore
 		protected abstract void PrepareCommands();
 		protected abstract void DoFlush();
 		public abstract void Save(string file);
-		public abstract System.Data.DataSet RawQuery(string query);
-		public abstract System.Data.DataSet RawQuery(string query, int limit);
-		public abstract object RawQueryScalar(string query);
+
+		public IDataReader SqlQuery(string query)
+		{
+			using(var cmd = Connection.CreateCommand())
+			{
+				cmd.CommandText = query;
+				return cmd.ExecuteReader();
+			}
+		}
+
+		public object SqlScalar(string query)
+		{
+			using(var cmd = Connection.CreateCommand())
+			{
+				cmd.CommandText = query;
+				return cmd.ExecuteScalar();
+			}
+		}
+
+		public void SqlCommand(string query)
+		{
+			using(var cmd = Connection.CreateCommand())
+			{
+				cmd.CommandText = query;
+				cmd.ExecuteNonQuery();
+			}
+		}
 
 		public DataEngineBase(string name)
 		{
