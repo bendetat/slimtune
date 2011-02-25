@@ -1174,10 +1174,10 @@ void ClrProfiler::OnSampleTimer()
 		unsigned __int64 cycles = threadTime - threadInfo->Context->ThreadTime;
 		if(m_config.WeightedSampling)
 		{
-			//the cycle time is divided by a fixed 1 MHz (arbitrary) scaling factor to produce "weighted samples"
+			//the cycle time is divided by a fixed 1 GHz (arbitrary) scaling factor to produce "weighted samples"
 			//weighted samples have no absolute meaning
-			sample.Time = (float) cycles / (float) 1e6;
-			if(sample.Time > 20 * m_config.SampleInterval)
+			sample.Time = (float) cycles / (float) 1e9;
+			if(sample.Time > 20 * 1000 * m_config.SampleInterval)
 			{
 				//avoid assigning a huge amount of time to one event and just drop the sample
 				//this is assuming a max "clock rate" of 20 GHz (the 20 in the if)
