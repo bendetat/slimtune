@@ -32,19 +32,6 @@ using FluentNHibernate.Cfg.Db;
 
 namespace UICore
 {
-	public struct CallGraph<T>
-	{
-		//this is: ThreadId, ParentId, ChildId, HitCount
-		public SortedList<int, SortedDictionary<int, SortedList<int, T>>> Graph;
-
-		public static CallGraph<T> Create()
-		{
-			CallGraph<T> cg = new CallGraph<T>();
-			cg.Graph = new SortedList<int, SortedDictionary<int, SortedList<int, T>>>(8);
-			return cg;
-		}
-	}
-
 	public struct AllocData
 	{
 		public long Size;
@@ -69,9 +56,9 @@ namespace UICore
 		private List<ClassInfo> m_classCache = new List<ClassInfo>(kClassCacheSize);
 
 		//Everything is stored sorted so that we can sprint through the database quickly
-		protected CallGraph<double> m_calls = CallGraph<double>.Create();
+		protected Dictionary<long, Call> m_calls = new Dictionary<long, Call>();
 		//this is: FunctionId, ThreadId, HitCount
-		protected SortedDictionary<int, SortedList<int, double>> m_samples = new SortedDictionary<int, SortedList<int, double>>();
+		protected Dictionary<long, Sample> m_samples = new Dictionary<long, Sample>();
 
 		//this is: ClassId, FunctionId, AllocData
 		protected SortedDictionary<int, SortedDictionary<int, AllocData>> m_allocs = new SortedDictionary<int, SortedDictionary<int, AllocData>>();
@@ -274,20 +261,12 @@ namespace UICore
 			lock(m_lock)
 			{
 				//Update calls
-				SortedDictionary<int, SortedList<int, double>> perThread;
-				bool foundThread = m_calls.Graph.TryGetValue(sample.ThreadId, out perThread);
-				if(!foundThread)
-				{
-					perThread = new SortedDictionary<int, SortedList<int, double>>();
-					m_calls.Graph.Add(sample.ThreadId, perThread);
-				}
-
-				Increment(sample.Functions[0], 0, perThread, sample.Time);
+				Increment(sample.ThreadId, sample.Functions[0], 0, m_calls, sample.Time);
 				for(int f = 1; f < sample.Functions.Count; ++f)
 				{
-					Increment(sample.Functions[f], sample.Functions[f - 1], perThread, sample.Time);
+					Increment(sample.ThreadId, sample.Functions[f], sample.Functions[f - 1], m_calls, sample.Time);
 				}
-				Increment(0, sample.Functions[sample.Functions.Count - 1], perThread, sample.Time);
+				Increment(sample.ThreadId, 0, sample.Functions[sample.Functions.Count - 1], m_calls, sample.Time);
 
 				//Update overall samples count
 				for(int s = 0; s < sample.Functions.Count; ++s)
@@ -308,15 +287,12 @@ namespace UICore
 
 					if(first)
 					{
+						long key = Sample.ComputeKey(sample.ThreadId, functionId);
 						//add the function if we don't have it yet
-						if(!m_samples.ContainsKey(functionId))
-							m_samples.Add(functionId, new SortedList<int, double>());
-
-						//add this thread if we don't have it, else just increment
-						if(!m_samples[functionId].ContainsKey(sample.ThreadId))
-							m_samples[functionId].Add(sample.ThreadId, sample.Time);
+						if(!m_samples.ContainsKey(key))
+							m_samples.Add(key, new Sample { ThreadId = sample.ThreadId, FunctionId = functionId, Time = sample.Time });
 						else
-							m_samples[sample.Functions[s]][sample.ThreadId] += sample.Time;
+							m_samples[key].Time += sample.Time;
 					}
 				}
 
@@ -356,14 +332,7 @@ namespace UICore
 		{
 			lock(m_lock)
 			{
-				foreach(KeyValuePair<int, SortedDictionary<int, SortedList<int, double>>> threadKvp in m_calls.Graph)
-				{
-					int threadId = threadKvp.Key;
-					foreach(KeyValuePair<int, SortedList<int, double>> callerKvp in threadKvp.Value)
-					{
-						callerKvp.Value.Clear();
-					}
-				}
+				m_calls.Clear();
 				m_lastFlush = DateTime.UtcNow;
 				m_samples.Clear();
 				m_cachedSamples = 0;
@@ -425,24 +394,13 @@ namespace UICore
 			throw new NotImplementedException();
 		}
 
-		protected static void Increment(int key1, int key2, SortedDictionary<int, SortedList<int, double>> container, double time)
+		protected static void Increment(int threadId, int parentId, int childId, Dictionary<long, Call> container, double time)
 		{
-			SortedList<int, double> key1Table;
-			bool foundKey1Table = container.TryGetValue(key1, out key1Table);
-			if(!foundKey1Table)
-			{
-				key1Table = new SortedList<int, double>();
-				container.Add(key1, key1Table);
-			}
-
-			if(!key1Table.ContainsKey(key2))
-			{
-				key1Table.Add(key2, time);
-			}
+			long key = Call.ComputeKey(threadId, parentId, childId);
+			if(container.ContainsKey(key))
+				container[key].Time += time;
 			else
-			{
-				key1Table[key2] += time;
-			}
+				container.Add(key, new Call { ThreadId = threadId, ParentId = parentId, ChildId = childId, Time = time });
 		}
 
 		public virtual void MapFunction(FunctionInfo funcInfo)

@@ -75,10 +75,10 @@ namespace UICore
 		public virtual int Id { get; set; }
 		public virtual double Time { get; set; }
 
+		public virtual int SnapshotId { get; set; }
 		public virtual int ThreadId { get; set; }
 		public virtual int ParentId { get; set; }
 		public virtual int ChildId { get; set; }
-		public virtual int SnapshotId { get; set; }
 
 		public virtual ThreadInfo Thread { get; set; }
 		public virtual FunctionInfo Parent { get; set; }
@@ -102,6 +102,13 @@ namespace UICore
 		{
 			int hash = 13 + Thread.Id << 16 + Parent.Id << 8 + Child.Id;
 			return hash;
+		}
+
+		public static long ComputeKey(long threadId, long parentId, long childId)
+		{
+			return (threadId << 48) |
+				(parentId << 24) |
+				childId;
 		}
 	}
 
@@ -133,6 +140,11 @@ namespace UICore
 		{
 			int hash = 17 + Thread.Id << 16 + Function.Id;
 			return hash;
+		}
+
+		public static long ComputeKey(long threadId, long functionId)
+		{
+			return (threadId << 32) | functionId;
 		}
 	}
 
