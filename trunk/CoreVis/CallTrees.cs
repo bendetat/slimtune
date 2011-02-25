@@ -211,7 +211,7 @@ where c.ParentId = :parentId and c.ChildId = 0
 
 					const string rawString = @"{0:P2} Thread {1} - {2}{3}{4}";
 					const string tipString = "{0:P2} - Thread {1}\r\nEntry point: {2}{3}{4}";
-					const string niceString = @"\1{0:P3} \2Thread {1} \0- {2}\2{3}\0{4}";
+					const string niceString = @"\1{0:P2} \2Thread {1} \0- {2}\2{3}\0{4}";
 
 					string signature, funcName, classAndFunc, baseName;
 					BreakName(name, out signature, out funcName, out classAndFunc, out baseName);
@@ -259,7 +259,7 @@ where c.ParentId = :parentId and c.ChildId = 0
 
 						string name = FunctionInfo.GetFullSignature(c.Child);
 						const string rawString = @"{0:P2} {1} - {2:P2} - {3}{4}{5}";
-						const string tipString = "[Id {6}] {3}{4}{5}\r\n{0:P3} of thread - {1} weighted samples - {2:P3} of parent\r\n{7:P3} outside children - {8} weighted samples";
+						const string tipString = "[Id {6}] {3}{4}{5}\r\n{0:P2} of thread - {1:0.###} weighted samples - {2:P2} of parent\r\n{7:P2} outside children - {8:0.###} weighted samples";
 						const string niceString = @"\1{0:P2} \2{1} \0- \3{2:P2} \0- {3}\2{4}\0{5}";
 						const string recursiveString = @"\4{0:P2} \2(recursive)";
 

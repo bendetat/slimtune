@@ -257,7 +257,7 @@ group by c.Id
 						if(parentTime == 0)
 							item.PercentTime = 0;
 						else
-							item.PercentTime = Math.Round(100 * item.Time / parentTime, 3);
+							item.PercentTime = Math.Round(100 * c.Time / parentTime, 3);
 						yield return item;
 					}
 				}
@@ -355,7 +355,7 @@ group by c.Id
 						if(parentTime == 0)
 							item.PercentTime = 0;
 						else
-							item.PercentTime = Math.Round(100 * item.Time / parentTime, 3);
+							item.PercentTime = Math.Round(100 * c.Time / parentTime, 3);
 						yield return item;
 					}
 				}
