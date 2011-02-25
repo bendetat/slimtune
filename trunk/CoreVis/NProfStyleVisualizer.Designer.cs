@@ -158,12 +158,12 @@ namespace SlimTuneUI.CoreVis
 			// 
 			// m_parentsTimeColumn
 			// 
-			this.m_parentsTimeColumn.Header = "Time";
+			this.m_parentsTimeColumn.Header = "Time (Inclusive)";
 			this.m_parentsTimeColumn.MinColumnWidth = 60;
 			this.m_parentsTimeColumn.Sortable = true;
 			this.m_parentsTimeColumn.SortOrder = System.Windows.Forms.SortOrder.None;
 			this.m_parentsTimeColumn.TooltipText = null;
-			this.m_parentsTimeColumn.Width = 70;
+			this.m_parentsTimeColumn.Width = 90;
 			// 
 			// m_parentsPercentColumn
 			// 
@@ -264,7 +264,7 @@ namespace SlimTuneUI.CoreVis
 			// 
 			// m_callersTimeColumn
 			// 
-			this.m_callersTimeColumn.Header = "% Time";
+			this.m_callersTimeColumn.Header = "Time (Exclusive)";
 			this.m_callersTimeColumn.MinColumnWidth = 50;
 			this.m_callersTimeColumn.Sortable = true;
 			this.m_callersTimeColumn.SortOrder = System.Windows.Forms.SortOrder.None;

@@ -231,7 +231,7 @@ group by c.Id
 							item.Name = s.Function.Name + s.Function.Signature;
 						else
 							item.Name = "(unknown)";
-						item.Time = s.Time;
+						item.Time = Math.Round(s.Time, 3);
 						item.PercentTime = Math.Round(100 * s.Time / totalTime, 3);
 						yield return item;
 					}
@@ -253,7 +253,7 @@ group by c.Id
 						item.Thread = parentNode.Thread;
 						item.Id = c.ChildId;
 						item.Name = FunctionInfo.GetFullSignature(c.Child);
-						item.Time = c.Time;
+						item.Time = Math.Round(c.Time, 3);
 						if(parentTime == 0)
 							item.PercentTime = 0;
 						else
@@ -330,7 +330,7 @@ group by c.Id
 						item.Id = c.ParentId;
 						item.Thread = c.Thread.Id;
 						item.Name = FunctionInfo.GetFullSignature(c.Parent);
-						item.Time = c.Time;
+						item.Time = Math.Round(c.Time, 3);
 						yield return item;
 					}
 				}
@@ -351,7 +351,7 @@ group by c.Id
 						item.Thread = parentNode.Thread;
 						item.Id = c.ParentId;
 						item.Name = FunctionInfo.GetFullSignature(c.Parent);
-						item.Time = c.Time;
+						item.Time = Math.Round(c.Time, 3);
 						if(parentTime == 0)
 							item.PercentTime = 0;
 						else
