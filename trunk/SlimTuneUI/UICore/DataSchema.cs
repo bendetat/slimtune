@@ -15,9 +15,6 @@ namespace UICore
 		public virtual string Name { get; set; }
 		public virtual long DateTime { get; set; }
 
-		/*public virtual IList<Call> Calls { get; set; }
-		public virtual IList<Sample> Samples { get; set; }*/
-
 		public virtual string ToString(string format)
 		{
 			DateTime dt = DateTime != long.MaxValue ? System.DateTime.FromFileTime(DateTime) : System.DateTime.Now;

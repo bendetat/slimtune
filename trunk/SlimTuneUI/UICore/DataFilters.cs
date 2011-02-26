@@ -10,7 +10,7 @@ namespace UICore.Filters
 		public Snapshot()
 		{
 			WithName("Snapshot")
-				.AddParameter("snapshot", NHibernate.NHibernateUtil.Int32);
+				.AddParameter("snapshotId", NHibernate.NHibernateUtil.Int32);
 		}
 	}
 

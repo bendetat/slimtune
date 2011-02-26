@@ -39,8 +39,8 @@ namespace SlimTuneUI.CoreVis
 		Connection m_connection;
 		Snapshot m_snapshot;
 
-		ParentsModel m_calleesModel;
-		CallersModel m_callersModel;
+		TopDownModel m_calleesModel;
+		BottomUpModel m_callersModel;
 
 		public string DisplayName
 		{
@@ -73,8 +73,8 @@ namespace SlimTuneUI.CoreVis
 			m_connection = connection;
 			m_snapshot = snapshot;
 
-			m_calleesModel = new ParentsModel(connection.DataEngine, m_snapshot);
-			m_callersModel = new CallersModel(connection.DataEngine, m_snapshot);
+			m_calleesModel = new TopDownModel(connection.DataEngine, m_snapshot);
+			m_callersModel = new BottomUpModel(connection.DataEngine, m_snapshot);
 			m_callees.Model = new SortedTreeModel(m_calleesModel);
 			m_callers.Model = new SortedTreeModel(m_callersModel);
 
@@ -180,7 +180,7 @@ namespace SlimTuneUI.CoreVis
 		public double? PercentTime { get; set; }
 	}
 
-	class ParentsModel : ITreeModel
+	class TopDownModel : ITreeModel
 	{
 		//find out what functions took the most time inclusive
 		const string kTopLevelQuery = @"
@@ -188,7 +188,6 @@ select s, max(s2.Time)
 from Sample s
 	join s.Thread.Samples s2
 	left join fetch s.Function
-where s2.SnapshotId = :snapshotId
 group by s.Id
 order by s.Time desc
 ";
@@ -198,15 +197,14 @@ select c, sum(c2.Time)
 from Call c
 	join c.Parent.CallsAsParent c2
 	left join fetch c.Child
-where c.ParentId = :parentId and c.ThreadId = :threadId
-	and c2.ThreadId = :threadId and c2.SnapshotId = :snapshotId
+where c.ParentId = :parentId and c.ChildId <> 0
 group by c.Id
 ";
 
 		IDataEngine m_data;
 		Snapshot m_snapshot;
 
-		public ParentsModel(IDataEngine data, Snapshot snapshot)
+		public TopDownModel(IDataEngine data, Snapshot snapshot)
 		{
 			m_data = data;
 			m_snapshot = snapshot;
@@ -221,7 +219,6 @@ group by c.Id
 				{
 					//top level queries
 					var data = session.CreateQuery(kTopLevelQuery)
-						.SetInt32("snapshotId", m_snapshot.Id)
 						.SetMaxResults(200)
 						.List<object[]>();
 					foreach(var row in data)
@@ -244,10 +241,9 @@ group by c.Id
 				else
 				{
 					var parentNode = treePath.LastNode as FunctionItem;
+					session.EnableFilter("Thread").SetParameter("threadId", parentNode.Thread);
 					var data = session.CreateQuery(kChildQuery)
 						.SetInt32("parentId", parentNode.Id)
-						.SetInt32("threadId", parentNode.Thread)
-						.SetInt32("snapshotId", m_snapshot.Id)
 						.List<object[]>();
 
 					foreach(var row in data)
@@ -290,7 +286,7 @@ group by c.Id
 #pragma warning restore
 	}
 
-	class CallersModel : ITreeModel
+	class BottomUpModel : ITreeModel
 	{
 		//find the methods that account for the most time exclusive
 		//that means high time in Call.ChildId = 0
@@ -306,15 +302,14 @@ select c, sum(c2.Time)
 from Call c
 	join c.Child.CallsAsChild c2
 	left join fetch c.Parent
-where c.Child.Id = :childId and c.Thread.Id = :threadId
-	and c2.Thread.Id = :threadId and c2.Snapshot.Id = :snapshotId
+where c.Child.Id = :childId and c.ParentId <> 0
 group by c.Id
 ";
 
 		IDataEngine m_data;
 		Snapshot m_snapshot;
 
-		public CallersModel(IDataEngine data, Snapshot snapshot)
+		public BottomUpModel(IDataEngine data, Snapshot snapshot)
 		{
 			m_data = data;
 			m_snapshot = snapshot;
@@ -342,10 +337,9 @@ group by c.Id
 				else
 				{
 					var parentNode = treePath.LastNode as FunctionItem;
+					session.EnableFilter("Thread").SetParameter("threadId", parentNode.Thread);
 					var data = session.CreateQuery(kChildQuery)
 						.SetInt32("childId", parentNode.Id)
-						.SetInt32("threadId", parentNode.Thread)
-						.SetInt32("snapshotId", m_snapshot.Id)
 						.List<object[]>();
 
 					foreach(var row in data)

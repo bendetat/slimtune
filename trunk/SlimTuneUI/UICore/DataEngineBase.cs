@@ -204,7 +204,7 @@ namespace UICore
 		public virtual NHibernate.ISession OpenSession(int snapshot)
 		{
 			var session = m_sessionFactory.OpenSession(Connection);
-			session.EnableFilter("Snapshot").SetParameter("snapshot", snapshot);
+			session.EnableFilter("Snapshot").SetParameter("snapshotId", snapshot);
 			return session;
 		}
 

@@ -25,16 +25,6 @@ namespace UICore.Mappings
 			Map(x => x.Name);
 			Map(x => x.DateTime);
 
-			//This causes severe N+1 issues right now
-			/*HasMany(x => x.Calls)
-				.Cascade.Delete()
-				.Inverse()
-				.KeyColumn("SnapshotId");
-			HasMany(x => x.Samples)
-				.Cascade.AllDeleteOrphan()
-				.Inverse()
-				.KeyColumn("SnapshotId");*/
-
 			Table("Snapshots");
 		}
 	}
@@ -52,11 +42,13 @@ namespace UICore.Mappings
 				.Inverse()
 				.KeyColumn("ThreadId")
 				.LazyLoad()
+				.ApplyFilter<Filters.Snapshot>("SnapshotId = :snapshotId")
 				.ReadOnly();
 			HasMany(x => x.Calls)
 				.Inverse()
 				.KeyColumn("ThreadId")
 				.LazyLoad()
+				.ApplyFilter<Filters.Snapshot>("SnapshotId = :snapshotId")
 				.ReadOnly();
 
 			Table("Threads");
@@ -79,16 +71,22 @@ namespace UICore.Mappings
 				.Inverse()
 				.KeyColumn("ParentId")
 				.LazyLoad()
+				.ApplyFilter<Filters.Snapshot>("SnapshotId = :snapshotId")
+				.ApplyFilter<Filters.Thread>("ThreadId = :threadId")
 				.ReadOnly();
 			HasMany(x => x.CallsAsChild)
 				.Inverse()
 				.KeyColumn("ChildId")
 				.LazyLoad()
+				.ApplyFilter<Filters.Snapshot>("SnapshotId = :snapshotId")
+				.ApplyFilter<Filters.Thread>("ThreadId = :threadId")
 				.ReadOnly();
 			HasMany(x => x.Samples)
 				.Inverse()
 				.KeyColumn("FunctionId")
 				.LazyLoad()
+				.ApplyFilter<Filters.Snapshot>("SnapshotId = :snapshotId")
+				.ApplyFilter<Filters.Thread>("ThreadId = :threadId")
 				.ReadOnly();
 			Table("Functions");
 		}
@@ -137,7 +135,7 @@ namespace UICore.Mappings
 			References(x => x.Snapshot, "SnapshotId")
 				.Not.Nullable();
 
-			ApplyFilter<Filters.Snapshot>("SnapshotId = :snapshot");
+			ApplyFilter<Filters.Snapshot>("SnapshotId = :snapshotId");
 			ApplyFilter<Filters.Thread>("ThreadId = :threadId");
 
 			Table("Calls");
@@ -160,12 +158,11 @@ namespace UICore.Mappings
 				.Index("Samples_ThreadIndex, Samples_Composite");
 			References(x => x.Function, "FunctionId")
 				.LazyLoad()
-				.NotFound.Ignore()
 				.Index("Samples_FunctionIndex, Samples_Composite");
 			References(x => x.Snapshot, "SnapshotId")
 				.Not.Nullable();
 
-			ApplyFilter<Filters.Snapshot>("SnapshotId = :snapshot");
+			ApplyFilter<Filters.Snapshot>("SnapshotId = :snapshotId");
 			ApplyFilter<Filters.Thread>("ThreadId = :threadId");
 
 			Table("Samples");
