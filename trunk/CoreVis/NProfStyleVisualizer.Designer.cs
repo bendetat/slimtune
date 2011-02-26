@@ -51,28 +51,28 @@ namespace SlimTuneUI.CoreVis
 		{
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(NProfStyleVisualizer));
 			this.m_splitter = new System.Windows.Forms.SplitContainer();
-			this.m_callees = new Aga.Controls.Tree.TreeViewAdv();
-			this.m_parentsIdColumn = new Aga.Controls.Tree.TreeColumn();
-			this.m_parentsThreadIdColumn = new Aga.Controls.Tree.TreeColumn();
-			this.m_parentsNameColumn = new Aga.Controls.Tree.TreeColumn();
-			this.m_parentsTimeColumn = new Aga.Controls.Tree.TreeColumn();
-			this.m_parentsPercentColumn = new Aga.Controls.Tree.TreeColumn();
-			this.m_parentsIdTextBox = new Aga.Controls.Tree.NodeControls.NodeTextBox();
-			this.m_parentsThreadTextBox = new Aga.Controls.Tree.NodeControls.NodeTextBox();
-			this.m_parentsNameTextBox = new Aga.Controls.Tree.NodeControls.NodeTextBox();
-			this.m_parentsTimeTextBox = new Aga.Controls.Tree.NodeControls.NodeTextBox();
-			this.m_parentsPercentTextBox = new Aga.Controls.Tree.NodeControls.NodeTextBox();
-			this.m_callers = new Aga.Controls.Tree.TreeViewAdv();
-			this.m_callersIdColumn = new Aga.Controls.Tree.TreeColumn();
-			this.m_callersThreadIdColumn = new Aga.Controls.Tree.TreeColumn();
-			this.m_callersNameColumn = new Aga.Controls.Tree.TreeColumn();
-			this.m_callersTimeColumn = new Aga.Controls.Tree.TreeColumn();
-			this.m_callersPercentColumn = new Aga.Controls.Tree.TreeColumn();
-			this.m_callersIdTextBox = new Aga.Controls.Tree.NodeControls.NodeTextBox();
-			this.m_callersThreadTextBox = new Aga.Controls.Tree.NodeControls.NodeTextBox();
-			this.m_callersNameTextBox = new Aga.Controls.Tree.NodeControls.NodeTextBox();
-			this.m_callersTimeTextBox = new Aga.Controls.Tree.NodeControls.NodeTextBox();
-			this.m_callersPercentTextBox = new Aga.Controls.Tree.NodeControls.NodeTextBox();
+			this.m_topDown = new Aga.Controls.Tree.TreeViewAdv();
+			this.m_topDownIdColumn = new Aga.Controls.Tree.TreeColumn();
+			this.m_topDownThreadIdColumn = new Aga.Controls.Tree.TreeColumn();
+			this.m_topDownNameColumn = new Aga.Controls.Tree.TreeColumn();
+			this.m_topDownTimeColumn = new Aga.Controls.Tree.TreeColumn();
+			this.m_topDownPercentColumn = new Aga.Controls.Tree.TreeColumn();
+			this.m_topDownIdTextBox = new Aga.Controls.Tree.NodeControls.NodeTextBox();
+			this.m_topDownThreadTextBox = new Aga.Controls.Tree.NodeControls.NodeTextBox();
+			this.m_topDownNameTextBox = new Aga.Controls.Tree.NodeControls.NodeTextBox();
+			this.m_topDownTimeTextBox = new Aga.Controls.Tree.NodeControls.NodeTextBox();
+			this.m_topDownPercentTextBox = new Aga.Controls.Tree.NodeControls.NodeTextBox();
+			this.m_bottomUp = new Aga.Controls.Tree.TreeViewAdv();
+			this.m_bottomUpIdColumn = new Aga.Controls.Tree.TreeColumn();
+			this.m_bottomUpThreadIdColumn = new Aga.Controls.Tree.TreeColumn();
+			this.m_bottomUpNameColumn = new Aga.Controls.Tree.TreeColumn();
+			this.m_bottomUpTimeColumn = new Aga.Controls.Tree.TreeColumn();
+			this.m_bottomUpPercentColumn = new Aga.Controls.Tree.TreeColumn();
+			this.m_bottomUpIdTextBox = new Aga.Controls.Tree.NodeControls.NodeTextBox();
+			this.m_bottomUpThreadTextBox = new Aga.Controls.Tree.NodeControls.NodeTextBox();
+			this.m_bottomUpNameTextBox = new Aga.Controls.Tree.NodeControls.NodeTextBox();
+			this.m_bottomUpTimeTextBox = new Aga.Controls.Tree.NodeControls.NodeTextBox();
+			this.m_bottomUpPercentTextBox = new Aga.Controls.Tree.NodeControls.NodeTextBox();
 			this.m_refreshButton = new System.Windows.Forms.Button();
 			this.m_splitter.Panel1.SuspendLayout();
 			this.m_splitter.Panel2.SuspendLayout();
@@ -90,230 +90,230 @@ namespace SlimTuneUI.CoreVis
 			// 
 			// m_splitter.Panel1
 			// 
-			this.m_splitter.Panel1.Controls.Add(this.m_callees);
+			this.m_splitter.Panel1.Controls.Add(this.m_topDown);
 			// 
 			// m_splitter.Panel2
 			// 
-			this.m_splitter.Panel2.Controls.Add(this.m_callers);
+			this.m_splitter.Panel2.Controls.Add(this.m_bottomUp);
 			this.m_splitter.Size = new System.Drawing.Size(884, 569);
 			this.m_splitter.SplitterDistance = 268;
 			this.m_splitter.TabIndex = 0;
 			// 
-			// m_callees
+			// m_topDown
 			// 
-			this.m_callees.BackColor = System.Drawing.SystemColors.Window;
-			this.m_callees.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.m_callees.Columns.Add(this.m_parentsIdColumn);
-			this.m_callees.Columns.Add(this.m_parentsThreadIdColumn);
-			this.m_callees.Columns.Add(this.m_parentsNameColumn);
-			this.m_callees.Columns.Add(this.m_parentsTimeColumn);
-			this.m_callees.Columns.Add(this.m_parentsPercentColumn);
-			this.m_callees.DefaultToolTipProvider = null;
-			this.m_callees.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.m_callees.DragDropMarkColor = System.Drawing.Color.Black;
-			this.m_callees.GridLineStyle = ((Aga.Controls.Tree.GridLineStyle) ((Aga.Controls.Tree.GridLineStyle.Horizontal | Aga.Controls.Tree.GridLineStyle.Vertical)));
-			this.m_callees.LineColor = System.Drawing.SystemColors.ControlDark;
-			this.m_callees.LoadOnDemand = true;
-			this.m_callees.Location = new System.Drawing.Point(0, 0);
-			this.m_callees.Model = null;
-			this.m_callees.Name = "m_callees";
-			this.m_callees.NodeControls.Add(this.m_parentsIdTextBox);
-			this.m_callees.NodeControls.Add(this.m_parentsThreadTextBox);
-			this.m_callees.NodeControls.Add(this.m_parentsNameTextBox);
-			this.m_callees.NodeControls.Add(this.m_parentsTimeTextBox);
-			this.m_callees.NodeControls.Add(this.m_parentsPercentTextBox);
-			this.m_callees.SelectedNode = null;
-			this.m_callees.Size = new System.Drawing.Size(884, 268);
-			this.m_callees.TabIndex = 0;
-			this.m_callees.UnloadCollapsedOnReload = true;
-			this.m_callees.UseColumns = true;
-			this.m_callees.ColumnClicked += new System.EventHandler<Aga.Controls.Tree.TreeColumnEventArgs>(this.ColumnClicked);
+			this.m_topDown.BackColor = System.Drawing.SystemColors.Window;
+			this.m_topDown.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.m_topDown.Columns.Add(this.m_topDownIdColumn);
+			this.m_topDown.Columns.Add(this.m_topDownThreadIdColumn);
+			this.m_topDown.Columns.Add(this.m_topDownNameColumn);
+			this.m_topDown.Columns.Add(this.m_topDownTimeColumn);
+			this.m_topDown.Columns.Add(this.m_topDownPercentColumn);
+			this.m_topDown.DefaultToolTipProvider = null;
+			this.m_topDown.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.m_topDown.DragDropMarkColor = System.Drawing.Color.Black;
+			this.m_topDown.GridLineStyle = ((Aga.Controls.Tree.GridLineStyle) ((Aga.Controls.Tree.GridLineStyle.Horizontal | Aga.Controls.Tree.GridLineStyle.Vertical)));
+			this.m_topDown.LineColor = System.Drawing.SystemColors.ControlDark;
+			this.m_topDown.LoadOnDemand = true;
+			this.m_topDown.Location = new System.Drawing.Point(0, 0);
+			this.m_topDown.Model = null;
+			this.m_topDown.Name = "m_topDown";
+			this.m_topDown.NodeControls.Add(this.m_topDownIdTextBox);
+			this.m_topDown.NodeControls.Add(this.m_topDownThreadTextBox);
+			this.m_topDown.NodeControls.Add(this.m_topDownNameTextBox);
+			this.m_topDown.NodeControls.Add(this.m_topDownTimeTextBox);
+			this.m_topDown.NodeControls.Add(this.m_topDownPercentTextBox);
+			this.m_topDown.SelectedNode = null;
+			this.m_topDown.Size = new System.Drawing.Size(884, 268);
+			this.m_topDown.TabIndex = 0;
+			this.m_topDown.UnloadCollapsedOnReload = true;
+			this.m_topDown.UseColumns = true;
+			this.m_topDown.ColumnClicked += new System.EventHandler<Aga.Controls.Tree.TreeColumnEventArgs>(this.ColumnClicked);
 			// 
-			// m_parentsIdColumn
+			// m_topDownIdColumn
 			// 
-			this.m_parentsIdColumn.Header = "Id";
-			this.m_parentsIdColumn.MinColumnWidth = 100;
-			this.m_parentsIdColumn.Sortable = true;
-			this.m_parentsIdColumn.SortOrder = System.Windows.Forms.SortOrder.None;
-			this.m_parentsIdColumn.TooltipText = null;
-			this.m_parentsIdColumn.Width = 200;
+			this.m_topDownIdColumn.Header = "Id";
+			this.m_topDownIdColumn.MinColumnWidth = 100;
+			this.m_topDownIdColumn.Sortable = true;
+			this.m_topDownIdColumn.SortOrder = System.Windows.Forms.SortOrder.None;
+			this.m_topDownIdColumn.TooltipText = null;
+			this.m_topDownIdColumn.Width = 200;
 			// 
-			// m_parentsThreadIdColumn
+			// m_topDownThreadIdColumn
 			// 
-			this.m_parentsThreadIdColumn.Header = "Thread";
-			this.m_parentsThreadIdColumn.MinColumnWidth = 50;
-			this.m_parentsThreadIdColumn.Sortable = true;
-			this.m_parentsThreadIdColumn.SortOrder = System.Windows.Forms.SortOrder.None;
-			this.m_parentsThreadIdColumn.TooltipText = null;
-			this.m_parentsThreadIdColumn.Width = 80;
+			this.m_topDownThreadIdColumn.Header = "Thread";
+			this.m_topDownThreadIdColumn.MinColumnWidth = 50;
+			this.m_topDownThreadIdColumn.Sortable = true;
+			this.m_topDownThreadIdColumn.SortOrder = System.Windows.Forms.SortOrder.None;
+			this.m_topDownThreadIdColumn.TooltipText = null;
+			this.m_topDownThreadIdColumn.Width = 80;
 			// 
-			// m_parentsNameColumn
+			// m_topDownNameColumn
 			// 
-			this.m_parentsNameColumn.Header = "Parents";
-			this.m_parentsNameColumn.MinColumnWidth = 200;
-			this.m_parentsNameColumn.Sortable = true;
-			this.m_parentsNameColumn.SortOrder = System.Windows.Forms.SortOrder.None;
-			this.m_parentsNameColumn.TooltipText = null;
-			this.m_parentsNameColumn.Width = 420;
+			this.m_topDownNameColumn.Header = "Function Calls (top-down)";
+			this.m_topDownNameColumn.MinColumnWidth = 200;
+			this.m_topDownNameColumn.Sortable = true;
+			this.m_topDownNameColumn.SortOrder = System.Windows.Forms.SortOrder.None;
+			this.m_topDownNameColumn.TooltipText = null;
+			this.m_topDownNameColumn.Width = 420;
 			// 
-			// m_parentsTimeColumn
+			// m_topDownTimeColumn
 			// 
-			this.m_parentsTimeColumn.Header = "Time (Inclusive)";
-			this.m_parentsTimeColumn.MinColumnWidth = 60;
-			this.m_parentsTimeColumn.Sortable = true;
-			this.m_parentsTimeColumn.SortOrder = System.Windows.Forms.SortOrder.None;
-			this.m_parentsTimeColumn.TooltipText = null;
-			this.m_parentsTimeColumn.Width = 90;
+			this.m_topDownTimeColumn.Header = "Time (Inclusive)";
+			this.m_topDownTimeColumn.MinColumnWidth = 60;
+			this.m_topDownTimeColumn.Sortable = true;
+			this.m_topDownTimeColumn.SortOrder = System.Windows.Forms.SortOrder.None;
+			this.m_topDownTimeColumn.TooltipText = null;
+			this.m_topDownTimeColumn.Width = 90;
 			// 
-			// m_parentsPercentColumn
+			// m_topDownPercentColumn
 			// 
-			this.m_parentsPercentColumn.Header = "% of Parent";
-			this.m_parentsPercentColumn.SortOrder = System.Windows.Forms.SortOrder.None;
-			this.m_parentsPercentColumn.TooltipText = null;
-			this.m_parentsPercentColumn.Width = 80;
+			this.m_topDownPercentColumn.Header = "% of Parent";
+			this.m_topDownPercentColumn.SortOrder = System.Windows.Forms.SortOrder.None;
+			this.m_topDownPercentColumn.TooltipText = null;
+			this.m_topDownPercentColumn.Width = 80;
 			// 
-			// m_parentsIdTextBox
+			// m_topDownIdTextBox
 			// 
-			this.m_parentsIdTextBox.DataPropertyName = "Id";
-			this.m_parentsIdTextBox.IncrementalSearchEnabled = true;
-			this.m_parentsIdTextBox.LeftMargin = 3;
-			this.m_parentsIdTextBox.ParentColumn = this.m_parentsIdColumn;
+			this.m_topDownIdTextBox.DataPropertyName = "Id";
+			this.m_topDownIdTextBox.IncrementalSearchEnabled = true;
+			this.m_topDownIdTextBox.LeftMargin = 3;
+			this.m_topDownIdTextBox.ParentColumn = this.m_topDownIdColumn;
 			// 
-			// m_parentsThreadTextBox
+			// m_topDownThreadTextBox
 			// 
-			this.m_parentsThreadTextBox.DataPropertyName = "Thread";
-			this.m_parentsThreadTextBox.IncrementalSearchEnabled = true;
-			this.m_parentsThreadTextBox.LeftMargin = 3;
-			this.m_parentsThreadTextBox.ParentColumn = this.m_parentsThreadIdColumn;
+			this.m_topDownThreadTextBox.DataPropertyName = "Thread";
+			this.m_topDownThreadTextBox.IncrementalSearchEnabled = true;
+			this.m_topDownThreadTextBox.LeftMargin = 3;
+			this.m_topDownThreadTextBox.ParentColumn = this.m_topDownThreadIdColumn;
 			// 
-			// m_parentsNameTextBox
+			// m_topDownNameTextBox
 			// 
-			this.m_parentsNameTextBox.DataPropertyName = "Name";
-			this.m_parentsNameTextBox.IncrementalSearchEnabled = true;
-			this.m_parentsNameTextBox.LeftMargin = 3;
-			this.m_parentsNameTextBox.ParentColumn = this.m_parentsNameColumn;
+			this.m_topDownNameTextBox.DataPropertyName = "Name";
+			this.m_topDownNameTextBox.IncrementalSearchEnabled = true;
+			this.m_topDownNameTextBox.LeftMargin = 3;
+			this.m_topDownNameTextBox.ParentColumn = this.m_topDownNameColumn;
 			// 
-			// m_parentsTimeTextBox
+			// m_topDownTimeTextBox
 			// 
-			this.m_parentsTimeTextBox.DataPropertyName = "Time";
-			this.m_parentsTimeTextBox.IncrementalSearchEnabled = true;
-			this.m_parentsTimeTextBox.LeftMargin = 3;
-			this.m_parentsTimeTextBox.ParentColumn = this.m_parentsTimeColumn;
+			this.m_topDownTimeTextBox.DataPropertyName = "Time";
+			this.m_topDownTimeTextBox.IncrementalSearchEnabled = true;
+			this.m_topDownTimeTextBox.LeftMargin = 3;
+			this.m_topDownTimeTextBox.ParentColumn = this.m_topDownTimeColumn;
 			// 
-			// m_parentsPercentTextBox
+			// m_topDownPercentTextBox
 			// 
-			this.m_parentsPercentTextBox.DataPropertyName = "PercentTime";
-			this.m_parentsPercentTextBox.IncrementalSearchEnabled = true;
-			this.m_parentsPercentTextBox.LeftMargin = 3;
-			this.m_parentsPercentTextBox.ParentColumn = this.m_parentsPercentColumn;
+			this.m_topDownPercentTextBox.DataPropertyName = "PercentTime";
+			this.m_topDownPercentTextBox.IncrementalSearchEnabled = true;
+			this.m_topDownPercentTextBox.LeftMargin = 3;
+			this.m_topDownPercentTextBox.ParentColumn = this.m_topDownPercentColumn;
 			// 
-			// m_callers
+			// m_bottomUp
 			// 
-			this.m_callers.BackColor = System.Drawing.SystemColors.Window;
-			this.m_callers.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.m_callers.Columns.Add(this.m_callersIdColumn);
-			this.m_callers.Columns.Add(this.m_callersThreadIdColumn);
-			this.m_callers.Columns.Add(this.m_callersNameColumn);
-			this.m_callers.Columns.Add(this.m_callersTimeColumn);
-			this.m_callers.Columns.Add(this.m_callersPercentColumn);
-			this.m_callers.DefaultToolTipProvider = null;
-			this.m_callers.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.m_callers.DragDropMarkColor = System.Drawing.Color.Black;
-			this.m_callers.GridLineStyle = ((Aga.Controls.Tree.GridLineStyle) ((Aga.Controls.Tree.GridLineStyle.Horizontal | Aga.Controls.Tree.GridLineStyle.Vertical)));
-			this.m_callers.LineColor = System.Drawing.SystemColors.ControlDark;
-			this.m_callers.LoadOnDemand = true;
-			this.m_callers.Location = new System.Drawing.Point(0, 0);
-			this.m_callers.Model = null;
-			this.m_callers.Name = "m_callers";
-			this.m_callers.NodeControls.Add(this.m_callersIdTextBox);
-			this.m_callers.NodeControls.Add(this.m_callersThreadTextBox);
-			this.m_callers.NodeControls.Add(this.m_callersNameTextBox);
-			this.m_callers.NodeControls.Add(this.m_callersTimeTextBox);
-			this.m_callers.NodeControls.Add(this.m_callersPercentTextBox);
-			this.m_callers.SelectedNode = null;
-			this.m_callers.Size = new System.Drawing.Size(884, 297);
-			this.m_callers.TabIndex = 1;
-			this.m_callers.UseColumns = true;
-			this.m_callers.ColumnClicked += new System.EventHandler<Aga.Controls.Tree.TreeColumnEventArgs>(this.ColumnClicked);
+			this.m_bottomUp.BackColor = System.Drawing.SystemColors.Window;
+			this.m_bottomUp.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.m_bottomUp.Columns.Add(this.m_bottomUpIdColumn);
+			this.m_bottomUp.Columns.Add(this.m_bottomUpThreadIdColumn);
+			this.m_bottomUp.Columns.Add(this.m_bottomUpNameColumn);
+			this.m_bottomUp.Columns.Add(this.m_bottomUpTimeColumn);
+			this.m_bottomUp.Columns.Add(this.m_bottomUpPercentColumn);
+			this.m_bottomUp.DefaultToolTipProvider = null;
+			this.m_bottomUp.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.m_bottomUp.DragDropMarkColor = System.Drawing.Color.Black;
+			this.m_bottomUp.GridLineStyle = ((Aga.Controls.Tree.GridLineStyle) ((Aga.Controls.Tree.GridLineStyle.Horizontal | Aga.Controls.Tree.GridLineStyle.Vertical)));
+			this.m_bottomUp.LineColor = System.Drawing.SystemColors.ControlDark;
+			this.m_bottomUp.LoadOnDemand = true;
+			this.m_bottomUp.Location = new System.Drawing.Point(0, 0);
+			this.m_bottomUp.Model = null;
+			this.m_bottomUp.Name = "m_bottomUp";
+			this.m_bottomUp.NodeControls.Add(this.m_bottomUpIdTextBox);
+			this.m_bottomUp.NodeControls.Add(this.m_bottomUpThreadTextBox);
+			this.m_bottomUp.NodeControls.Add(this.m_bottomUpNameTextBox);
+			this.m_bottomUp.NodeControls.Add(this.m_bottomUpTimeTextBox);
+			this.m_bottomUp.NodeControls.Add(this.m_bottomUpPercentTextBox);
+			this.m_bottomUp.SelectedNode = null;
+			this.m_bottomUp.Size = new System.Drawing.Size(884, 297);
+			this.m_bottomUp.TabIndex = 1;
+			this.m_bottomUp.UseColumns = true;
+			this.m_bottomUp.ColumnClicked += new System.EventHandler<Aga.Controls.Tree.TreeColumnEventArgs>(this.ColumnClicked);
 			// 
-			// m_callersIdColumn
+			// m_bottomUpIdColumn
 			// 
-			this.m_callersIdColumn.Header = "Id";
-			this.m_callersIdColumn.MinColumnWidth = 100;
-			this.m_callersIdColumn.SortOrder = System.Windows.Forms.SortOrder.None;
-			this.m_callersIdColumn.TooltipText = null;
-			this.m_callersIdColumn.Width = 200;
+			this.m_bottomUpIdColumn.Header = "Id";
+			this.m_bottomUpIdColumn.MinColumnWidth = 100;
+			this.m_bottomUpIdColumn.SortOrder = System.Windows.Forms.SortOrder.None;
+			this.m_bottomUpIdColumn.TooltipText = null;
+			this.m_bottomUpIdColumn.Width = 200;
 			// 
-			// m_callersThreadIdColumn
+			// m_bottomUpThreadIdColumn
 			// 
-			this.m_callersThreadIdColumn.Header = "Thread";
-			this.m_callersThreadIdColumn.MinColumnWidth = 50;
-			this.m_callersThreadIdColumn.Sortable = true;
-			this.m_callersThreadIdColumn.SortOrder = System.Windows.Forms.SortOrder.None;
-			this.m_callersThreadIdColumn.TooltipText = null;
-			this.m_callersThreadIdColumn.Width = 80;
+			this.m_bottomUpThreadIdColumn.Header = "Thread";
+			this.m_bottomUpThreadIdColumn.MinColumnWidth = 50;
+			this.m_bottomUpThreadIdColumn.Sortable = true;
+			this.m_bottomUpThreadIdColumn.SortOrder = System.Windows.Forms.SortOrder.None;
+			this.m_bottomUpThreadIdColumn.TooltipText = null;
+			this.m_bottomUpThreadIdColumn.Width = 80;
 			// 
-			// m_callersNameColumn
+			// m_bottomUpNameColumn
 			// 
-			this.m_callersNameColumn.Header = "Callers";
-			this.m_callersNameColumn.MinColumnWidth = 200;
-			this.m_callersNameColumn.Sortable = true;
-			this.m_callersNameColumn.SortOrder = System.Windows.Forms.SortOrder.None;
-			this.m_callersNameColumn.TooltipText = null;
-			this.m_callersNameColumn.Width = 420;
+			this.m_bottomUpNameColumn.Header = "Function Parents (bottom-up)";
+			this.m_bottomUpNameColumn.MinColumnWidth = 200;
+			this.m_bottomUpNameColumn.Sortable = true;
+			this.m_bottomUpNameColumn.SortOrder = System.Windows.Forms.SortOrder.None;
+			this.m_bottomUpNameColumn.TooltipText = null;
+			this.m_bottomUpNameColumn.Width = 420;
 			// 
-			// m_callersTimeColumn
+			// m_bottomUpTimeColumn
 			// 
-			this.m_callersTimeColumn.Header = "Time (Exclusive)";
-			this.m_callersTimeColumn.MinColumnWidth = 50;
-			this.m_callersTimeColumn.Sortable = true;
-			this.m_callersTimeColumn.SortOrder = System.Windows.Forms.SortOrder.None;
-			this.m_callersTimeColumn.TooltipText = null;
-			this.m_callersTimeColumn.Width = 90;
+			this.m_bottomUpTimeColumn.Header = "Time (Exclusive)";
+			this.m_bottomUpTimeColumn.MinColumnWidth = 50;
+			this.m_bottomUpTimeColumn.Sortable = true;
+			this.m_bottomUpTimeColumn.SortOrder = System.Windows.Forms.SortOrder.None;
+			this.m_bottomUpTimeColumn.TooltipText = null;
+			this.m_bottomUpTimeColumn.Width = 90;
 			// 
-			// m_callersPercentColumn
+			// m_bottomUpPercentColumn
 			// 
-			this.m_callersPercentColumn.Header = "% of Calls";
-			this.m_callersPercentColumn.MinColumnWidth = 50;
-			this.m_callersPercentColumn.Sortable = true;
-			this.m_callersPercentColumn.SortOrder = System.Windows.Forms.SortOrder.None;
-			this.m_callersPercentColumn.TooltipText = null;
-			this.m_callersPercentColumn.Width = 90;
+			this.m_bottomUpPercentColumn.Header = "% of Calls";
+			this.m_bottomUpPercentColumn.MinColumnWidth = 50;
+			this.m_bottomUpPercentColumn.Sortable = true;
+			this.m_bottomUpPercentColumn.SortOrder = System.Windows.Forms.SortOrder.None;
+			this.m_bottomUpPercentColumn.TooltipText = null;
+			this.m_bottomUpPercentColumn.Width = 90;
 			// 
-			// m_callersIdTextBox
+			// m_bottomUpIdTextBox
 			// 
-			this.m_callersIdTextBox.DataPropertyName = "Id";
-			this.m_callersIdTextBox.IncrementalSearchEnabled = true;
-			this.m_callersIdTextBox.LeftMargin = 3;
-			this.m_callersIdTextBox.ParentColumn = this.m_callersIdColumn;
+			this.m_bottomUpIdTextBox.DataPropertyName = "Id";
+			this.m_bottomUpIdTextBox.IncrementalSearchEnabled = true;
+			this.m_bottomUpIdTextBox.LeftMargin = 3;
+			this.m_bottomUpIdTextBox.ParentColumn = this.m_bottomUpIdColumn;
 			// 
-			// m_callersThreadTextBox
+			// m_bottomUpThreadTextBox
 			// 
-			this.m_callersThreadTextBox.DataPropertyName = "Thread";
-			this.m_callersThreadTextBox.IncrementalSearchEnabled = true;
-			this.m_callersThreadTextBox.LeftMargin = 3;
-			this.m_callersThreadTextBox.ParentColumn = this.m_callersThreadIdColumn;
+			this.m_bottomUpThreadTextBox.DataPropertyName = "Thread";
+			this.m_bottomUpThreadTextBox.IncrementalSearchEnabled = true;
+			this.m_bottomUpThreadTextBox.LeftMargin = 3;
+			this.m_bottomUpThreadTextBox.ParentColumn = this.m_bottomUpThreadIdColumn;
 			// 
-			// m_callersNameTextBox
+			// m_bottomUpNameTextBox
 			// 
-			this.m_callersNameTextBox.DataPropertyName = "Name";
-			this.m_callersNameTextBox.IncrementalSearchEnabled = true;
-			this.m_callersNameTextBox.LeftMargin = 3;
-			this.m_callersNameTextBox.ParentColumn = this.m_callersNameColumn;
+			this.m_bottomUpNameTextBox.DataPropertyName = "Name";
+			this.m_bottomUpNameTextBox.IncrementalSearchEnabled = true;
+			this.m_bottomUpNameTextBox.LeftMargin = 3;
+			this.m_bottomUpNameTextBox.ParentColumn = this.m_bottomUpNameColumn;
 			// 
-			// m_callersTimeTextBox
+			// m_bottomUpTimeTextBox
 			// 
-			this.m_callersTimeTextBox.DataPropertyName = "Time";
-			this.m_callersTimeTextBox.IncrementalSearchEnabled = true;
-			this.m_callersTimeTextBox.LeftMargin = 3;
-			this.m_callersTimeTextBox.ParentColumn = this.m_callersTimeColumn;
+			this.m_bottomUpTimeTextBox.DataPropertyName = "Time";
+			this.m_bottomUpTimeTextBox.IncrementalSearchEnabled = true;
+			this.m_bottomUpTimeTextBox.LeftMargin = 3;
+			this.m_bottomUpTimeTextBox.ParentColumn = this.m_bottomUpTimeColumn;
 			// 
-			// m_callersPercentTextBox
+			// m_bottomUpPercentTextBox
 			// 
-			this.m_callersPercentTextBox.DataPropertyName = "PercentTime";
-			this.m_callersPercentTextBox.IncrementalSearchEnabled = true;
-			this.m_callersPercentTextBox.LeftMargin = 3;
-			this.m_callersPercentTextBox.ParentColumn = this.m_callersPercentColumn;
+			this.m_bottomUpPercentTextBox.DataPropertyName = "PercentTime";
+			this.m_bottomUpPercentTextBox.IncrementalSearchEnabled = true;
+			this.m_bottomUpPercentTextBox.LeftMargin = 3;
+			this.m_bottomUpPercentTextBox.ParentColumn = this.m_bottomUpPercentColumn;
 			// 
 			// m_refreshButton
 			// 
@@ -347,28 +347,28 @@ namespace SlimTuneUI.CoreVis
 		#endregion
 
 		private System.Windows.Forms.SplitContainer m_splitter;
-		private Aga.Controls.Tree.TreeViewAdv m_callees;
-		private Aga.Controls.Tree.TreeViewAdv m_callers;
-		private Aga.Controls.Tree.TreeColumn m_parentsIdColumn;
-		private Aga.Controls.Tree.TreeColumn m_parentsThreadIdColumn;
-		private Aga.Controls.Tree.TreeColumn m_parentsNameColumn;
-		private Aga.Controls.Tree.TreeColumn m_parentsTimeColumn;
-		private Aga.Controls.Tree.TreeColumn m_callersIdColumn;
-		private Aga.Controls.Tree.TreeColumn m_callersThreadIdColumn;
-		private Aga.Controls.Tree.TreeColumn m_callersNameColumn;
-		private Aga.Controls.Tree.TreeColumn m_callersTimeColumn;
-		private Aga.Controls.Tree.NodeControls.NodeTextBox m_parentsIdTextBox;
-		private Aga.Controls.Tree.NodeControls.NodeTextBox m_parentsThreadTextBox;
-		private Aga.Controls.Tree.NodeControls.NodeTextBox m_parentsNameTextBox;
-		private Aga.Controls.Tree.NodeControls.NodeTextBox m_callersIdTextBox;
-		private Aga.Controls.Tree.NodeControls.NodeTextBox m_callersThreadTextBox;
-		private Aga.Controls.Tree.NodeControls.NodeTextBox m_callersNameTextBox;
-		private Aga.Controls.Tree.NodeControls.NodeTextBox m_callersTimeTextBox;
+		private Aga.Controls.Tree.TreeViewAdv m_topDown;
+		private Aga.Controls.Tree.TreeViewAdv m_bottomUp;
+		private Aga.Controls.Tree.TreeColumn m_topDownIdColumn;
+		private Aga.Controls.Tree.TreeColumn m_topDownThreadIdColumn;
+		private Aga.Controls.Tree.TreeColumn m_topDownNameColumn;
+		private Aga.Controls.Tree.TreeColumn m_topDownTimeColumn;
+		private Aga.Controls.Tree.TreeColumn m_bottomUpIdColumn;
+		private Aga.Controls.Tree.TreeColumn m_bottomUpThreadIdColumn;
+		private Aga.Controls.Tree.TreeColumn m_bottomUpNameColumn;
+		private Aga.Controls.Tree.TreeColumn m_bottomUpTimeColumn;
+		private Aga.Controls.Tree.NodeControls.NodeTextBox m_topDownIdTextBox;
+		private Aga.Controls.Tree.NodeControls.NodeTextBox m_topDownThreadTextBox;
+		private Aga.Controls.Tree.NodeControls.NodeTextBox m_topDownNameTextBox;
+		private Aga.Controls.Tree.NodeControls.NodeTextBox m_bottomUpIdTextBox;
+		private Aga.Controls.Tree.NodeControls.NodeTextBox m_bottomUpThreadTextBox;
+		private Aga.Controls.Tree.NodeControls.NodeTextBox m_bottomUpNameTextBox;
+		private Aga.Controls.Tree.NodeControls.NodeTextBox m_bottomUpTimeTextBox;
 		private System.Windows.Forms.Button m_refreshButton;
-		private Aga.Controls.Tree.NodeControls.NodeTextBox m_parentsTimeTextBox;
-		private Aga.Controls.Tree.TreeColumn m_callersPercentColumn;
-		private Aga.Controls.Tree.NodeControls.NodeTextBox m_callersPercentTextBox;
-		private Aga.Controls.Tree.TreeColumn m_parentsPercentColumn;
-		private Aga.Controls.Tree.NodeControls.NodeTextBox m_parentsPercentTextBox;
+		private Aga.Controls.Tree.NodeControls.NodeTextBox m_topDownTimeTextBox;
+		private Aga.Controls.Tree.TreeColumn m_bottomUpPercentColumn;
+		private Aga.Controls.Tree.NodeControls.NodeTextBox m_bottomUpPercentTextBox;
+		private Aga.Controls.Tree.TreeColumn m_topDownPercentColumn;
+		private Aga.Controls.Tree.NodeControls.NodeTextBox m_topDownPercentTextBox;
 	}
 }

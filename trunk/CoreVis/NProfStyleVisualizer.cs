@@ -39,8 +39,8 @@ namespace SlimTuneUI.CoreVis
 		Connection m_connection;
 		Snapshot m_snapshot;
 
-		TopDownModel m_calleesModel;
-		BottomUpModel m_callersModel;
+		TopDownModel m_topDownModel;
+		BottomUpModel m_bottomUpModel;
 
 		public string DisplayName
 		{
@@ -73,16 +73,16 @@ namespace SlimTuneUI.CoreVis
 			m_connection = connection;
 			m_snapshot = snapshot;
 
-			m_calleesModel = new TopDownModel(connection.DataEngine, m_snapshot);
-			m_callersModel = new BottomUpModel(connection.DataEngine, m_snapshot);
-			m_callees.Model = new SortedTreeModel(m_calleesModel);
-			m_callers.Model = new SortedTreeModel(m_callersModel);
+			m_topDownModel = new TopDownModel(connection.DataEngine, m_snapshot);
+			m_bottomUpModel = new BottomUpModel(connection.DataEngine, m_snapshot);
+			m_topDown.Model = new SortedTreeModel(m_topDownModel);
+			m_bottomUp.Model = new SortedTreeModel(m_bottomUpModel);
 
 			//set the sort orders
-			ColumnClicked(m_callees, new TreeColumnEventArgs(m_parentsTimeColumn));
-			ColumnClicked(m_callees, new TreeColumnEventArgs(m_parentsTimeColumn));
-			ColumnClicked(m_callers, new TreeColumnEventArgs(m_callersTimeColumn));
-			ColumnClicked(m_callers, new TreeColumnEventArgs(m_callersTimeColumn));
+			ColumnClicked(m_topDown, new TreeColumnEventArgs(m_topDownTimeColumn));
+			ColumnClicked(m_topDown, new TreeColumnEventArgs(m_topDownTimeColumn));
+			ColumnClicked(m_bottomUp, new TreeColumnEventArgs(m_bottomUpTimeColumn));
+			ColumnClicked(m_bottomUp, new TreeColumnEventArgs(m_bottomUpTimeColumn));
 
 			return true;
 		}
@@ -93,8 +93,8 @@ namespace SlimTuneUI.CoreVis
 
 		private void m_refreshButton_Click(object sender, EventArgs e)
 		{
-			m_calleesModel.Refresh();
-			m_callersModel.Refresh();
+			m_topDownModel.Refresh();
+			m_bottomUpModel.Refresh();
 		}
 
 		private void ColumnClicked(object sender, TreeColumnEventArgs e)
@@ -138,15 +138,15 @@ namespace SlimTuneUI.CoreVis
 			{
 				//yeah, this is awful
 				int result = 0;
-				if(Column == Parent.m_parentsIdColumn || Column == Parent.m_callersIdColumn)
+				if(Column == Parent.m_topDownIdColumn || Column == Parent.m_bottomUpIdColumn)
 					result = x.Id.CompareTo(y.Id);
-				else if(Column == Parent.m_parentsThreadIdColumn || Column == Parent.m_callersThreadIdColumn)
+				else if(Column == Parent.m_topDownThreadIdColumn || Column == Parent.m_bottomUpThreadIdColumn)
 					result = x.Thread.CompareTo(y.Thread);
-				else if(Column == Parent.m_parentsNameColumn || Column == Parent.m_callersNameColumn)
+				else if(Column == Parent.m_topDownNameColumn || Column == Parent.m_bottomUpNameColumn)
 					result = x.Name.CompareTo(y.Name);
-				else if(Column == Parent.m_parentsTimeColumn || Column == Parent.m_callersTimeColumn)
+				else if(Column == Parent.m_topDownTimeColumn || Column == Parent.m_bottomUpTimeColumn)
 					result = x.Time.CompareTo(y.Time);
-				else if(Column == Parent.m_parentsPercentColumn || Column == Parent.m_callersPercentColumn)
+				else if(Column == Parent.m_topDownPercentColumn || Column == Parent.m_bottomUpPercentColumn)
 					result = Compare(x.PercentTime, y.PercentTime);
 
 				//if primary sort is not differentiating, go to secondary sort criteria (hard coded for now)
@@ -219,7 +219,7 @@ group by c.Id
 				{
 					//top level queries
 					var data = session.CreateQuery(kTopLevelQuery)
-						.SetMaxResults(200)
+						.SetMaxResults(100)
 						.List<object[]>();
 					foreach(var row in data)
 					{
@@ -323,7 +323,9 @@ group by c.Id
 				if(treePath.IsEmpty())
 				{
 					//top level queries
-					var calls = session.CreateQuery(kTopLevelQuery).List<Call>();
+					var calls = session.CreateQuery(kTopLevelQuery)
+						.SetMaxResults(100)
+						.List<Call>();
 					foreach(var c in calls)
 					{
 						var item = new FunctionItem();
