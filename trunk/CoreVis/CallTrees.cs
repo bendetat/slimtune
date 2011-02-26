@@ -106,6 +106,11 @@ where c.ParentId = :parentId and c.ChildId = 0
 			get { return this; }
 		}
 
+		public Snapshot Snapshot
+		{
+			get { return m_snapshot; }
+		}
+
 		public CallTrees()
 		{
 			InitializeComponent();

@@ -26,6 +26,11 @@ namespace SlimTuneUI.CoreVis
 			get { return this; }
 		}
 
+		public Snapshot Snapshot
+		{
+			get { return null; }
+		}
+
 		public QueryDebugger()
 		{
 			InitializeComponent();

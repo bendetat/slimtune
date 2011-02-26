@@ -21,8 +21,20 @@ namespace UICore.Mappings
 		public SnapshotMap()
 		{
 			Id(x => x.Id);
+
 			Map(x => x.Name);
 			Map(x => x.DateTime);
+
+			//This causes severe N+1 issues right now
+			/*HasMany(x => x.Calls)
+				.Cascade.Delete()
+				.Inverse()
+				.KeyColumn("SnapshotId");
+			HasMany(x => x.Samples)
+				.Cascade.AllDeleteOrphan()
+				.Inverse()
+				.KeyColumn("SnapshotId");*/
+
 			Table("Snapshots");
 		}
 	}
@@ -103,7 +115,6 @@ namespace UICore.Mappings
 	{
 		public CallMap()
 		{
-			ReadOnly();
 			Id(x => x.Id);
 
 			Map(x => x.Time)
@@ -137,7 +148,6 @@ namespace UICore.Mappings
 	{
 		public SampleMap()
 		{
-			ReadOnly();
 			Id(x => x.Id);
 			Map(x => x.Time)
 				.Not.Nullable();

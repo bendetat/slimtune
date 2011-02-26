@@ -61,6 +61,7 @@ namespace SlimTuneUI
 			else if(conn.IsConnected)
 			{
 				status = "Running";
+				SnapshotButton.Enabled = true;
 			}
 			else
 			{
@@ -338,6 +339,70 @@ namespace SlimTuneUI
 				ReconnectButton.Enabled = false;
 				StatusLabel.Text = "Status: Running";
 				this.BringToFront();
+			}
+		}
+
+		private void DeleteSnapshotButton_Click(object sender, EventArgs e)
+		{
+			var snapshot = SnapshotsListBox.SelectedItem as Snapshot;
+			if(snapshot.Id == 0)
+			{
+				DialogResult result = MessageBox.Show("WARNING: This will clear all currently collected data. Save snapshot before continuing?",
+					"Clear Data", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button3);
+				if(result == DialogResult.Yes)
+				{
+					Connection.DataEngine.Snapshot("Clear Data");
+					RefreshSnapshots();
+					Connection.DataEngine.ClearData();
+				}
+				else if(result == DialogResult.No)
+				{
+					Connection.DataEngine.ClearData();
+				}
+			}
+			else
+			{
+				DateTime snapshotTime = DateTime.FromFileTimeUtc(snapshot.DateTime);
+				DialogResult result = MessageBox.Show(string.Format("Are you sure you want to delete {0}, saved on {1}?", snapshot.Name, snapshotTime),
+					"Delete Snapshot", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2);
+				if(result == DialogResult.Yes)
+				{
+					//delete the snapshot
+					using(var session = Connection.DataEngine.OpenSession())
+					using(var tx = session.BeginTransaction())
+					{
+						session.Lock(snapshot, NHibernate.LockMode.None);
+
+						//have not figured out how to make this automatic yet
+						session.CreateQuery("delete from Call where SnapshotId = :id")
+							.SetInt32("id", snapshot.Id)
+							.ExecuteUpdate();
+						session.CreateQuery("delete from Sample where SnapshotId = :id")
+							.SetInt32("id", snapshot.Id)
+							.ExecuteUpdate();
+
+						session.Delete(snapshot);
+
+						tx.Commit();
+					}
+
+					RefreshSnapshots();
+
+					//close visualizers using the snapshot
+					for(int t = 0; t < VisualizerHost.TabPages.Count;)
+					{
+						var page = VisualizerHost.TabPages[t];
+						var vis = page.Tag as IVisualizer;
+						if(vis.Snapshot.Id == snapshot.Id)
+						{
+							CloseTab(t);
+						}
+						else
+						{
+							++t;
+						}
+					}
+				}
 			}
 		}
 	}

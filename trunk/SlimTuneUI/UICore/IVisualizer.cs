@@ -30,6 +30,7 @@ namespace UICore
 	{
 		string DisplayName { get; }
 		System.Windows.Forms.UserControl Control { get; }
+		Snapshot Snapshot { get; }
 
 		bool Initialize(ProfilerWindowBase mainWindow, Connection connection, Snapshot snapshot);
 		void OnClose();

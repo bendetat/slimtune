@@ -50,19 +50,16 @@ namespace SlimTuneUI
 		private void InitializeComponent()
 		{
 			System.Windows.Forms.GroupBox VisualizersGroupBox;
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ProfilerWindow));
 			this.label1 = new System.Windows.Forms.Label();
 			this.m_openVisualizerButton = new System.Windows.Forms.Button();
 			this.m_visualizerCombo = new System.Windows.Forms.ComboBox();
 			this.MainSplitter = new System.Windows.Forms.SplitContainer();
 			this.SnapshotsGroupBox = new System.Windows.Forms.GroupBox();
+			this.DeleteSnapshotButton = new System.Windows.Forms.Button();
+			this.SnapshotButton = new System.Windows.Forms.Button();
 			this.SnapshotsListBox = new System.Windows.Forms.CheckedListBox();
 			this.label2 = new System.Windows.Forms.Label();
-			this.TasksGroupBox = new System.Windows.Forms.GroupBox();
-			this.ResumeButton = new System.Windows.Forms.Button();
-			this.PauseButton = new System.Windows.Forms.Button();
-			this.ClearDataButton = new System.Windows.Forms.Button();
-			this.SnapshotButton = new System.Windows.Forms.Button();
-			this.TasksLabel = new System.Windows.Forms.Label();
 			this.InfoGroupBox = new System.Windows.Forms.GroupBox();
 			this.ReconnectButton = new System.Windows.Forms.Button();
 			this.StatusLabel = new System.Windows.Forms.Label();
@@ -78,7 +75,6 @@ namespace SlimTuneUI
 			this.MainSplitter.Panel2.SuspendLayout();
 			this.MainSplitter.SuspendLayout();
 			this.SnapshotsGroupBox.SuspendLayout();
-			this.TasksGroupBox.SuspendLayout();
 			this.InfoGroupBox.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -139,7 +135,6 @@ namespace SlimTuneUI
 			// MainSplitter.Panel1
 			// 
 			this.MainSplitter.Panel1.Controls.Add(this.SnapshotsGroupBox);
-			this.MainSplitter.Panel1.Controls.Add(this.TasksGroupBox);
 			this.MainSplitter.Panel1.Controls.Add(this.InfoGroupBox);
 			this.MainSplitter.Panel1.Controls.Add(VisualizersGroupBox);
 			// 
@@ -155,13 +150,36 @@ namespace SlimTuneUI
 			// 
 			this.SnapshotsGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
 						| System.Windows.Forms.AnchorStyles.Right)));
+			this.SnapshotsGroupBox.Controls.Add(this.DeleteSnapshotButton);
+			this.SnapshotsGroupBox.Controls.Add(this.SnapshotButton);
 			this.SnapshotsGroupBox.Controls.Add(this.SnapshotsListBox);
 			this.SnapshotsGroupBox.Controls.Add(this.label2);
-			this.SnapshotsGroupBox.Location = new System.Drawing.Point(4, 374);
+			this.SnapshotsGroupBox.Location = new System.Drawing.Point(4, 265);
 			this.SnapshotsGroupBox.Name = "SnapshotsGroupBox";
 			this.SnapshotsGroupBox.Size = new System.Drawing.Size(194, 140);
 			this.SnapshotsGroupBox.TabIndex = 11;
 			this.SnapshotsGroupBox.TabStop = false;
+			// 
+			// DeleteSnapshotButton
+			// 
+			this.DeleteSnapshotButton.Image = ((System.Drawing.Image) (resources.GetObject("DeleteSnapshotButton.Image")));
+			this.DeleteSnapshotButton.Location = new System.Drawing.Point(5, 69);
+			this.DeleteSnapshotButton.Name = "DeleteSnapshotButton";
+			this.DeleteSnapshotButton.Size = new System.Drawing.Size(30, 23);
+			this.DeleteSnapshotButton.TabIndex = 3;
+			this.DeleteSnapshotButton.UseVisualStyleBackColor = true;
+			this.DeleteSnapshotButton.Click += new System.EventHandler(this.DeleteSnapshotButton_Click);
+			// 
+			// SnapshotButton
+			// 
+			this.SnapshotButton.Enabled = false;
+			this.SnapshotButton.Image = ((System.Drawing.Image) (resources.GetObject("SnapshotButton.Image")));
+			this.SnapshotButton.Location = new System.Drawing.Point(5, 40);
+			this.SnapshotButton.Name = "SnapshotButton";
+			this.SnapshotButton.Size = new System.Drawing.Size(30, 23);
+			this.SnapshotButton.TabIndex = 2;
+			this.SnapshotButton.UseVisualStyleBackColor = true;
+			this.SnapshotButton.Click += new System.EventHandler(this.SnapshotButton_Click);
 			// 
 			// SnapshotsListBox
 			// 
@@ -169,9 +187,9 @@ namespace SlimTuneUI
 						| System.Windows.Forms.AnchorStyles.Right)));
 			this.SnapshotsListBox.FormatString = "({0}) {1} - {2}";
 			this.SnapshotsListBox.FormattingEnabled = true;
-			this.SnapshotsListBox.Location = new System.Drawing.Point(9, 38);
+			this.SnapshotsListBox.Location = new System.Drawing.Point(41, 40);
 			this.SnapshotsListBox.Name = "SnapshotsListBox";
-			this.SnapshotsListBox.Size = new System.Drawing.Size(179, 94);
+			this.SnapshotsListBox.Size = new System.Drawing.Size(147, 94);
 			this.SnapshotsListBox.TabIndex = 1;
 			this.SnapshotsListBox.SelectedIndexChanged += new System.EventHandler(this.SnapshotsListBox_SelectedIndexChanged);
 			this.SnapshotsListBox.Format += new System.Windows.Forms.ListControlConvertEventHandler(this.SnapshotsListBox_Format);
@@ -185,71 +203,6 @@ namespace SlimTuneUI
 			this.label2.Size = new System.Drawing.Size(79, 14);
 			this.label2.TabIndex = 0;
 			this.label2.Text = "Snapshots:";
-			// 
-			// TasksGroupBox
-			// 
-			this.TasksGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
-			this.TasksGroupBox.Controls.Add(this.ResumeButton);
-			this.TasksGroupBox.Controls.Add(this.PauseButton);
-			this.TasksGroupBox.Controls.Add(this.ClearDataButton);
-			this.TasksGroupBox.Controls.Add(this.SnapshotButton);
-			this.TasksGroupBox.Controls.Add(this.TasksLabel);
-			this.TasksGroupBox.Location = new System.Drawing.Point(3, 265);
-			this.TasksGroupBox.Name = "TasksGroupBox";
-			this.TasksGroupBox.Size = new System.Drawing.Size(194, 103);
-			this.TasksGroupBox.TabIndex = 6;
-			this.TasksGroupBox.TabStop = false;
-			// 
-			// ResumeButton
-			// 
-			this.ResumeButton.Location = new System.Drawing.Point(92, 67);
-			this.ResumeButton.Name = "ResumeButton";
-			this.ResumeButton.Size = new System.Drawing.Size(75, 23);
-			this.ResumeButton.TabIndex = 10;
-			this.ResumeButton.Text = "Resume";
-			this.ResumeButton.UseVisualStyleBackColor = true;
-			this.ResumeButton.Visible = false;
-			// 
-			// PauseButton
-			// 
-			this.PauseButton.Location = new System.Drawing.Point(11, 68);
-			this.PauseButton.Name = "PauseButton";
-			this.PauseButton.Size = new System.Drawing.Size(75, 23);
-			this.PauseButton.TabIndex = 9;
-			this.PauseButton.Text = "Pause ";
-			this.PauseButton.UseVisualStyleBackColor = true;
-			this.PauseButton.Visible = false;
-			// 
-			// ClearDataButton
-			// 
-			this.ClearDataButton.Location = new System.Drawing.Point(92, 38);
-			this.ClearDataButton.Name = "ClearDataButton";
-			this.ClearDataButton.Size = new System.Drawing.Size(75, 23);
-			this.ClearDataButton.TabIndex = 2;
-			this.ClearDataButton.Text = "Clear Data";
-			this.ClearDataButton.UseVisualStyleBackColor = true;
-			this.ClearDataButton.Click += new System.EventHandler(this.ClearDataButton_Click);
-			// 
-			// SnapshotButton
-			// 
-			this.SnapshotButton.Location = new System.Drawing.Point(10, 38);
-			this.SnapshotButton.Name = "SnapshotButton";
-			this.SnapshotButton.Size = new System.Drawing.Size(75, 23);
-			this.SnapshotButton.TabIndex = 1;
-			this.SnapshotButton.Text = "Snapshot";
-			this.SnapshotButton.UseVisualStyleBackColor = true;
-			this.SnapshotButton.Click += new System.EventHandler(this.SnapshotButton_Click);
-			// 
-			// TasksLabel
-			// 
-			this.TasksLabel.AutoSize = true;
-			this.TasksLabel.Font = new System.Drawing.Font("Verdana", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
-			this.TasksLabel.Location = new System.Drawing.Point(7, 20);
-			this.TasksLabel.Name = "TasksLabel";
-			this.TasksLabel.Size = new System.Drawing.Size(48, 14);
-			this.TasksLabel.TabIndex = 0;
-			this.TasksLabel.Text = "Tasks:";
 			// 
 			// InfoGroupBox
 			// 
@@ -369,8 +322,6 @@ namespace SlimTuneUI
 			this.MainSplitter.ResumeLayout(false);
 			this.SnapshotsGroupBox.ResumeLayout(false);
 			this.SnapshotsGroupBox.PerformLayout();
-			this.TasksGroupBox.ResumeLayout(false);
-			this.TasksGroupBox.PerformLayout();
 			this.InfoGroupBox.ResumeLayout(false);
 			this.InfoGroupBox.PerformLayout();
 			this.ResumeLayout(false);
@@ -390,17 +341,13 @@ namespace SlimTuneUI
 		private System.Windows.Forms.Label HostLabel;
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.Label StatusLabel;
-		private System.Windows.Forms.GroupBox TasksGroupBox;
-		private System.Windows.Forms.Label TasksLabel;
-		private System.Windows.Forms.Button ClearDataButton;
-		private System.Windows.Forms.Button SnapshotButton;
 		private System.Windows.Forms.Button m_closeVisualizerButton;
 		private System.Windows.Forms.GroupBox SnapshotsGroupBox;
 		private System.Windows.Forms.CheckedListBox SnapshotsListBox;
 		private System.Windows.Forms.Label label2;
-		private System.Windows.Forms.Button ResumeButton;
-		private System.Windows.Forms.Button PauseButton;
 		private System.Windows.Forms.Button ReconnectButton;
+		private System.Windows.Forms.Button SnapshotButton;
+		private System.Windows.Forms.Button DeleteSnapshotButton;
 
 	}
 }

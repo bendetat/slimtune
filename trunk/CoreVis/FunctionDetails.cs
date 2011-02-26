@@ -30,6 +30,11 @@ namespace SlimTuneUI.CoreVis
 			get { return this; }
 		}
 
+		public Snapshot Snapshot
+		{
+			get { return m_snapshot; }
+		}
+
 		public FunctionDetails()
 		{
 			InitializeComponent();
