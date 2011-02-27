@@ -6,6 +6,10 @@ namespace SlimTuneUI
 	{
 		#region IDataEngine Members
 
+#pragma warning disable 0067
+		public event EventHandler DataFlush;
+		public event EventHandler DataClear;
+
 		public string Name
 		{
 			get { return "Dummy Engine"; }

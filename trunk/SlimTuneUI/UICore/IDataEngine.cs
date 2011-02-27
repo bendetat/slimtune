@@ -53,6 +53,9 @@ namespace UICore
 		bool InMemory { get; }
 		IDbConnection Connection { get; }
 
+		event EventHandler DataFlush;
+		event EventHandler DataClear;
+
 		void WriteProperty(string name, string value);
 		string GetProperty(string name);
 

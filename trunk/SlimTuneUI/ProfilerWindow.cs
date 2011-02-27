@@ -29,6 +29,7 @@ using System.Text;
 using System.Windows.Forms;
 
 using UICore;
+using NHibernate;
 
 namespace SlimTuneUI
 {
@@ -45,6 +46,7 @@ namespace SlimTuneUI
 			m_mainWindow.AddWindow(this);
 
 			Connection.Disconnected += new EventHandler(Connection_Disconnected);
+			Connection.DataEngine.DataFlush += new EventHandler(DataEngine_DataFlush);
 
 			string host = string.IsNullOrEmpty(conn.HostName) ? "(file)" : conn.HostName;
 			HostLabel.Text = "Host: " + host;
@@ -79,6 +81,11 @@ namespace SlimTuneUI
 			RefreshSnapshots();
 		}
 
+		void DataEngine_DataFlush(object sender, EventArgs e)
+		{
+			this.Invoke(new System.Action(RefreshSnapshots));
+		}
+
 		void Connection_Disconnected(object sender, EventArgs e)
 		{
 			try
@@ -89,6 +96,7 @@ namespace SlimTuneUI
 					{
 						StatusLabel.Text = "Status: Stopped";
 						SnapshotButton.Enabled = false;
+						ReconnectButton.Enabled = true;
 					});
 				}
 			}
@@ -191,18 +199,6 @@ namespace SlimTuneUI
 			m_closeVisualizerButton.Enabled = true;
 		}
 
-		private void ClearDataButton_Click(object sender, EventArgs e)
-		{
-			DialogResult result = MessageBox.Show("WARNING: This will save a snapshot and then clear all current data. Continue?",
-				"Clear Data", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2);
-			if(result == DialogResult.Yes)
-			{
-				Connection.DataEngine.Snapshot("Clear Data");
-				RefreshSnapshots();
-				Connection.DataEngine.ClearData();
-			}
-		}
-
 		private void SnapshotButton_Click(object sender, EventArgs e)
 		{
 			if(!Connection.IsConnected)
@@ -211,7 +207,7 @@ namespace SlimTuneUI
 				return;
 			}
 
-			Connection.DataEngine.Snapshot("User snapshot");
+			Connection.DataEngine.Snapshot("User");
 			RefreshSnapshots();
 			MessageBox.Show("Snapshot saved", "Take Snapshot");
 		}
@@ -226,12 +222,18 @@ namespace SlimTuneUI
 			using(var session = Connection.DataEngine.OpenSession())
 			using(var tx = session.BeginTransaction())
 			{
-				var snapshots = session.CreateCriteria<Snapshot>().List<Snapshot>();
+				var snapshots = session.CreateCriteria<Snapshot>()
+					.AddOrder(NHibernate.Criterion.Order.Desc("DateTime"))
+					.List<Snapshot>();
 				foreach(var snap in snapshots)
 				{
 					if(snap.Id == selId)
 						selIndex = SnapshotsListBox.Items.Count;
-					SnapshotsListBox.Items.Add(snap);
+
+					if(snap.Id == 0)
+						SnapshotsListBox.Items.Insert(0, snap);
+					else
+						SnapshotsListBox.Items.Add(snap);
 				}
 
 				tx.Commit();
@@ -326,6 +328,7 @@ namespace SlimTuneUI
 
 			SnapshotsListBox.SetItemChecked(SnapshotsListBox.SelectedIndex, true);
 			ActiveSnapshot = SnapshotsListBox.SelectedItem as Snapshot;
+			RenameSnapshotButton.Enabled = ActiveSnapshot.Id != 0;
 		}
 
 		private void ReconnectButton_Click(object sender, EventArgs e)
@@ -351,7 +354,7 @@ namespace SlimTuneUI
 					"Clear Data", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button3);
 				if(result == DialogResult.Yes)
 				{
-					Connection.DataEngine.Snapshot("Clear Data");
+					Connection.DataEngine.Snapshot("Cleared Data");
 					RefreshSnapshots();
 					Connection.DataEngine.ClearData();
 				}
@@ -362,8 +365,8 @@ namespace SlimTuneUI
 			}
 			else
 			{
-				DateTime snapshotTime = DateTime.FromFileTimeUtc(snapshot.DateTime);
-				DialogResult result = MessageBox.Show(string.Format("Are you sure you want to delete {0}, saved on {1}?", snapshot.Name, snapshotTime),
+				DateTime snapshotTime = DateTime.FromFileTime(snapshot.DateTime);
+				DialogResult result = MessageBox.Show(string.Format("Are you sure you want to delete '{0}', saved on {1}?", snapshot.Name, snapshotTime),
 					"Delete Snapshot", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2);
 				if(result == DialogResult.Yes)
 				{
@@ -371,7 +374,7 @@ namespace SlimTuneUI
 					using(var session = Connection.DataEngine.OpenSession())
 					using(var tx = session.BeginTransaction())
 					{
-						session.Lock(snapshot, NHibernate.LockMode.None);
+						session.Lock(snapshot, LockMode.None);
 
 						//have not figured out how to make this automatic yet
 						session.CreateQuery("delete from Call where SnapshotId = :id")
@@ -404,6 +407,34 @@ namespace SlimTuneUI
 					}
 				}
 			}
+		}
+
+		private void RenameSnapshotButton_Click(object sender, EventArgs e)
+		{
+			if(ActiveSnapshot.Id == 0)
+			{
+				//TODO: Inform the user?
+				return;
+			}
+
+			string name = string.Empty;
+			DateTime snapshotTime = DateTime.FromFileTime(ActiveSnapshot.DateTime);
+			var result = Utilities.InputBox("Rename Snapshot",
+				string.Format("Enter the new name for '{0}', saved on {1}:", ActiveSnapshot.Name, snapshotTime),
+				ref name);
+			if(result == System.Windows.Forms.DialogResult.Cancel || name == string.Empty)
+				return;
+
+			using(var session = Connection.DataEngine.OpenSession())
+			using(var tx = session.BeginTransaction())
+			{
+				session.Lock(ActiveSnapshot, LockMode.None);
+				ActiveSnapshot.Name = name;
+				session.Update(ActiveSnapshot);
+
+				tx.Commit();
+			}
+			RefreshSnapshots();
 		}
 	}
 }

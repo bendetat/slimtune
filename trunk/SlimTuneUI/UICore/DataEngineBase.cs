@@ -63,7 +63,7 @@ namespace UICore
 		//this is: ClassId, FunctionId, AllocData
 		protected SortedDictionary<int, SortedDictionary<int, AllocData>> m_allocs = new SortedDictionary<int, SortedDictionary<int, AllocData>>();
 
-		private DateTime m_lastFlush = DateTime.UtcNow;
+		private DateTime m_lastFlush = DateTime.Now;
 		//we use this so we don't have to check DateTime.Now on every single sample
 		protected int m_cachedSamples;
 
@@ -74,6 +74,9 @@ namespace UICore
 		private Dictionary<int, ISessionFactory> m_snapshotFactories = new Dictionary<int, ISessionFactory>(8);
 
 		protected object m_lock = new object();
+
+		public event EventHandler DataFlush;
+		public event EventHandler DataClear;
 
 		public string Name
 		{
@@ -105,7 +108,7 @@ namespace UICore
 		{
 			get
 			{
-				var span = DateTime.UtcNow - m_lastFlush;
+				var span = DateTime.Now - m_lastFlush;
 				if(span.TotalSeconds > 5.0)
 					return true;
 				return false;
@@ -169,7 +172,7 @@ namespace UICore
 				var firstSnapshot = m_statelessSession.CreateSQLQuery("INSERT INTO Snapshots (Id, Name, DateTime) VALUES (:id, :name, :datetime)")
 					.SetInt32("id", 0)
 					.SetString("name", "Current")
-					.SetInt64("datetime", long.MaxValue);
+					.SetInt64("datetime", DateTime.Now.ToFileTime());
 				firstSnapshot.ExecuteUpdate();
 			}
 			else
@@ -219,6 +222,11 @@ namespace UICore
 			{
 				using(var tx = m_statelessSession.BeginTransaction())
 				{
+					//update the timestamp on the current snapshot
+					m_statelessSession.CreateQuery("update Snapshot set DateTime = :dateTime where Id = 0")
+						.SetInt64("dateTime", DateTime.Now.ToFileTime())
+						.ExecuteUpdate();
+
 					//flush functions
 					foreach(var f in m_functionCache)
 					{
@@ -252,7 +260,9 @@ namespace UICore
 				}
 
 				DoFlush();
-				m_lastFlush = DateTime.UtcNow;
+				m_lastFlush = DateTime.Now;
+
+				Utilities.FireEvent(this, DataFlush);
 			}
 		}
 
@@ -333,7 +343,7 @@ namespace UICore
 			lock(m_lock)
 			{
 				m_calls.Clear();
-				m_lastFlush = DateTime.UtcNow;
+				m_lastFlush = DateTime.Now;
 				m_samples.Clear();
 				m_cachedSamples = 0;
 
@@ -344,6 +354,8 @@ namespace UICore
 					session.CreateQuery("delete from Sample where SnapshotId = 0").ExecuteUpdate();
 					tx.Commit();
 				}
+
+				Utilities.FireEvent(this, DataClear);
 			}
 		}
 

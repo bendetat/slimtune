@@ -49,13 +49,14 @@ namespace SlimTuneUI
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.Windows.Forms.GroupBox VisualizersGroupBox;
+			this.components = new System.ComponentModel.Container();
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ProfilerWindow));
+			this.MainSplitter = new System.Windows.Forms.SplitContainer();
+			this.SnapshotsGroupBox = new System.Windows.Forms.GroupBox();
+			this.RenameSnapshotButton = new System.Windows.Forms.Button();
 			this.label1 = new System.Windows.Forms.Label();
 			this.m_openVisualizerButton = new System.Windows.Forms.Button();
 			this.m_visualizerCombo = new System.Windows.Forms.ComboBox();
-			this.MainSplitter = new System.Windows.Forms.SplitContainer();
-			this.SnapshotsGroupBox = new System.Windows.Forms.GroupBox();
 			this.DeleteSnapshotButton = new System.Windows.Forms.Button();
 			this.SnapshotButton = new System.Windows.Forms.Button();
 			this.SnapshotsListBox = new System.Windows.Forms.CheckedListBox();
@@ -69,61 +70,13 @@ namespace SlimTuneUI
 			this.HostLabel = new System.Windows.Forms.Label();
 			this.m_closeVisualizerButton = new System.Windows.Forms.Button();
 			this.VisualizerHost = new System.Windows.Forms.TabControl();
-			VisualizersGroupBox = new System.Windows.Forms.GroupBox();
-			VisualizersGroupBox.SuspendLayout();
+			this.m_toolTip = new System.Windows.Forms.ToolTip(this.components);
 			this.MainSplitter.Panel1.SuspendLayout();
 			this.MainSplitter.Panel2.SuspendLayout();
 			this.MainSplitter.SuspendLayout();
 			this.SnapshotsGroupBox.SuspendLayout();
 			this.InfoGroupBox.SuspendLayout();
 			this.SuspendLayout();
-			// 
-			// VisualizersGroupBox
-			// 
-			VisualizersGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
-			VisualizersGroupBox.Controls.Add(this.label1);
-			VisualizersGroupBox.Controls.Add(this.m_openVisualizerButton);
-			VisualizersGroupBox.Controls.Add(this.m_visualizerCombo);
-			VisualizersGroupBox.Location = new System.Drawing.Point(3, 161);
-			VisualizersGroupBox.Name = "VisualizersGroupBox";
-			VisualizersGroupBox.Size = new System.Drawing.Size(195, 98);
-			VisualizersGroupBox.TabIndex = 4;
-			VisualizersGroupBox.TabStop = false;
-			// 
-			// label1
-			// 
-			this.label1.AutoSize = true;
-			this.label1.Font = new System.Drawing.Font("Verdana", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
-			this.label1.Location = new System.Drawing.Point(7, 20);
-			this.label1.Name = "label1";
-			this.label1.Size = new System.Drawing.Size(139, 14);
-			this.label1.TabIndex = 7;
-			this.label1.Text = "Available Visualizers:";
-			// 
-			// m_openVisualizerButton
-			// 
-			this.m_openVisualizerButton.Location = new System.Drawing.Point(6, 64);
-			this.m_openVisualizerButton.Name = "m_openVisualizerButton";
-			this.m_openVisualizerButton.Size = new System.Drawing.Size(91, 23);
-			this.m_openVisualizerButton.TabIndex = 6;
-			this.m_openVisualizerButton.Text = "Open Visualizer";
-			this.m_openVisualizerButton.UseVisualStyleBackColor = true;
-			this.m_openVisualizerButton.Click += new System.EventHandler(this.m_openVisualizerButton_Click);
-			// 
-			// m_visualizerCombo
-			// 
-			this.m_visualizerCombo.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
-			this.m_visualizerCombo.DisplayMember = "Name";
-			this.m_visualizerCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.m_visualizerCombo.FormattingEnabled = true;
-			this.m_visualizerCombo.Location = new System.Drawing.Point(6, 37);
-			this.m_visualizerCombo.Name = "m_visualizerCombo";
-			this.m_visualizerCombo.Size = new System.Drawing.Size(183, 21);
-			this.m_visualizerCombo.Sorted = true;
-			this.m_visualizerCombo.TabIndex = 5;
-			this.m_visualizerCombo.ValueMember = "Name";
 			// 
 			// MainSplitter
 			// 
@@ -136,7 +89,6 @@ namespace SlimTuneUI
 			// 
 			this.MainSplitter.Panel1.Controls.Add(this.SnapshotsGroupBox);
 			this.MainSplitter.Panel1.Controls.Add(this.InfoGroupBox);
-			this.MainSplitter.Panel1.Controls.Add(VisualizersGroupBox);
 			// 
 			// MainSplitter.Panel2
 			// 
@@ -150,15 +102,65 @@ namespace SlimTuneUI
 			// 
 			this.SnapshotsGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
 						| System.Windows.Forms.AnchorStyles.Right)));
+			this.SnapshotsGroupBox.Controls.Add(this.RenameSnapshotButton);
+			this.SnapshotsGroupBox.Controls.Add(this.label1);
+			this.SnapshotsGroupBox.Controls.Add(this.m_openVisualizerButton);
+			this.SnapshotsGroupBox.Controls.Add(this.m_visualizerCombo);
 			this.SnapshotsGroupBox.Controls.Add(this.DeleteSnapshotButton);
 			this.SnapshotsGroupBox.Controls.Add(this.SnapshotButton);
 			this.SnapshotsGroupBox.Controls.Add(this.SnapshotsListBox);
 			this.SnapshotsGroupBox.Controls.Add(this.label2);
-			this.SnapshotsGroupBox.Location = new System.Drawing.Point(4, 265);
+			this.SnapshotsGroupBox.Location = new System.Drawing.Point(4, 161);
 			this.SnapshotsGroupBox.Name = "SnapshotsGroupBox";
-			this.SnapshotsGroupBox.Size = new System.Drawing.Size(194, 140);
+			this.SnapshotsGroupBox.Size = new System.Drawing.Size(194, 211);
 			this.SnapshotsGroupBox.TabIndex = 11;
 			this.SnapshotsGroupBox.TabStop = false;
+			// 
+			// RenameSnapshotButton
+			// 
+			this.RenameSnapshotButton.Enabled = false;
+			this.RenameSnapshotButton.Image = ((System.Drawing.Image) (resources.GetObject("RenameSnapshotButton.Image")));
+			this.RenameSnapshotButton.Location = new System.Drawing.Point(5, 98);
+			this.RenameSnapshotButton.Name = "RenameSnapshotButton";
+			this.RenameSnapshotButton.Size = new System.Drawing.Size(30, 23);
+			this.RenameSnapshotButton.TabIndex = 11;
+			this.m_toolTip.SetToolTip(this.RenameSnapshotButton, "Rename the selected snapshot.");
+			this.RenameSnapshotButton.UseVisualStyleBackColor = true;
+			this.RenameSnapshotButton.Click += new System.EventHandler(this.RenameSnapshotButton_Click);
+			// 
+			// label1
+			// 
+			this.label1.AutoSize = true;
+			this.label1.Font = new System.Drawing.Font("Verdana", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
+			this.label1.Location = new System.Drawing.Point(2, 137);
+			this.label1.Name = "label1";
+			this.label1.Size = new System.Drawing.Size(139, 14);
+			this.label1.TabIndex = 10;
+			this.label1.Text = "Available Visualizers:";
+			// 
+			// m_openVisualizerButton
+			// 
+			this.m_openVisualizerButton.Location = new System.Drawing.Point(5, 181);
+			this.m_openVisualizerButton.Name = "m_openVisualizerButton";
+			this.m_openVisualizerButton.Size = new System.Drawing.Size(91, 23);
+			this.m_openVisualizerButton.TabIndex = 9;
+			this.m_openVisualizerButton.Text = "Open Visualizer";
+			this.m_toolTip.SetToolTip(this.m_openVisualizerButton, "Open the selected visualizer, viewing the selected snapshot.");
+			this.m_openVisualizerButton.UseVisualStyleBackColor = true;
+			// 
+			// m_visualizerCombo
+			// 
+			this.m_visualizerCombo.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+						| System.Windows.Forms.AnchorStyles.Right)));
+			this.m_visualizerCombo.DisplayMember = "Name";
+			this.m_visualizerCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.m_visualizerCombo.FormattingEnabled = true;
+			this.m_visualizerCombo.Location = new System.Drawing.Point(5, 154);
+			this.m_visualizerCombo.Name = "m_visualizerCombo";
+			this.m_visualizerCombo.Size = new System.Drawing.Size(183, 21);
+			this.m_visualizerCombo.Sorted = true;
+			this.m_visualizerCombo.TabIndex = 8;
+			this.m_visualizerCombo.ValueMember = "Name";
 			// 
 			// DeleteSnapshotButton
 			// 
@@ -167,6 +169,7 @@ namespace SlimTuneUI
 			this.DeleteSnapshotButton.Name = "DeleteSnapshotButton";
 			this.DeleteSnapshotButton.Size = new System.Drawing.Size(30, 23);
 			this.DeleteSnapshotButton.TabIndex = 3;
+			this.m_toolTip.SetToolTip(this.DeleteSnapshotButton, "Delete the selected snapshot.");
 			this.DeleteSnapshotButton.UseVisualStyleBackColor = true;
 			this.DeleteSnapshotButton.Click += new System.EventHandler(this.DeleteSnapshotButton_Click);
 			// 
@@ -178,6 +181,7 @@ namespace SlimTuneUI
 			this.SnapshotButton.Name = "SnapshotButton";
 			this.SnapshotButton.Size = new System.Drawing.Size(30, 23);
 			this.SnapshotButton.TabIndex = 2;
+			this.m_toolTip.SetToolTip(this.SnapshotButton, "Create a new snapshot.");
 			this.SnapshotButton.UseVisualStyleBackColor = true;
 			this.SnapshotButton.Click += new System.EventHandler(this.SnapshotButton_Click);
 			// 
@@ -185,7 +189,7 @@ namespace SlimTuneUI
 			// 
 			this.SnapshotsListBox.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
 						| System.Windows.Forms.AnchorStyles.Right)));
-			this.SnapshotsListBox.FormatString = "({0}) {1} - {2}";
+			this.SnapshotsListBox.FormatString = "({0}) {1} - {2:hh:mm:ss MM/dd/yy}";
 			this.SnapshotsListBox.FormattingEnabled = true;
 			this.SnapshotsListBox.Location = new System.Drawing.Point(41, 40);
 			this.SnapshotsListBox.Name = "SnapshotsListBox";
@@ -228,6 +232,7 @@ namespace SlimTuneUI
 			this.ReconnectButton.Size = new System.Drawing.Size(75, 22);
 			this.ReconnectButton.TabIndex = 9;
 			this.ReconnectButton.Text = "Reconnect";
+			this.m_toolTip.SetToolTip(this.ReconnectButton, "Reconnect to the application this results file profiled previously.");
 			this.ReconnectButton.UseVisualStyleBackColor = true;
 			this.ReconnectButton.Click += new System.EventHandler(this.ReconnectButton_Click);
 			// 
@@ -305,6 +310,10 @@ namespace SlimTuneUI
 			this.VisualizerHost.TabIndex = 1;
 			this.VisualizerHost.MouseClick += new System.Windows.Forms.MouseEventHandler(this.VisualizerHost_MouseClick);
 			// 
+			// m_toolTip
+			// 
+			this.m_toolTip.IsBalloon = true;
+			// 
 			// ProfilerWindow
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -315,8 +324,6 @@ namespace SlimTuneUI
 			this.Text = "ProfilerWindow";
 			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ProfilerWindow_FormClosing);
 			this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ProfilerWindow_FormClosed);
-			VisualizersGroupBox.ResumeLayout(false);
-			VisualizersGroupBox.PerformLayout();
 			this.MainSplitter.Panel1.ResumeLayout(false);
 			this.MainSplitter.Panel2.ResumeLayout(false);
 			this.MainSplitter.ResumeLayout(false);
@@ -332,14 +339,11 @@ namespace SlimTuneUI
 
 		private System.Windows.Forms.SplitContainer MainSplitter;
 		internal System.Windows.Forms.TabControl VisualizerHost;
-		private System.Windows.Forms.Button m_openVisualizerButton;
-		private System.Windows.Forms.ComboBox m_visualizerCombo;
 		private System.Windows.Forms.GroupBox InfoGroupBox;
 		private System.Windows.Forms.Label NameLabel;
 		private System.Windows.Forms.Label EngineLabel;
 		private System.Windows.Forms.Label PortLabel;
 		private System.Windows.Forms.Label HostLabel;
-		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.Label StatusLabel;
 		private System.Windows.Forms.Button m_closeVisualizerButton;
 		private System.Windows.Forms.GroupBox SnapshotsGroupBox;
@@ -348,6 +352,11 @@ namespace SlimTuneUI
 		private System.Windows.Forms.Button ReconnectButton;
 		private System.Windows.Forms.Button SnapshotButton;
 		private System.Windows.Forms.Button DeleteSnapshotButton;
+		private System.Windows.Forms.Button RenameSnapshotButton;
+		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.Button m_openVisualizerButton;
+		private System.Windows.Forms.ComboBox m_visualizerCombo;
+		private System.Windows.Forms.ToolTip m_toolTip;
 
 	}
 }
