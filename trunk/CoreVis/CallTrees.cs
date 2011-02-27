@@ -36,7 +36,6 @@ namespace SlimTuneUI.CoreVis
 	{
 		const string kQuery = @"
 from Call c
-left join fetch c.Parent
 left join fetch c.Child
 left join fetch c.Thread
 where c.Parent.Id = :parentId
@@ -200,9 +199,9 @@ where c.ParentId = :parentId and c.ChildId = 0
 			using(var session = m_connection.DataEngine.OpenSession(m_snapshot.Id))
 			using(var tx = session.BeginTransaction())
 			{
-				var query = session.CreateQuery(kQuery);
-				query.SetInt32("parentId", 0);
-				var threads = query.List<Call>();
+				var threads = session.CreateQuery(kQuery)
+					.SetInt32("parentId", 0)
+					.List<Call>();
 
 				double totalTime = 0;
 				foreach(var t in threads)
@@ -245,10 +244,10 @@ where c.ParentId = :parentId and c.ChildId = 0
 				using(var tx = session.BeginTransaction())
 				{
 					var parent = (NodeData) node.Tag;
-					var query = session.CreateQuery(kQuery);
-					query.SetInt32("parentId", parent.Id);
 					session.EnableFilter("Thread").SetParameter("threadId", parent.ThreadId);
-					var calls = query.List<Call>();
+					var calls = session.CreateQuery(kQuery)
+						.SetInt32("parentId", parent.Id)
+						.List<Call>();
 
 					//find out total child time
 					double totalTime = 0;
