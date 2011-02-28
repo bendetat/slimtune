@@ -55,5 +55,10 @@ namespace UICore
 			Visualizers = new List<IVisualizer>();
 			Connection = conn;
 		}
+
+		public virtual ToolStrip GetToolStrip(IVisualizer visualizer)
+		{
+			throw new NotImplementedException();
+		}
 	}
 }

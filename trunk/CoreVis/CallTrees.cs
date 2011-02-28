@@ -91,6 +91,9 @@ where c.ParentId = :parentId and c.ChildId = 0
 		FontSet m_normalFonts;
 		FontSet m_filteredFonts;
 
+		ToolStripSplitButton m_toolstripButton;
+		Regex[] m_filters;
+
 		ProfilerWindowBase m_mainWindow;
 		Connection m_connection;
 		Snapshot m_snapshot;
@@ -151,6 +154,15 @@ where c.ParentId = :parentId and c.ChildId = 0
 			m_connection = connection;
 			m_snapshot = snapshot;
 
+			var toolstrip = mainWindow.GetToolStrip(this);
+			m_toolstripButton = new ToolStripSplitButton("Filters");
+			m_toolstripButton.Image = new Bitmap(SlimTuneUI.CoreVis.Properties.Resources.FiltersButtonImage);
+
+			m_filters = GetFilters();
+			RefreshFilters();
+
+			toolstrip.Items.Add(m_toolstripButton);
+
 			UpdateTopLevel();
 			return true;
 		}
@@ -164,6 +176,33 @@ where c.ParentId = :parentId and c.ChildId = 0
 			m_treeView.Nodes.Clear();
 			UpdateTopLevel();
 			Utilities.FireEvent(this, Refreshed);
+		}
+
+		private void RefreshFilters()
+		{
+			m_toolstripButton.DropDownItems.Clear();
+			EventHandler clickEvent = new EventHandler(FilterMenu_Click);
+			foreach(var f in m_filters)
+			{
+				var item = new ToolStripMenuItem(f.ToString());
+				item.Checked = true;
+				item.CheckOnClick = true;
+				item.Click += clickEvent;
+				item.Tag = f;
+				m_toolstripButton.DropDownItems.Add(item);
+			}
+		}
+
+		private static Regex[] GetFilters()
+		{
+			var filterStrings = Settings.Default.Filters.Split(';');
+			Regex[] regex = new Regex[filterStrings.Length];
+			for(int i = 0; i < filterStrings.Length; ++i)
+			{
+				regex[i] = new Regex(filterStrings[i]);
+			}
+
+			return regex;
 		}
 
 		private static void BreakName(string name, out string signature, out string funcName, out string classAndFunc, out string baseName)
@@ -197,11 +236,15 @@ where c.ParentId = :parentId and c.ChildId = 0
 			if(string.IsNullOrEmpty(name))
 				return false;
 
-			//TODO: Replace with proper filters
-			/*if(m_filterSystemMenu.Checked && name.StartsWith("System."))
-				return true;
-			if(m_filterMicrosoftMenu.Checked && name.StartsWith("Microsoft."))
-				return true;*/
+			foreach(ToolStripMenuItem item in m_toolstripButton.DropDownItems)
+			{
+				if(!item.Checked)
+					continue;
+
+				var regex = item.Tag as Regex;
+				if(regex.IsMatch(name))
+					return true;
+			}
 
 			return false;
 		}

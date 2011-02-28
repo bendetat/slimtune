@@ -81,6 +81,17 @@ namespace SlimTuneUI
 			RefreshSnapshots();
 		}
 
+		public override ToolStrip GetToolStrip(IVisualizer visualizer)
+		{
+			int index = Visualizers.IndexOf(visualizer);
+			if(index < 0)
+				return null;
+
+			var page = VisualizerHost.TabPages[index];
+			var toolbar = page.Controls[0] as VisualizerToolbar;
+			return toolbar.ToolStrip;
+		}
+
 		void DataEngine_DataFlush(object sender, EventArgs e)
 		{
 			this.Invoke(new System.Action(RefreshSnapshots));
@@ -186,9 +197,6 @@ namespace SlimTuneUI
 		public void AddVisualizer(Type visType)
 		{
 			IVisualizer visualizer = (IVisualizer) Activator.CreateInstance(visType);
-			if(!visualizer.Initialize(this, Connection, ActiveSnapshot))
-				return;
-
 			Visualizers.Add(visualizer);
 			TabPage page = new TabPage(visualizer.DisplayName);
 			page.Tag = visualizer;
@@ -204,6 +212,15 @@ namespace SlimTuneUI
 			page.Controls.Add(visualizer.Control);
 
 			VisualizerHost.TabPages.Add(page);
+
+			//We have to initialize here to make sure everything is wired if the visualizer calls back in
+			if(!visualizer.Initialize(this, Connection, ActiveSnapshot))
+			{
+				VisualizerHost.TabPages.Remove(page);
+				Visualizers.Remove(visualizer);
+				return;
+			}
+
 			VisualizerHost.SelectedTab = page;
 			m_closeVisualizerButton.Enabled = true;
 		}
