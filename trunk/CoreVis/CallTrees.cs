@@ -95,6 +95,8 @@ where c.ParentId = :parentId and c.ChildId = 0
 		Connection m_connection;
 		Snapshot m_snapshot;
 
+		public event EventHandler Refreshed;
+
 		public string DisplayName
 		{
 			get { return "Thread Calls"; }
@@ -108,6 +110,11 @@ where c.ParentId = :parentId and c.ChildId = 0
 		public Snapshot Snapshot
 		{
 			get { return m_snapshot; }
+		}
+
+		public bool SupportsRefresh
+		{
+			get { return true; }
 		}
 
 		public CallTrees()
@@ -152,6 +159,13 @@ where c.ParentId = :parentId and c.ChildId = 0
 		{
 		}
 
+		public void RefreshView()
+		{
+			m_treeView.Nodes.Clear();
+			UpdateTopLevel();
+			Utilities.FireEvent(this, Refreshed);
+		}
+
 		private static void BreakName(string name, out string signature, out string funcName, out string classAndFunc, out string baseName)
 		{
 			int sigIndex = name.IndexOf('(');
@@ -184,10 +198,10 @@ where c.ParentId = :parentId and c.ChildId = 0
 				return false;
 
 			//TODO: Replace with proper filters
-			if(m_filterSystemMenu.Checked && name.StartsWith("System."))
+			/*if(m_filterSystemMenu.Checked && name.StartsWith("System."))
 				return true;
 			if(m_filterMicrosoftMenu.Checked && name.StartsWith("Microsoft."))
-				return true;
+				return true;*/
 
 			return false;
 		}
@@ -413,8 +427,7 @@ where c.ParentId = :parentId and c.ChildId = 0
 
 		private void m_refreshButton_Click(object sender, EventArgs e)
 		{
-			m_treeView.Nodes.Clear();
-			UpdateTopLevel();
+			Refresh();
 		}
 
 		private void FilterMenu_Click(object sender, EventArgs e)

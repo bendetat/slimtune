@@ -192,8 +192,17 @@ namespace SlimTuneUI
 			Visualizers.Add(visualizer);
 			TabPage page = new TabPage(visualizer.DisplayName);
 			page.Tag = visualizer;
-			visualizer.Control.Dock = DockStyle.Fill;
+
+			var toolbar = new VisualizerToolbar(ActiveSnapshot, visualizer);
+			toolbar.Dock = DockStyle.Top;
+			page.Controls.Add(toolbar);
+
+			visualizer.Control.Top = toolbar.Height;
+			visualizer.Control.Left = 0;
+			visualizer.Control.Size = new System.Drawing.Size(page.Width, page.Height - toolbar.Height);
+			visualizer.Control.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
 			page.Controls.Add(visualizer.Control);
+
 			VisualizerHost.TabPages.Add(page);
 			VisualizerHost.SelectedTab = page;
 			m_closeVisualizerButton.Enabled = true;
@@ -223,7 +232,7 @@ namespace SlimTuneUI
 			using(var tx = session.BeginTransaction())
 			{
 				var snapshots = session.CreateCriteria<Snapshot>()
-					.AddOrder(NHibernate.Criterion.Order.Desc("DateTime"))
+					.AddOrder(NHibernate.Criterion.Order.Desc("TimeStamp"))
 					.List<Snapshot>();
 				foreach(var snap in snapshots)
 				{
@@ -365,8 +374,7 @@ namespace SlimTuneUI
 			}
 			else
 			{
-				DateTime snapshotTime = DateTime.FromFileTime(snapshot.DateTime);
-				DialogResult result = MessageBox.Show(string.Format("Are you sure you want to delete '{0}', saved on {1}?", snapshot.Name, snapshotTime),
+				DialogResult result = MessageBox.Show(string.Format("Are you sure you want to delete '{0}', saved on {1}?", snapshot.Name, snapshot.DateTime),
 					"Delete Snapshot", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2);
 				if(result == DialogResult.Yes)
 				{
@@ -418,9 +426,8 @@ namespace SlimTuneUI
 			}
 
 			string name = string.Empty;
-			DateTime snapshotTime = DateTime.FromFileTime(ActiveSnapshot.DateTime);
 			var result = Utilities.InputBox("Rename Snapshot",
-				string.Format("Enter the new name for '{0}', saved on {1}:", ActiveSnapshot.Name, snapshotTime),
+				string.Format("Enter the new name for '{0}', saved on {1}:", ActiveSnapshot.Name, ActiveSnapshot.DateTime),
 				ref name);
 			if(result == System.Windows.Forms.DialogResult.Cancel || name == string.Empty)
 				return;

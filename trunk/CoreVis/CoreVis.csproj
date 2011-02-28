@@ -123,6 +123,11 @@
       <DependentUpon>NProfStyleVisualizer.cs</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="QueryDebugger.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -147,6 +152,10 @@
     <EmbeddedResource Include="NProfStyleVisualizer.resx">
       <DependentUpon>NProfStyleVisualizer.cs</DependentUpon>
       <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="QueryDebugger.resx">
       <DependentUpon>QueryDebugger.cs</DependentUpon>

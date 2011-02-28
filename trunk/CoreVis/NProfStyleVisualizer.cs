@@ -42,6 +42,8 @@ namespace SlimTuneUI.CoreVis
 		TopDownModel m_topDownModel;
 		BottomUpModel m_bottomUpModel;
 
+		public event EventHandler Refreshed;
+
 		public string DisplayName
 		{
 			get { return "Tree Views"; }
@@ -55,6 +57,11 @@ namespace SlimTuneUI.CoreVis
 		public Snapshot Snapshot
 		{
 			get { return m_snapshot; }
+		}
+
+		public bool SupportsRefresh
+		{
+			get { return true; }
 		}
 
 		public NProfStyleVisualizer()
@@ -91,10 +98,16 @@ namespace SlimTuneUI.CoreVis
 		{
 		}
 
-		private void m_refreshButton_Click(object sender, EventArgs e)
+		public void RefreshView()
 		{
 			m_topDownModel.Refresh();
 			m_bottomUpModel.Refresh();
+			Utilities.FireEvent(this, Refreshed);
+		}
+
+		private void m_refreshButton_Click(object sender, EventArgs e)
+		{
+			RefreshView();
 		}
 
 		private void ColumnClicked(object sender, TreeColumnEventArgs e)

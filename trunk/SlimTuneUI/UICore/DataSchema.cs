@@ -13,12 +13,16 @@ namespace UICore
 	{
 		public virtual int Id { get; set; }
 		public virtual string Name { get; set; }
-		public virtual long DateTime { get; set; }
+		public virtual long TimeStamp { get; set; }
+
+		public virtual DateTime DateTime
+		{
+			get { return TimeStamp != long.MaxValue ? System.DateTime.FromFileTime(TimeStamp) : System.DateTime.Now; }
+		}
 
 		public virtual string ToString(string format)
 		{
-			DateTime dt = DateTime != long.MaxValue ? System.DateTime.FromFileTime(DateTime) : System.DateTime.Now;
-			return string.Format(format, Id, Name, dt);
+			return string.Format(format, Id, Name, DateTime);
 		}
 	}
 

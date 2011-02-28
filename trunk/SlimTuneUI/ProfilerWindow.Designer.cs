@@ -147,6 +147,7 @@ namespace SlimTuneUI
 			this.m_openVisualizerButton.Text = "Open Visualizer";
 			this.m_toolTip.SetToolTip(this.m_openVisualizerButton, "Open the selected visualizer, viewing the selected snapshot.");
 			this.m_openVisualizerButton.UseVisualStyleBackColor = true;
+			this.m_openVisualizerButton.Click += new System.EventHandler(this.m_openVisualizerButton_Click);
 			// 
 			// m_visualizerCombo
 			// 

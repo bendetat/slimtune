@@ -16,6 +16,8 @@ namespace SlimTuneUI.CoreVis
 	{
 		Connection m_connection;
 
+		public event EventHandler Refreshed;
+
 		public string DisplayName
 		{
 			get { return "Query Debugger"; }
@@ -29,6 +31,11 @@ namespace SlimTuneUI.CoreVis
 		public Snapshot Snapshot
 		{
 			get { return null; }
+		}
+
+		public bool SupportsRefresh
+		{
+			get { return false; }
 		}
 
 		public QueryDebugger()
@@ -53,12 +60,18 @@ namespace SlimTuneUI.CoreVis
 		{
 		}
 
+		public void RefreshView()
+		{
+		}
+
 		private void QueryButton_Click(object sender, EventArgs e)
 		{
 			if(SqlRadioButton.Checked)
 				QuerySql();
 			else
 				QueryHql();
+
+			Utilities.FireEvent(this, Refreshed);
 		}
 
 		private void QuerySql()

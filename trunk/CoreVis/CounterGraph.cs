@@ -23,6 +23,8 @@ namespace SlimTuneUI.CoreVis
 		ColorRotator m_colors = new ColorRotator();
 		bool m_redrawGraph = true;
 
+		public event EventHandler Refreshed;
+
 		public string DisplayName
 		{
 			get
@@ -39,6 +41,11 @@ namespace SlimTuneUI.CoreVis
 		public Snapshot Snapshot
 		{
 			get { return m_snapshot; }
+		}
+
+		public bool SupportsRefresh
+		{
+			get { return false; }
 		}
 
 		public CounterGraph()
@@ -78,6 +85,14 @@ namespace SlimTuneUI.CoreVis
 		public void OnClose()
 		{
 			m_refreshTimer.Enabled = false;
+		}
+
+		public void RefreshView()
+		{
+			UpdateCounters();
+			UpdateGraph();
+
+			Utilities.FireEvent(this, Refreshed);
 		}
 
 		private void UpdateCounters()
@@ -185,8 +200,7 @@ namespace SlimTuneUI.CoreVis
 
 		private void m_refreshTimer_Tick(object sender, EventArgs e)
 		{
-			UpdateCounters();
-			UpdateGraph();
+			Refresh();
 		}
 	}
 

@@ -20,6 +20,8 @@ namespace SlimTuneUI.CoreVis
 		Snapshot m_snapshot;
 		ColorRotator m_colors = new ColorRotator();
 
+		public event EventHandler Refreshed;
+
 		public string DisplayName
 		{
 			get { return Utilities.GetDisplayName(typeof(FunctionDetails)); }
@@ -33,6 +35,11 @@ namespace SlimTuneUI.CoreVis
 		public Snapshot Snapshot
 		{
 			get { return m_snapshot; }
+		}
+
+		public bool SupportsRefresh
+		{
+			get { return false; }
 		}
 
 		public FunctionDetails()
@@ -59,6 +66,16 @@ namespace SlimTuneUI.CoreVis
 		public void OnClose()
 		{
 			m_refreshTimer.Enabled = false;
+		}
+
+		public void RefreshView()
+		{
+			if(FunctionList.Items.Count < 1)
+				UpdateFunctionList();
+			else
+				RefreshGraph();
+
+			Utilities.FireEvent(this, Refreshed);
 		}
 
 		private void UpdateFunctionList()
@@ -182,10 +199,7 @@ namespace SlimTuneUI.CoreVis
 
 		private void m_refreshTimer_Tick(object sender, EventArgs e)
 		{
-			if(FunctionList.Items.Count < 1)
-				UpdateFunctionList();
-			else
-				RefreshGraph();
+			RefreshView();
 		}
 	}
 

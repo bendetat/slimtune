@@ -49,7 +49,6 @@ namespace SlimTuneUI.CoreVis
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(NProfStyleVisualizer));
 			this.m_splitter = new System.Windows.Forms.SplitContainer();
 			this.m_topDown = new Aga.Controls.Tree.TreeViewAdv();
 			this.m_topDownIdColumn = new Aga.Controls.Tree.TreeColumn();
@@ -73,7 +72,6 @@ namespace SlimTuneUI.CoreVis
 			this.m_bottomUpNameTextBox = new Aga.Controls.Tree.NodeControls.NodeTextBox();
 			this.m_bottomUpTimeTextBox = new Aga.Controls.Tree.NodeControls.NodeTextBox();
 			this.m_bottomUpPercentTextBox = new Aga.Controls.Tree.NodeControls.NodeTextBox();
-			this.m_refreshButton = new System.Windows.Forms.Button();
 			this.m_splitter.Panel1.SuspendLayout();
 			this.m_splitter.Panel2.SuspendLayout();
 			this.m_splitter.SuspendLayout();
@@ -81,10 +79,8 @@ namespace SlimTuneUI.CoreVis
 			// 
 			// m_splitter
 			// 
-			this.m_splitter.Anchor = ((System.Windows.Forms.AnchorStyles) ((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-						| System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
-			this.m_splitter.Location = new System.Drawing.Point(0, 26);
+			this.m_splitter.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.m_splitter.Location = new System.Drawing.Point(0, 0);
 			this.m_splitter.Name = "m_splitter";
 			this.m_splitter.Orientation = System.Windows.Forms.Orientation.Horizontal;
 			// 
@@ -95,8 +91,8 @@ namespace SlimTuneUI.CoreVis
 			// m_splitter.Panel2
 			// 
 			this.m_splitter.Panel2.Controls.Add(this.m_bottomUp);
-			this.m_splitter.Size = new System.Drawing.Size(884, 569);
-			this.m_splitter.SplitterDistance = 268;
+			this.m_splitter.Size = new System.Drawing.Size(884, 595);
+			this.m_splitter.SplitterDistance = 280;
 			this.m_splitter.TabIndex = 0;
 			// 
 			// m_topDown
@@ -123,7 +119,7 @@ namespace SlimTuneUI.CoreVis
 			this.m_topDown.NodeControls.Add(this.m_topDownTimeTextBox);
 			this.m_topDown.NodeControls.Add(this.m_topDownPercentTextBox);
 			this.m_topDown.SelectedNode = null;
-			this.m_topDown.Size = new System.Drawing.Size(884, 268);
+			this.m_topDown.Size = new System.Drawing.Size(884, 280);
 			this.m_topDown.TabIndex = 0;
 			this.m_topDown.UnloadCollapsedOnReload = true;
 			this.m_topDown.UseColumns = true;
@@ -231,7 +227,7 @@ namespace SlimTuneUI.CoreVis
 			this.m_bottomUp.NodeControls.Add(this.m_bottomUpTimeTextBox);
 			this.m_bottomUp.NodeControls.Add(this.m_bottomUpPercentTextBox);
 			this.m_bottomUp.SelectedNode = null;
-			this.m_bottomUp.Size = new System.Drawing.Size(884, 297);
+			this.m_bottomUp.Size = new System.Drawing.Size(884, 311);
 			this.m_bottomUp.TabIndex = 1;
 			this.m_bottomUp.UseColumns = true;
 			this.m_bottomUp.ColumnClicked += new System.EventHandler<Aga.Controls.Tree.TreeColumnEventArgs>(this.ColumnClicked);
@@ -315,24 +311,10 @@ namespace SlimTuneUI.CoreVis
 			this.m_bottomUpPercentTextBox.LeftMargin = 3;
 			this.m_bottomUpPercentTextBox.ParentColumn = this.m_bottomUpPercentColumn;
 			// 
-			// m_refreshButton
-			// 
-			this.m_refreshButton.Image = ((System.Drawing.Image) (resources.GetObject("m_refreshButton.Image")));
-			this.m_refreshButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			this.m_refreshButton.Location = new System.Drawing.Point(0, 2);
-			this.m_refreshButton.Name = "m_refreshButton";
-			this.m_refreshButton.Size = new System.Drawing.Size(75, 23);
-			this.m_refreshButton.TabIndex = 1;
-			this.m_refreshButton.Text = "Refresh";
-			this.m_refreshButton.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-			this.m_refreshButton.UseVisualStyleBackColor = true;
-			this.m_refreshButton.Click += new System.EventHandler(this.m_refreshButton_Click);
-			// 
 			// NProfStyleVisualizer
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.Controls.Add(this.m_refreshButton);
 			this.Controls.Add(this.m_splitter);
 			this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
 			this.Name = "NProfStyleVisualizer";
@@ -364,7 +346,6 @@ namespace SlimTuneUI.CoreVis
 		private Aga.Controls.Tree.NodeControls.NodeTextBox m_bottomUpThreadTextBox;
 		private Aga.Controls.Tree.NodeControls.NodeTextBox m_bottomUpNameTextBox;
 		private Aga.Controls.Tree.NodeControls.NodeTextBox m_bottomUpTimeTextBox;
-		private System.Windows.Forms.Button m_refreshButton;
 		private Aga.Controls.Tree.NodeControls.NodeTextBox m_topDownTimeTextBox;
 		private Aga.Controls.Tree.TreeColumn m_bottomUpPercentColumn;
 		private Aga.Controls.Tree.NodeControls.NodeTextBox m_bottomUpPercentTextBox;

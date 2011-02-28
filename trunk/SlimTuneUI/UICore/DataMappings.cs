@@ -23,7 +23,8 @@ namespace UICore.Mappings
 			Id(x => x.Id);
 
 			Map(x => x.Name);
-			Map(x => x.DateTime);
+			Map(x => x.TimeStamp)
+				.Column("DateTime");
 
 			Table("Snapshots");
 		}

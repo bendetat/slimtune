@@ -223,8 +223,8 @@ namespace UICore
 				using(var tx = m_statelessSession.BeginTransaction())
 				{
 					//update the timestamp on the current snapshot
-					m_statelessSession.CreateQuery("update Snapshot set DateTime = :dateTime where Id = 0")
-						.SetInt64("dateTime", DateTime.Now.ToFileTime())
+					m_statelessSession.CreateQuery("update Snapshot set TimeStamp = :timeStamp where Id = 0")
+						.SetInt64("timeStamp", DateTime.Now.ToFileTime())
 						.ExecuteUpdate();
 
 					//flush functions
@@ -325,7 +325,7 @@ namespace UICore
 				{
 					Snapshot snapshot = new Snapshot();
 					snapshot.Name = name;
-					snapshot.DateTime = DateTime.Now.ToFileTime();
+					snapshot.TimeStamp = DateTime.Now.ToFileTime();
 					session.Save(snapshot);
 
 					string sampleQuery = string.Format("insert into Sample (ThreadId, FunctionId, Time, SnapshotId) select s.ThreadId, s.FunctionId, s.Time, {0} from Sample s where SnapshotId = 0", snapshot.Id);

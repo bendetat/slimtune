@@ -28,6 +28,8 @@ namespace SlimTuneUI.CoreVis
 			public double TotalTime;
 		}
 
+		public event EventHandler Refreshed;
+
 		public string DisplayName
 		{
 			get { return "Hotspots"; }
@@ -41,6 +43,11 @@ namespace SlimTuneUI.CoreVis
 		public Snapshot Snapshot
 		{
 			get { return m_snapshot; }
+		}
+
+		public bool SupportsRefresh
+		{
+			get { return true; }
 		}
 
 		public HotSpots()
@@ -66,6 +73,16 @@ namespace SlimTuneUI.CoreVis
 
 		public void OnClose()
 		{
+		}
+
+		public void RefreshView()
+		{
+			var rightTag = HotspotsList.Tag as ListTag;
+			if(rightTag != null)
+				RemoveList(rightTag.Right);
+
+			UpdateHotspots();
+			Utilities.FireEvent(this, Refreshed);
 		}
 
 		private void UpdateHotspots()

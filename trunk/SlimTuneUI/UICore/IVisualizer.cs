@@ -31,8 +31,12 @@ namespace UICore
 		string DisplayName { get; }
 		System.Windows.Forms.UserControl Control { get; }
 		Snapshot Snapshot { get; }
+		bool SupportsRefresh { get; }
+
+		event EventHandler Refreshed;
 
 		bool Initialize(ProfilerWindowBase mainWindow, Connection connection, Snapshot snapshot);
 		void OnClose();
+		void RefreshView();
 	}
 }
