@@ -22,7 +22,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
@@ -181,6 +180,7 @@ where c.ParentId = :parentId and c.ChildId = 0
 		private void RefreshFilters()
 		{
 			m_toolstripButton.DropDownItems.Clear();
+			m_filters = GetFilters();
 			EventHandler clickEvent = new EventHandler(FilterMenu_Click);
 			foreach(var f in m_filters)
 			{
@@ -191,11 +191,20 @@ where c.ParentId = :parentId and c.ChildId = 0
 				item.Tag = f;
 				m_toolstripButton.DropDownItems.Add(item);
 			}
+
+			var edit = new ToolStripMenuItem("Edit...");
+			edit.Click += new EventHandler(EditFilters_Click);
+			m_toolstripButton.DropDownItems.Add(edit);
+		}
+
+		private static string[] GetFilterStrings()
+		{
+			return Settings.Default.Filters.Split(';');
 		}
 
 		private static Regex[] GetFilters()
 		{
-			var filterStrings = Settings.Default.Filters.Split(';');
+			var filterStrings = GetFilterStrings();
 			Regex[] regex = new Regex[filterStrings.Length];
 			for(int i = 0; i < filterStrings.Length; ++i)
 			{
@@ -476,6 +485,20 @@ where c.ParentId = :parentId and c.ChildId = 0
 		private void FilterMenu_Click(object sender, EventArgs e)
 		{
 			m_treeView.Invalidate();
+		}
+
+		private void EditFilters_Click(object sender, EventArgs e)
+		{
+			CollectionEditor editor = new CollectionEditor();
+			editor.Text = "Edit Filters";
+			editor.Edit(GetFilterStrings());
+			var result = editor.ShowDialog(m_mainWindow);
+			if(result == DialogResult.OK)
+			{
+				Settings.Default.Filters = string.Join(";", editor.Collection);
+				Settings.Default.Save();
+				RefreshFilters();
+			}
 		}
 	}
 }

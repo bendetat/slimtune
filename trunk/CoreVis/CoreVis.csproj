@@ -97,6 +97,12 @@
     <Compile Include="CallTrees.designer.cs">
       <DependentUpon>CallTrees.cs</DependentUpon>
     </Compile>
+    <Compile Include="CollectionEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CollectionEditor.Designer.cs">
+      <DependentUpon>CollectionEditor.cs</DependentUpon>
+    </Compile>
     <Compile Include="ColorRotator.cs" />
     <Compile Include="CounterGraph.cs">
       <SubType>UserControl</SubType>
@@ -146,6 +152,9 @@
       <DependentUpon>CallTrees.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="CollectionEditor.resx">
+      <DependentUpon>CollectionEditor.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="CounterGraph.resx">
       <DependentUpon>CounterGraph.cs</DependentUpon>
     </EmbeddedResource>
@@ -175,7 +184,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
     <None Include="Resources\magnifier.png" />
     <Content Include="SciLexer.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

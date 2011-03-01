@@ -23,12 +23,15 @@ namespace SlimTuneUI.CoreVis {
             }
         }
         
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("^System.*;^Microsoft.*")]
         public string Filters {
             get {
                 return ((string)(this["Filters"]));
+            }
+            set {
+                this["Filters"] = value;
             }
         }
     }

@@ -2,7 +2,7 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="SlimTuneUI.CoreVis" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="Filters" Type="System.String" Scope="Application">
+    <Setting Name="Filters" Type="System.String" Scope="User">
       <Value Profile="(Default)">^System.*;^Microsoft.*</Value>
     </Setting>
   </Settings>
