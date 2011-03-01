@@ -342,7 +342,7 @@ namespace SlimTuneUI
 		private void SnapshotsListBox_Format(object sender, ListControlConvertEventArgs e)
 		{
 			var item = e.ListItem as Snapshot;
-			e.Value = item.ToString(SnapshotsListBox.FormatString);
+			e.Value = string.Format("({0}) {1} - {2} {3}", item.Id, item.Name, item.DateTime.ToLongTimeString(), item.DateTime.ToShortDateString());
 		}
 
 		private void SnapshotsListBox_SelectedIndexChanged(object sender, EventArgs e)

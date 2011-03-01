@@ -19,11 +19,6 @@ namespace UICore
 		{
 			get { return TimeStamp != long.MaxValue ? System.DateTime.FromFileTime(TimeStamp) : System.DateTime.Now; }
 		}
-
-		public virtual string ToString(string format)
-		{
-			return string.Format(format, Id, Name, DateTime);
-		}
 	}
 
 	public class ThreadInfo

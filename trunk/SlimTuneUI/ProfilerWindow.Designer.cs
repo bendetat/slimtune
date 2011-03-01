@@ -190,7 +190,6 @@ namespace SlimTuneUI
 			// 
 			this.SnapshotsListBox.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
 						| System.Windows.Forms.AnchorStyles.Right)));
-			this.SnapshotsListBox.FormatString = "({0}) {1} - {2:hh:mm:ss MM/dd/yy}";
 			this.SnapshotsListBox.FormattingEnabled = true;
 			this.SnapshotsListBox.Location = new System.Drawing.Point(41, 40);
 			this.SnapshotsListBox.Name = "SnapshotsListBox";
